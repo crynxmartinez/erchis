@@ -67,17 +67,17 @@ export default function PlayerInfo({
   onOpenModal,
 }: PlayerInfoProps) {
   return (
-    <div className="bg-[#242424] rounded border border-[#333]">
+    <div>
       {/* Header */}
-      <div className="bg-[#2a2a2a] px-3 py-1.5 border-b border-[#333] flex items-center gap-2">
-        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="bg-[#2a2a2a] px-3 py-1.5 text-xs font-medium text-gray-400 uppercase tracking-wide border-y border-[#333] flex items-center gap-2">
+        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
-        <span className="text-gray-400 text-sm">Information</span>
+        <span>Information</span>
       </div>
 
       {/* Content */}
-      <div className="p-3 space-y-1">
+      <div className="px-3 py-2 space-y-1">
         {/* Basic Info */}
         <div className="space-y-0.5 text-sm">
           <div className="flex">
@@ -99,11 +99,8 @@ export default function PlayerInfo({
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="border-t border-[#333] my-2" />
-
         {/* Resource Bars */}
-        <div className="space-y-1">
+        <div className="space-y-1 pt-2">
           <StatBar 
             label="Life" 
             current={life.current} 

@@ -26,7 +26,7 @@ const navSections: NavSection[] = [
 
 export default function Sidebar() {
   return (
-    <aside className="w-56 bg-[#1e1e1e] border-r border-[#333] overflow-y-auto">
+    <aside>
       {navSections.map((section) => (
         <div key={section.title} className="mb-2">
           {/* Section Header */}

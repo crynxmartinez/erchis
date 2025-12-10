@@ -30,12 +30,10 @@ export default function GameLayout({ children, playerData }: GameLayoutProps) {
       {/* Main Layout */}
       <div className="flex">
         {/* Left Sidebar */}
-        <div className="w-56 flex-shrink-0">
+        <div className="w-56 flex-shrink-0 bg-[#1e1e1e] border-r border-[#333]">
           <div className="sticky top-12 h-[calc(100vh-48px)] overflow-y-auto">
             {/* Player Info */}
-            <div className="p-2">
-              <PlayerInfo {...playerData} onOpenModal={() => setIsModalOpen(true)} />
-            </div>
+            <PlayerInfo {...playerData} onOpenModal={() => setIsModalOpen(true)} />
 
             {/* Navigation */}
             <Sidebar />
