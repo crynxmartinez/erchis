@@ -19,4 +19,43 @@ model User {
   role      String   @default("player")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Player data
+  player    Player?
+}
+
+model Player {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+
+  // Basic Info
+  level     Int      @default(1)
+  exp       Int      @default(0)
+  col       Int      @default(0)
+
+  // Stats (25 points at creation, +1 per level, min 0)
+  str       Int      @default(0)
+  agi       Int      @default(0)
+  vit       Int      @default(0)
+  int       Int      @default(0)
+  dex       Int      @default(0)
+  luk       Int      @default(0)
+  statPoints Int     @default(25) // Unspent stat points
+
+  // Resources
+  currentHp Int      @default(100)
+  currentAp Int      @default(100)
+  maxAp     Int      @default(100)
+
+  // Regen tracking (store last regen time)
+  lastHpRegen DateTime @default(now())
+  lastApRegen DateTime @default(now())
+
+  // Location
+  currentFloor Int   @default(1)
+  currentArea  String @default("town")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
