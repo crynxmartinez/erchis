@@ -1,6 +1,10 @@
+'use client'
+
+import { useState } from 'react'
 import TopNav from './TopNav'
 import Sidebar from './Sidebar'
 import PlayerInfo from './PlayerInfo'
+import PlayerModal from './PlayerModal'
 
 interface PlayerData {
   username: string
@@ -16,6 +20,7 @@ interface GameLayoutProps {
 }
 
 export default function GameLayout({ children, playerData }: GameLayoutProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
     <div className="min-h-screen bg-[#1a1a1a] text-white">
@@ -29,7 +34,7 @@ export default function GameLayout({ children, playerData }: GameLayoutProps) {
           <div className="sticky top-12 h-[calc(100vh-48px)] overflow-y-auto">
             {/* Player Info */}
             <div className="p-2">
-              <PlayerInfo {...playerData} />
+              <PlayerInfo {...playerData} onOpenModal={() => setIsModalOpen(true)} />
             </div>
 
             {/* Navigation */}
@@ -42,6 +47,13 @@ export default function GameLayout({ children, playerData }: GameLayoutProps) {
           {children}
         </main>
       </div>
+
+      {/* Player Modal */}
+      <PlayerModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        username={playerData.username}
+      />
     </div>
   )
 }

@@ -17,12 +17,12 @@ function StatBar({ label, current, max, color, tooltip }: StatBarProps) {
 
   return (
     <div 
-      className="relative group"
+      className="relative"
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
       <div className="flex items-center text-xs py-0.5">
-        <div className="flex-1 h-4 bg-[#1a1a1a] rounded-sm overflow-hidden relative">
+        <div className="flex-1 h-4 bg-[#1a1a1a] rounded-sm overflow-hidden relative cursor-help">
           <div
             className={`h-full transition-all ${color}`}
             style={{ width: `${percentage}%` }}
@@ -39,9 +39,9 @@ function StatBar({ label, current, max, color, tooltip }: StatBarProps) {
         </span>
       </div>
       
-      {/* Tooltip */}
+      {/* Tooltip - positioned below */}
       {showTooltip && (
-        <div className="absolute left-full ml-2 top-0 z-50 bg-[#1a1a1a] border border-[#444] rounded px-2 py-1 text-xs text-gray-300 whitespace-nowrap shadow-lg">
+        <div className="absolute left-0 top-full mt-1 z-[100] bg-[#111] border border-[#555] rounded px-2 py-1 text-xs text-gray-200 whitespace-nowrap shadow-xl">
           {tooltip}
         </div>
       )}
@@ -55,6 +55,7 @@ interface PlayerInfoProps {
   col: number
   life: { current: number; max: number }
   ap: { current: number; max: number }
+  onOpenModal: () => void
 }
 
 export default function PlayerInfo({
@@ -63,6 +64,7 @@ export default function PlayerInfo({
   col,
   life,
   ap,
+  onOpenModal,
 }: PlayerInfoProps) {
   return (
     <div className="bg-[#242424] rounded border border-[#333]">
@@ -80,7 +82,12 @@ export default function PlayerInfo({
         <div className="space-y-0.5 text-sm">
           <div className="flex">
             <span className="text-gray-500 w-14">Name:</span>
-            <span className="text-[#6eb5ff]">{username}</span>
+            <button 
+              onClick={onOpenModal}
+              className="text-[#6eb5ff] hover:text-[#8ec5ff] hover:underline cursor-pointer transition-colors"
+            >
+              {username}
+            </button>
           </div>
           <div className="flex">
             <span className="text-gray-500 w-14">Col:</span>

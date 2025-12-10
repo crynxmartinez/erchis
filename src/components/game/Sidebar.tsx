@@ -17,15 +17,6 @@ interface NavSection {
 
 const navSections: NavSection[] = [
   {
-    title: 'Menu',
-    items: [
-      { icon: '🏠', label: 'Home', href: '/dashboard' },
-      { icon: '📦', label: 'Inventory', href: '/inventory' },
-      { icon: '📊', label: 'Stats', href: '/stats' },
-      { icon: '⚔️', label: 'Guild', href: '/guild' },
-    ],
-  },
-  {
     title: 'Floors',
     items: [
       { icon: '🏰', label: 'Floor 1', href: '/floor/1' },
