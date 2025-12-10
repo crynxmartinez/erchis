@@ -14,30 +14,8 @@ export default function TopNav({ username }: TopNavProps) {
         <span className="text-2xl font-bold text-[#6eb5ff] tracking-wider">ERCHIS</span>
       </Link>
 
-      {/* Nav Links */}
-      <nav className="flex items-center gap-1 text-sm">
-        {['Wiki', 'Rules', 'Forums', 'Discord', 'Staff', 'Credits'].map((item) => (
-          <Link
-            key={item}
-            href="#"
-            className="px-2 py-1 text-gray-300 hover:text-white hover:bg-[#333] rounded transition-colors"
-          >
-            {item}
-          </Link>
-        ))}
-      </nav>
-
       {/* Spacer */}
       <div className="flex-1" />
-
-      {/* Search */}
-      <div className="flex items-center mr-4">
-        <input
-          type="text"
-          placeholder="Search..."
-          className="bg-[#2a2a2a] border border-[#444] rounded px-3 py-1 text-sm text-white placeholder-gray-500 w-40 focus:outline-none focus:border-[#6eb5ff]"
-        />
-      </div>
 
       {/* User Menu */}
       <div className="flex items-center gap-3">

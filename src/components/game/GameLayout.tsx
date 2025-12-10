@@ -5,20 +5,16 @@ import PlayerInfo from './PlayerInfo'
 interface GameLayoutProps {
   children: React.ReactNode
   username: string
-  role: string
 }
 
 export default function GameLayout({ children, username }: GameLayoutProps) {
-  // Placeholder player stats - will come from database later
+  // TODO: Fetch from database
   const playerStats = {
     username,
-    money: 261915,
-    level: 6,
-    points: 0,
-    energy: { current: 100, max: 100 },
-    nerve: { current: 15, max: 15 },
-    happy: { current: 150, max: 150 },
-    life: { current: 225, max: 225 },
+    level: 1,
+    col: 0,
+    life: { current: 100, max: 100 },
+    ap: { current: 100, max: 100 },
   }
 
   return (

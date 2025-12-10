@@ -17,37 +17,18 @@ interface NavSection {
 
 const navSections: NavSection[] = [
   {
-    title: 'Areas',
+    title: 'Menu',
     items: [
       { icon: '🏠', label: 'Home', href: '/dashboard' },
-      { icon: '📦', label: 'Items', href: '/items' },
-      { icon: '🏙️', label: 'City', href: '/city' },
-      { icon: '💼', label: 'Job', href: '/job' },
-      { icon: '💪', label: 'Gym', href: '/gym', highlight: true },
-      { icon: '🏢', label: 'Properties', href: '/properties' },
-      { icon: '📚', label: 'Education', href: '/education' },
-      { icon: '🔫', label: 'Crimes', href: '/crimes', highlight: true },
-      { icon: '📋', label: 'Missions', href: '/missions' },
-      { icon: '📰', label: 'Newspaper', href: '/newspaper' },
-      { icon: '⛓️', label: 'Jail', href: '/jail' },
-      { icon: '🏥', label: 'Hospital', href: '/hospital' },
-      { icon: '🎰', label: 'Casino', href: '/casino' },
-      { icon: '💬', label: 'Forums', href: '/forums' },
-      { icon: '🏆', label: 'Hall of Fame', href: '/hof' },
-      { icon: '⚔️', label: 'Faction', href: '/faction' },
-      { icon: '👥', label: 'Recruit Citizens', href: '/recruit' },
-      { icon: '📅', label: 'Calendar', href: '/calendar' },
-      { icon: '🎮', label: 'Elimination', href: '/elimination', highlight: true },
-      { icon: '🎉', label: 'Community Events', href: '/events', highlight: true },
-      { icon: '📜', label: 'Rules', href: '/rules', highlight: true },
+      { icon: '📦', label: 'Inventory', href: '/inventory' },
+      { icon: '📊', label: 'Stats', href: '/stats' },
+      { icon: '⚔️', label: 'Guild', href: '/guild' },
     ],
   },
   {
-    title: 'Lists',
+    title: 'Floors',
     items: [
-      { icon: '👫', label: 'Friends', href: '/friends', badge: 0 },
-      { icon: '😠', label: 'Enemies', href: '/enemies', badge: 0 },
-      { icon: '🎯', label: 'Targets', href: '/targets', badge: 0 },
+      { icon: '🏰', label: 'Floor 1', href: '/floor/1' },
     ],
   },
 ]
@@ -87,11 +68,6 @@ export default function Sidebar() {
         </div>
       ))}
 
-      {/* Server Info */}
-      <div className="px-3 py-2 text-xs text-gray-500 border-t border-[#333]">
-        <div>Server: Erchis-1</div>
-        <div>Wed 12:34:56 - 11/12/25</div>
-      </div>
     </aside>
   )
 }
