@@ -2,25 +2,25 @@ import TopNav from './TopNav'
 import Sidebar from './Sidebar'
 import PlayerInfo from './PlayerInfo'
 
-interface GameLayoutProps {
-  children: React.ReactNode
+interface PlayerData {
   username: string
+  level: number
+  col: number
+  life: { current: number; max: number }
+  ap: { current: number; max: number }
 }
 
-export default function GameLayout({ children, username }: GameLayoutProps) {
-  // TODO: Fetch from database
-  const playerStats = {
-    username,
-    level: 1,
-    col: 0,
-    life: { current: 100, max: 100 },
-    ap: { current: 100, max: 100 },
-  }
+interface GameLayoutProps {
+  children: React.ReactNode
+  playerData: PlayerData
+}
+
+export default function GameLayout({ children, playerData }: GameLayoutProps) {
 
   return (
     <div className="min-h-screen bg-[#1a1a1a] text-white">
       {/* Top Navigation */}
-      <TopNav username={username} />
+      <TopNav username={playerData.username} />
 
       {/* Main Layout */}
       <div className="flex">
@@ -29,7 +29,7 @@ export default function GameLayout({ children, username }: GameLayoutProps) {
           <div className="sticky top-12 h-[calc(100vh-48px)] overflow-y-auto">
             {/* Player Info */}
             <div className="p-2">
-              <PlayerInfo {...playerStats} />
+              <PlayerInfo {...playerData} />
             </div>
 
             {/* Navigation */}

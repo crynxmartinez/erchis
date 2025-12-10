@@ -11,6 +11,7 @@ const prisma = new PrismaClient({ adapter })
 async function main() {
   const hashedPassword = await bcrypt.hash('admin123', 10)
   
+  // Create or get admin user
   const admin = await prisma.user.upsert({
     where: { username: 'admin' },
     update: {},
@@ -21,7 +22,32 @@ async function main() {
     },
   })
   
-  console.log('Created admin user:', admin)
+  // Create player if doesn't exist
+  const player = await prisma.player.upsert({
+    where: { userId: admin.id },
+    update: {},
+    create: {
+      userId: admin.id,
+      level: 1,
+      exp: 0,
+      col: 0,
+      str: 0,
+      agi: 0,
+      vit: 0,
+      int: 0,
+      dex: 0,
+      luk: 0,
+      statPoints: 25,
+      currentHp: 100,
+      currentAp: 100,
+      maxAp: 100,
+      currentFloor: 1,
+      currentArea: 'town',
+    },
+  })
+  
+  console.log('Admin user:', admin)
+  console.log('Player data:', player)
 }
 
 main()

@@ -2,6 +2,8 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import GameLayout from '@/components/game/GameLayout'
 import Announcements from '@/components/game/Announcements'
+import { prisma } from '@/lib/prisma'
+import { calculateMaxHp, calculateHpRegen, calculateApRegen } from '@/lib/player'
 
 interface SessionData {
   userId: string
@@ -24,8 +26,44 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 
+  // Fetch player data
+  const player = await prisma.player.findUnique({
+    where: { userId: session.userId },
+  })
+
+  if (!player) {
+    // Create player if doesn't exist (new user)
+    redirect('/login')
+  }
+
+  // Calculate regen
+  const maxHp = calculateMaxHp(player.vit)
+  const { newHp, newLastRegen: newHpRegen } = calculateHpRegen(player.lastHpRegen, player.currentHp, maxHp)
+  const { newAp, newLastRegen: newApRegen } = calculateApRegen(player.lastApRegen, player.currentAp, player.maxAp)
+
+  // Update player if regen occurred
+  if (newHp !== player.currentHp || newAp !== player.currentAp) {
+    await prisma.player.update({
+      where: { id: player.id },
+      data: {
+        currentHp: newHp,
+        currentAp: newAp,
+        lastHpRegen: newHpRegen,
+        lastApRegen: newApRegen,
+      },
+    })
+  }
+
+  const playerData = {
+    username: session.username,
+    level: player.level,
+    col: player.col,
+    life: { current: newHp, max: maxHp },
+    ap: { current: newAp, max: player.maxAp },
+  }
+
   return (
-    <GameLayout username={session.username}>
+    <GameLayout playerData={playerData}>
       {/* Welcome Banner */}
       <div className="bg-[#242424] rounded border border-[#333] p-4 mb-4">
         <p className="text-gray-300">
