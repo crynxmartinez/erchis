@@ -8,7 +8,7 @@ interface PlayerModalProps {
   username: string
 }
 
-type TabType = 'inventory' | 'stats' | 'guild'
+type TabType = 'inventory' | 'stats'
 
 export default function PlayerModal({ isOpen, onClose, username }: PlayerModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>('inventory')
@@ -18,7 +18,6 @@ export default function PlayerModal({ isOpen, onClose, username }: PlayerModalPr
   const tabs: { id: TabType; icon: string; label: string }[] = [
     { id: 'inventory', icon: '📦', label: 'Inventory' },
     { id: 'stats', icon: '📊', label: 'Stats' },
-    { id: 'guild', icon: '⚔️', label: 'Guild' },
   ]
 
   return (
@@ -79,13 +78,6 @@ export default function PlayerModal({ isOpen, onClose, username }: PlayerModalPr
                 <div className="text-gray-400 text-center py-8">
                   <span className="text-4xl mb-4 block">📊</span>
                   <p>Stats coming soon</p>
-                </div>
-              )}
-              
-              {activeTab === 'guild' && (
-                <div className="text-gray-400 text-center py-8">
-                  <span className="text-4xl mb-4 block">⚔️</span>
-                  <p>Not in a guild</p>
                 </div>
               )}
             </div>
