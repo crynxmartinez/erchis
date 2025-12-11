@@ -67,16 +67,46 @@ export default async function TownPage({ params }: TownPageProps) {
     characterImage: player.characterImage,
   }
 
-  // Town name based on floor
-  const townNames: Record<number, string> = {
-    1: 'Town of Beginnings',
-    2: 'Urbus',
-    3: 'Zumfut',
-    4: 'Rovia',
-    5: 'Karluin',
+  // Town data based on floor
+  const townData: Record<number, { name: string; buildings: { icon: string; name: string; npc: string; desc: string; href: string }[] }> = {
+    1: {
+      name: 'Town of Beginnings',
+      buildings: [
+        { icon: '🏪', name: "Romolo's Provisions", npc: 'Romolo', desc: 'Buy & sell items', href: `/floor/1/town/shop` },
+        { icon: '⚔️', name: 'Steel & Edge Armory', npc: 'Diavel', desc: 'Get basic weapons', href: `/floor/1/town/armory` },
+        { icon: '📚', name: 'Arcane Archives', npc: 'Argo', desc: 'Learn new skills', href: `/floor/1/town/skills` },
+        { icon: '🔨', name: 'The Iron Forge', npc: 'Lisbeth', desc: 'Repair & upgrade', href: `/floor/1/town/forge` },
+        { icon: '🧪', name: 'Mystic Brews', npc: 'Agatha', desc: 'Potions & crafting', href: `/floor/1/town/alchemy` },
+        { icon: '📜', name: "Adventurer's Hall", npc: 'Klein', desc: 'Quests & requests', href: `/floor/1/town/quests` },
+        { icon: '🚪', name: 'The Eastern Gate', npc: 'Heathcliff', desc: 'Exit to fields', href: `/floor/1/town/gate` },
+      ],
+    },
+    2: {
+      name: 'Urbus',
+      buildings: [
+        { icon: '🏪', name: "Merchant's Row", npc: 'Tomas', desc: 'Buy & sell items', href: `/floor/2/town/shop` },
+        { icon: '⚔️', name: 'Blade & Shield', npc: 'Godfree', desc: 'Get basic weapons', href: `/floor/2/town/armory` },
+        { icon: '📚', name: 'Hall of Arts', npc: 'Silica', desc: 'Learn new skills', href: `/floor/2/town/skills` },
+        { icon: '🔨', name: 'Anvil Works', npc: 'Grimlock', desc: 'Repair & upgrade', href: `/floor/2/town/forge` },
+        { icon: '🧪', name: 'Herb & Remedy', npc: 'Sasha', desc: 'Potions & crafting', href: `/floor/2/town/alchemy` },
+        { icon: '📜', name: 'Guild Hall', npc: 'Thinker', desc: 'Quests & requests', href: `/floor/2/town/quests` },
+        { icon: '🚪', name: 'Northern Gate', npc: 'Corvatz', desc: 'Exit to fields', href: `/floor/2/town/gate` },
+      ],
+    },
   }
 
-  const townName = townNames[floorNumber] || `Floor ${floorNumber} Town`
+  const currentTown = townData[floorNumber] || {
+    name: `Floor ${floorNumber} Town`,
+    buildings: [
+      { icon: '🏪', name: 'General Store', npc: 'Merchant', desc: 'Buy & sell items', href: `/floor/${floorNumber}/town/shop` },
+      { icon: '⚔️', name: 'Armory', npc: 'Armorer', desc: 'Get basic weapons', href: `/floor/${floorNumber}/town/armory` },
+      { icon: '📚', name: 'Skill Hall', npc: 'Trainer', desc: 'Learn new skills', href: `/floor/${floorNumber}/town/skills` },
+      { icon: '🔨', name: 'Blacksmith', npc: 'Smith', desc: 'Repair & upgrade', href: `/floor/${floorNumber}/town/forge` },
+      { icon: '🧪', name: 'Apothecary', npc: 'Alchemist', desc: 'Potions & crafting', href: `/floor/${floorNumber}/town/alchemy` },
+      { icon: '📜', name: 'Quest Hall', npc: 'Receptionist', desc: 'Quests & requests', href: `/floor/${floorNumber}/town/quests` },
+      { icon: '🚪', name: 'Town Gate', npc: 'Guard', desc: 'Exit to fields', href: `/floor/${floorNumber}/town/gate` },
+    ],
+  }
 
   return (
     <GameLayout playerData={playerData}>
@@ -84,42 +114,26 @@ export default async function TownPage({ params }: TownPageProps) {
         <div className="flex items-center gap-3 mb-4">
           <span className="text-2xl">🏘️</span>
           <div>
-            <h1 className="text-xl font-bold text-[#6eb5ff]">{townName}</h1>
+            <h1 className="text-xl font-bold text-[#6eb5ff]">{currentTown.name}</h1>
             <p className="text-sm text-gray-400">Floor {floorNumber} - Safe Zone</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-6">
-          <div className="bg-[#1e1e1e] border border-[#333] rounded-lg p-4 text-center hover:border-[#6eb5ff] transition-colors cursor-pointer">
-            <span className="text-2xl block mb-2">🏪</span>
-            <span className="text-sm text-gray-300">General Store</span>
-            <p className="text-xs text-gray-500 mt-1">Buy & sell items</p>
-          </div>
-          <div className="bg-[#1e1e1e] border border-[#333] rounded-lg p-4 text-center hover:border-[#6eb5ff] transition-colors cursor-pointer">
-            <span className="text-2xl block mb-2">⚔️</span>
-            <span className="text-sm text-gray-300">Weapon Master</span>
-            <p className="text-xs text-gray-500 mt-1">Get basic weapons</p>
-          </div>
-          <div className="bg-[#1e1e1e] border border-[#333] rounded-lg p-4 text-center hover:border-[#6eb5ff] transition-colors cursor-pointer">
-            <span className="text-2xl block mb-2">📚</span>
-            <span className="text-sm text-gray-300">Skill Trainer</span>
-            <p className="text-xs text-gray-500 mt-1">Learn new skills</p>
-          </div>
-          <div className="bg-[#1e1e1e] border border-[#333] rounded-lg p-4 text-center hover:border-[#6eb5ff] transition-colors cursor-pointer">
-            <span className="text-2xl block mb-2">🔨</span>
-            <span className="text-sm text-gray-300">Blacksmith</span>
-            <p className="text-xs text-gray-500 mt-1">Repair & upgrade</p>
-          </div>
-          <div className="bg-[#1e1e1e] border border-[#333] rounded-lg p-4 text-center hover:border-[#6eb5ff] transition-colors cursor-pointer">
-            <span className="text-2xl block mb-2">🧪</span>
-            <span className="text-sm text-gray-300">Alchemist</span>
-            <p className="text-xs text-gray-500 mt-1">Potions & crafting</p>
-          </div>
-          <div className="bg-[#1e1e1e] border border-[#333] rounded-lg p-4 text-center hover:border-[#6eb5ff] transition-colors cursor-pointer">
-            <span className="text-2xl block mb-2">🚪</span>
-            <span className="text-sm text-gray-300">Gate Keeper</span>
-            <p className="text-xs text-gray-500 mt-1">Exit to fields</p>
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-6">
+          {currentTown.buildings.map((building) => (
+            <a
+              key={building.name}
+              href={building.href}
+              className="bg-[#1e1e1e] border border-[#333] rounded-lg p-4 hover:border-[#6eb5ff] transition-colors cursor-pointer block"
+            >
+              <div className="text-center">
+                <span className="text-2xl block mb-2">{building.icon}</span>
+                <span className="text-sm text-gray-300 font-medium block">{building.name}</span>
+                <p className="text-xs text-[#6eb5ff] mt-1">NPC: {building.npc}</p>
+                <p className="text-xs text-gray-500 mt-1">{building.desc}</p>
+              </div>
+            </a>
+          ))}
         </div>
 
         <div className="mt-6 p-3 bg-[#1a1a1a] rounded border border-[#333]">

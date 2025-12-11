@@ -40,7 +40,7 @@ interface PlayerModalProps {
   playerData: PlayerData
 }
 
-type TabType = 'inventory' | 'stats'
+type TabType = 'stats' | 'skills' | 'inventory'
 
 const STAT_INFO: Record<keyof PlayerStats, { name: string; color: string; effects: string[] }> = {
   str: { name: 'Strength', color: 'text-red-400', effects: ['+2 Physical Damage', '+1% Crit Damage'] },
@@ -77,8 +77,12 @@ export default function PlayerModal({ isOpen, onClose, playerData }: PlayerModal
 
   const tabs: { id: TabType; icon: string; label: string }[] = [
     { id: 'stats', icon: '📊', label: 'Stats' },
+    { id: 'skills', icon: '⚔️', label: 'Skills' },
     { id: 'inventory', icon: '📦', label: 'Inventory' },
   ]
+
+  // Placeholder learned skills - will be fetched from DB later
+  const learnedSkills: { id: string; name: string; type: string; weaponCategory: string | null; level: number; useCount: number }[] = []
 
   // Calculate derived stats
   const derivedStats = {
@@ -264,6 +268,58 @@ export default function PlayerModal({ isOpen, onClose, playerData }: PlayerModal
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+
+              {activeTab === 'skills' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-gray-400 uppercase">Learned Skills</h3>
+                    <span className="text-xs text-gray-500">{learnedSkills.length} / 100</span>
+                  </div>
+
+                  {learnedSkills.length === 0 ? (
+                    <div className="text-gray-400 text-center py-8">
+                      <span className="text-4xl mb-4 block">⚔️</span>
+                      <p>No skills learned yet</p>
+                      <p className="text-sm text-gray-500 mt-2">Visit the Skill Trainer in town to learn skills</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-2">
+                      {learnedSkills.map((skill) => (
+                        <div key={skill.id} className="bg-[#252525] rounded-lg p-3 border border-[#333] flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-[#1e1e1e] rounded flex items-center justify-center text-lg">
+                              {skill.type === 'universal' ? '🌟' : '⚔️'}
+                            </div>
+                            <div>
+                              <div className="text-white font-medium">{skill.name}</div>
+                              <div className="text-xs text-gray-500">
+                                {skill.weaponCategory || 'Universal'} • Level {skill.level}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xs text-gray-400">Uses: {skill.useCount}</div>
+                            <div className="w-20 h-1.5 bg-[#1a1a1a] rounded-full mt-1">
+                              <div 
+                                className="h-full bg-[#6eb5ff] rounded-full" 
+                                style={{ width: `${Math.min((skill.level / 10) * 100, 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="mt-4 p-3 bg-[#1a1a1a] rounded border border-[#333]">
+                    <div className="text-xs text-gray-500">
+                      <p className="mb-1">• Skills level up through usage (max level 10)</p>
+                      <p className="mb-1">• Higher level = more damage (+5% per level)</p>
+                      <p>• You can learn up to 100 skills (cannot unlearn)</p>
+                    </div>
+                  </div>
                 </div>
               )}
 
