@@ -214,10 +214,10 @@ function calculateApCost(stage: number, variantType: VariantType): number {
   return baseAp + modifier
 }
 
-function calculateCooldown(stage: number): string {
-  // Base: 1 + (stage × 0.5) turns
+function calculateCooldown(stage: number): number {
+  // Base: 1 + (stage × 0.5) turns, minimum 1, round up
   const cd = 1 + (stage * 0.5)
-  return `${cd} turns`
+  return Math.max(1, Math.ceil(cd))
 }
 
 function calculateBuffDuration(stage: number): number {

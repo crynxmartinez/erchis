@@ -18,7 +18,7 @@ interface Skill {
   archetype: string
   damage: string
   apCost: number
-  cooldown: string
+  cooldown: number | string
   passive: string | null
   children?: Skill[]
   category?: { id: string; name: string } | null
@@ -683,7 +683,11 @@ export default function SkillDatabaseBuilder() {
                       className="w-full bg-transparent border-b border-white/30 font-bold text-yellow-400 focus:outline-none"
                     />
                   ) : (
-                    <div className="font-bold text-yellow-400">{currentSkill.cooldown}</div>
+                    <div className="font-bold text-yellow-400">
+                      {typeof currentSkill.cooldown === 'number' 
+                        ? `${currentSkill.cooldown} turn${currentSkill.cooldown !== 1 ? 's' : ''}`
+                        : currentSkill.cooldown}
+                    </div>
                   )}
                 </div>
               </div>

@@ -213,7 +213,7 @@ model Skill {
   // Combat Stats
   damage        String   @default("100%") // e.g., "100% weapon damage", "50% x3 hits"
   apCost        Int      @default(5)
-  cooldown      String   @default("0.5s") // e.g., "0.5s", "1.2s"
+  cooldown      Int      @default(1) // Turns (minimum 1, round up)
 
   // Passive (unlocked at each stage)
   passive       String?  // e.g., "Quick Slash attacks are 5% faster"
