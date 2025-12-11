@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 interface StatBarProps {
   label: string
@@ -96,6 +97,10 @@ export default function PlayerInfo({
           <div className="flex">
             <span className="text-gray-500 w-14">Level:</span>
             <span className="text-white">{level}</span>
+          </div>
+          <div className="flex">
+            <span className="text-gray-500 w-14">Guild:</span>
+            <Link href="/guild" className="text-gray-400 hover:text-[#6eb5ff] transition-colors">None</Link>
           </div>
         </div>
 
