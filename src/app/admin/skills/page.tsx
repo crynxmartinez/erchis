@@ -116,8 +116,30 @@ export default function SkillDatabaseBuilder() {
       let skill: Skill
       
       if (data.skill) {
-        // Skill exists in database
-        skill = data.skill
+        // Skill exists in database - update it with correct values from StarterSkill
+        const updateResponse = await fetch('/api/skills/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: data.skill.id,
+            ampPercent: starter.ampPercent,
+            apCost: starter.apCost,
+            cooldown: starter.cooldown,
+            range: starter.range,
+            damageType: starter.damageType,
+            weaponRequirement: starter.weaponRequirement,
+            hasUtilityMode: starter.hasUtilityMode || false,
+            utilityEffect: starter.utilityEffect || null,
+            utilityDuration: starter.utilityDuration || null,
+          })
+        })
+        const updateData = await updateResponse.json()
+        if (updateData.success && updateData.skill) {
+          skill = updateData.skill
+        } else {
+          // If update fails, still use existing skill
+          skill = data.skill
+        }
       } else {
         // Create new starter skill in database
         const createResponse = await fetch('/api/skills/create', {
