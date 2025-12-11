@@ -12,6 +12,10 @@ export async function POST(request: Request) {
     if (data.description !== undefined) updateData.description = data.description
     if (data.skillType !== undefined) updateData.skillType = data.skillType
     if (data.damageType !== undefined) updateData.damageType = data.damageType
+    if (data.weaponRequirement !== undefined) updateData.weaponRequirement = data.weaponRequirement
+    if (data.hasUtilityMode !== undefined) updateData.hasUtilityMode = data.hasUtilityMode
+    if (data.utilityEffect !== undefined) updateData.utilityEffect = data.utilityEffect
+    if (data.utilityDuration !== undefined) updateData.utilityDuration = data.utilityDuration
     if (data.ampPercent !== undefined) updateData.ampPercent = data.ampPercent
     if (data.apCost !== undefined) updateData.apCost = data.apCost
     if (data.cooldown !== undefined) updateData.cooldown = data.cooldown

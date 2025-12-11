@@ -523,19 +523,35 @@ export default function SkillDatabaseBuilder() {
         {/* VIEW: Skill Type Categories */}
         {!loading && view.type === 'categories' && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">Choose Skill Type</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Choose Skill Type</h2>
+              <span className="text-sm text-gray-400">100 Starter Skills Total</span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
               {SKILL_TYPE_CATEGORIES.map(category => (
                 <button
                   key={category.id}
                   onClick={() => handleSelectCategory(category)}
-                  className={`border-2 rounded-lg p-6 text-center hover:scale-105 transition-all ${category.color}`}
+                  className={`border-2 rounded-lg p-4 text-left hover:scale-[1.02] transition-all ${category.color}`}
                 >
-                  <div className="text-4xl mb-3">{category.icon}</div>
-                  <div className="font-semibold text-lg mb-1">{category.name}</div>
-                  <div className="text-xs opacity-70 mb-2">{category.description}</div>
-                  <div className="text-xs text-gray-400 mt-2">
-                    {category.skills.length} skills
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-3xl">{category.icon}</span>
+                    <div>
+                      <div className="font-semibold text-lg">{category.name}</div>
+                      <div className="text-xs opacity-70">{category.skills.length} skills</div>
+                    </div>
+                  </div>
+                  <div className="text-xs opacity-80 mb-3">{category.description}</div>
+                  <div className={`text-xs px-2 py-1 rounded inline-block ${
+                    category.weaponRequirement === 'melee_only' ? 'bg-red-900/50 text-red-300' :
+                    category.weaponRequirement === 'ranged_only' ? 'bg-green-900/50 text-green-300' :
+                    category.weaponRequirement === 'magic_only' ? 'bg-purple-900/50 text-purple-300' :
+                    'bg-gray-900/50 text-gray-300'
+                  }`}>
+                    {category.weaponRequirement === 'melee_only' ? '⚔️ Melee Only' :
+                     category.weaponRequirement === 'ranged_only' ? '🏹 Ranged Only' :
+                     category.weaponRequirement === 'magic_only' ? '✨ Magic Only' :
+                     '🔄 Any Weapon'}
                   </div>
                 </button>
               ))}
@@ -546,9 +562,22 @@ export default function SkillDatabaseBuilder() {
         {/* VIEW: Starter Skills */}
         {!loading && view.type === 'starters' && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">
-              {view.category.icon} {view.category.name} Skills - Choose Starter
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">
+                {view.category.icon} {view.category.name} Skills
+              </h2>
+              <div className={`text-xs px-2 py-1 rounded ${
+                view.category.weaponRequirement === 'melee_only' ? 'bg-red-900/50 text-red-300' :
+                view.category.weaponRequirement === 'ranged_only' ? 'bg-green-900/50 text-green-300' :
+                view.category.weaponRequirement === 'magic_only' ? 'bg-purple-900/50 text-purple-300' :
+                'bg-gray-900/50 text-gray-300'
+              }`}>
+                {view.category.weaponRequirement === 'melee_only' ? '⚔️ Melee Only' :
+                 view.category.weaponRequirement === 'ranged_only' ? '🏹 Ranged Only' :
+                 view.category.weaponRequirement === 'magic_only' ? '✨ Magic Only' :
+                 '🔄 Any Weapon'}
+              </div>
+            </div>
             <p className="text-sm text-gray-400 mb-4">{view.category.description}</p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {view.category.skills.map((starter: StarterSkill) => (
@@ -559,10 +588,17 @@ export default function SkillDatabaseBuilder() {
                 >
                   <div className="font-semibold mb-1">{starter.name}</div>
                   <div className="text-xs text-gray-400 mb-2">{starter.subtype}</div>
-                  <div className="text-xs text-gray-500 line-clamp-2">{starter.description}</div>
-                  <div className="flex gap-2 mt-2">
-                    <span className="text-xs px-2 py-1 rounded bg-green-900/30 text-green-400">Stage 0</span>
-                    <span className={`text-xs px-2 py-1 rounded ${starter.damageType === 'magic' ? 'bg-purple-900/30 text-purple-400' : starter.damageType === 'physical' ? 'bg-red-900/30 text-red-400' : 'bg-gray-900/30 text-gray-400'}`}>
+                  <div className="text-xs text-gray-500 line-clamp-2 mb-2">{starter.description}</div>
+                  {starter.hasUtilityMode && (
+                    <div className="text-xs text-cyan-400 mb-2">🔮 Can enchant weapons</div>
+                  )}
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    <span className="text-xs px-2 py-0.5 rounded bg-green-900/30 text-green-400">Stage 0</span>
+                    <span className={`text-xs px-2 py-0.5 rounded ${
+                      starter.damageType === 'magic' ? 'bg-purple-900/30 text-purple-400' : 
+                      starter.damageType === 'physical' ? 'bg-red-900/30 text-red-400' : 
+                      'bg-gray-900/30 text-gray-400'
+                    }`}>
                       {starter.damageType}
                     </span>
                   </div>
@@ -645,7 +681,7 @@ export default function SkillDatabaseBuilder() {
                 </div>
               </div>
 
-              {/* Stats Grid */}
+              {/* Stats Grid - Row 1 */}
               <div className="grid grid-cols-4 gap-4 mb-4">
                 <div className="bg-black/20 rounded p-3">
                   <div className="text-xs text-gray-400 mb-1">Amp %</div>
@@ -693,6 +729,54 @@ export default function SkillDatabaseBuilder() {
                   <div className="font-bold text-purple-400">{currentSkill.targetType}</div>
                 </div>
               </div>
+
+              {/* Stats Grid - Row 2: Weapon & Utility */}
+              <div className="grid grid-cols-4 gap-4 mb-4">
+                <div className="bg-black/20 rounded p-3">
+                  <div className="text-xs text-gray-400 mb-1">Weapon Req</div>
+                  <div className={`font-bold text-sm ${
+                    currentSkill.weaponRequirement === 'melee_only' ? 'text-red-400' :
+                    currentSkill.weaponRequirement === 'ranged_only' ? 'text-green-400' :
+                    currentSkill.weaponRequirement === 'magic_only' ? 'text-purple-400' :
+                    'text-gray-400'
+                  }`}>
+                    {currentSkill.weaponRequirement === 'melee_only' ? '⚔️ Melee' :
+                     currentSkill.weaponRequirement === 'ranged_only' ? '🏹 Ranged' :
+                     currentSkill.weaponRequirement === 'magic_only' ? '✨ Magic' :
+                     '🔄 Any'}
+                  </div>
+                </div>
+                <div className="bg-black/20 rounded p-3">
+                  <div className="text-xs text-gray-400 mb-1">Damage Type</div>
+                  <div className={`font-bold ${
+                    currentSkill.damageType === 'magic' ? 'text-purple-400' :
+                    currentSkill.damageType === 'physical' ? 'text-red-400' :
+                    'text-gray-400'
+                  }`}>
+                    {currentSkill.damageType}
+                  </div>
+                </div>
+                <div className="bg-black/20 rounded p-3">
+                  <div className="text-xs text-gray-400 mb-1">Utility Mode</div>
+                  <div className={`font-bold ${currentSkill.hasUtilityMode ? 'text-cyan-400' : 'text-gray-500'}`}>
+                    {currentSkill.hasUtilityMode ? '🔮 Yes' : 'No'}
+                  </div>
+                </div>
+                <div className="bg-black/20 rounded p-3">
+                  <div className="text-xs text-gray-400 mb-1">Range</div>
+                  <div className="font-bold text-orange-400">{currentSkill.range} tile{currentSkill.range !== 1 ? 's' : ''}</div>
+                </div>
+              </div>
+
+              {/* Utility Effect (if has utility mode) */}
+              {currentSkill.hasUtilityMode && currentSkill.utilityEffect && (
+                <div className="bg-cyan-900/20 border border-cyan-500/30 rounded p-3 mb-4">
+                  <div className="text-xs text-cyan-400 mb-1">🔮 Utility Effect (when used with non-magic weapons)</div>
+                  <div className="text-cyan-300">
+                    {currentSkill.utilityEffect.replace('_', ' ')} for {currentSkill.utilityDuration || 3} turns
+                  </div>
+                </div>
+              )}
 
               {/* Effect */}
               <div className="mb-4">

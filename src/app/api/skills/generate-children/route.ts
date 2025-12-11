@@ -280,10 +280,19 @@ function generateEffect(
 
 export async function POST(request: Request) {
   try {
-    const { parentId, parentName, parentStage, categoryId, starterSkillName } = await request.json()
+    const { parentId, parentName, parentStage, starterSkillName } = await request.json()
     
     if (!parentId || parentStage === undefined) {
       return NextResponse.json({ error: 'parentId and parentStage are required' }, { status: 400 })
+    }
+    
+    // Get parent skill to inherit weapon requirement and utility mode
+    const parentSkill = await prisma.skill.findUnique({
+      where: { id: parentId }
+    })
+    
+    if (!parentSkill) {
+      return NextResponse.json({ error: 'Parent skill not found' }, { status: 404 })
     }
     
     const newStage = parentStage + 1
@@ -374,19 +383,39 @@ export async function POST(request: Request) {
         hitCount > 1 ? hitCount : undefined
       )
       
+      // Determine weapon requirement for child
+      // Most variants inherit parent's requirement
+      // Mobility variant can become 'any' (movement skills work with any weapon)
+      let childWeaponRequirement = parentSkill.weaponRequirement
+      if (variantType === 'mobility_variant') {
+        childWeaponRequirement = 'any'
+      }
+      
+      // Inherit utility mode from parent (magic skills keep their enchant ability)
+      const childHasUtilityMode = parentSkill.hasUtilityMode
+      const childUtilityEffect = parentSkill.utilityEffect
+      const childUtilityDuration = parentSkill.utilityDuration
+      
+      // Inherit damage type from parent
+      const childDamageType = parentSkill.damageType
+      
       const child = await prisma.skill.create({
         data: {
           name,
           description,
           skillType: config.skillType,
-          damageType: 'physical',
+          damageType: childDamageType,
+          weaponRequirement: childWeaponRequirement,
+          hasUtilityMode: childHasUtilityMode,
+          utilityEffect: childUtilityEffect,
+          utilityDuration: childUtilityDuration,
           stage: newStage,
           variantType,
           ampPercent,
           apCost,
           cooldown,
           targetType: config.targetType,
-          range: 1,
+          range: parentSkill.range,
           hitCount,
           buffType,
           buffDuration,
