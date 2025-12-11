@@ -97,23 +97,30 @@ All skills are **pre-built in database** using the Skill Database Builder.
 
 ### Damage Formula:
 ```
-Physical: WeaponBase × SkillAmp × (1 + STR or DEX / 100) × CritMultiplier
-Magic:    WeaponBase × SkillAmp × (1 + INT / 100) × 1.3
+Damage = WeaponBase × SkillAmp
+```
+
+### With Crit (Physical only):
+```
+Damage = WeaponBase × SkillAmp × CritMultiplier
 ```
 
 ### Physical vs Magic:
-| Type | Scaling Stat | Can Crit? | Base Amp |
-|------|--------------|-----------|----------|
-| Physical | STR or DEX | Yes | 70-150% |
-| Magic | INT | No | 100-200% |
+| Type | Can Crit? | Amp Range (Stage 0) |
+|------|-----------|---------------------|
+| Physical | Yes | 50-100% |
+| Magic | No | 100-150% |
+| None | No | 0% |
+
+**Note:** Stats are for requirements only, NOT damage calculation.
 
 ### Skill Amp Tiers:
-| Tier | Amp Range | Use Case |
-|------|-----------|----------|
-| Weak | 50-80% | Fast/utility, multi-hit |
-| Normal | 100% | Standard attacks |
-| Strong | 120-150% | Heavy/slow skills |
-| Power | 175-200% | Finishers, high cost |
+| Tier | Physical Amp | Magic Amp | Use Case |
+|------|--------------|-----------|----------|
+| Weak | 50-60% | 100-110% | Fast/utility, multi-hit |
+| Normal | 65-75% | 115-125% | Standard attacks |
+| Strong | 80-90% | 130-140% | Heavy/slow skills |
+| Power | 95-100% | 145-150% | Finishers, high cost |
 
 ---
 

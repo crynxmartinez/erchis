@@ -52,35 +52,37 @@ When a magic skill is used with a non-magic weapon, it becomes a weapon enchant:
 
 ## 2. Damage Types
 
-| Type | Scaling Stat | Can Crit? | Amp Range |
-|------|--------------|-----------|-----------|
-| **Physical** | STR or DEX | Yes | 70-150% |
-| **Magic** | INT | No | 100-200% |
+| Type | Can Crit? | Amp Range (Stage 0) |
+|------|-----------|---------------------|
+| **Physical** | Yes | 50-100% |
+| **Magic** | No | 100-150% |
+| **None** | No | 0% |
 
 ### Why This Balance:
 - Physical has lower amp but can crit (burst potential)
 - Magic has higher consistent amp but no crit
-- Both are viable, different playstyles
+- Non-damage skills (buffs, movement, utility) have 0% amp
+- Stats are for **requirements only**, NOT damage calculation
 
 ---
 
 ## 3. Damage Formula
 
-### Physical Damage:
+### Damage Formula:
 ```
-Damage = WeaponBase × SkillAmp × (1 + Stat/100) × CritMultiplier - EnemyDef
+Damage = WeaponBase × SkillAmp
 ```
 
-### Magic Damage:
+### With Crit (Physical only):
 ```
-Damage = WeaponBase × SkillAmp × (1 + INT/100) × 1.3 - EnemyMagicDef
+Damage = WeaponBase × SkillAmp × CritMultiplier
 ```
 
 ### Components:
 - **WeaponBase** = Weapon category's base damage % (40-140%)
-- **SkillAmp** = Skill's amplifier % (50-200%)
-- **Stat** = STR, DEX, or INT depending on weapon/skill
-- **CritMultiplier** = 1.5x base (can be modified)
+- **SkillAmp** = Skill's amplifier % (Physical: 50-100%, Magic: 100-150%)
+- **CritMultiplier** = 1.5x base (physical only, can be modified)
+- **Stats** = Used for requirements only, NOT damage calculation
 
 ---
 
