@@ -178,20 +178,36 @@ model Weapon {
 model Skill {
   id          String   @id @default(cuid())
   name        String
-  description String
+  description String   // Effect description
 
   // Category (null = universal skill)
   categoryId String?
   category   WeaponCategory? @relation(fields: [categoryId], references: [id])
 
-  skillType String // Attack, Defensive, Buff, Debuff, Movement, Utility, Recovery
+  // Skill Tree Structure
+  starterSkillName String?  // e.g., "Quick Slash" - the root skill this belongs to
+  parentId         String?  // Parent skill ID in the tree
+  parent           Skill?   @relation("SkillTree", fields: [parentId], references: [id])
+  children         Skill[]  @relation("SkillTree")
+  
+  stage            Int      @default(0)  // 0-5
+  archetype        String   @default("root") // root, power, speed, utility, mobility
+
+  skillType String // Attack, Attack / Combo, Attack / Movement, etc.
 
   // Combat Stats
+  damage        String   @default("100%") // e.g., "100% weapon damage", "50% x3 hits"
+  apCost        Int      @default(5)
+  cooldown      String   @default("0.5s") // e.g., "0.5s", "1.2s"
+
+  // Passive (unlocked at each stage)
+  passive       String?  // e.g., "Quick Slash attacks are 5% faster"
+
+  // Legacy fields for compatibility
   baseDamage    Int   @default(0)
   damageScaling Float @default(0)
   scalingStat   String? // STR, DEX, INT
-  cooldown      Float @default(0)
-  apCost        Int   @default(0)
+  cooldownFloat Float @default(0)
 
   // Range & Area
   range     Int     @default(1)
@@ -206,16 +222,21 @@ model Skill {
 
   // Requirements
   levelRequired       Int     @default(1)
-  prerequisiteSkillId String?
+  usesRequired        Int     @default(0) // Uses needed to unlock (100, 300, 500, 900, 1500)
 
   // Flags
-  isBasic   Boolean @default(true)
+  isBasic   Boolean @default(true)  // Starter skill (free from trainer)
   isPassive Boolean @default(false)
+  isUniversal Boolean @default(false) // No weapon required
 
   playerSkills PlayerSkill[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([starterSkillName])
+  @@index([categoryId])
+  @@index([stage])
 }
 
 // ============================================
