@@ -179,8 +179,16 @@ model Skill {
   description String   // Effect description
 
   // Type
-  skillType   String   // Attack, Defensive, Buff, Debuff, Utility
+  skillType   String   // Attack, Defensive, Buff, Debuff, Movement, Utility, Support
   damageType  String   @default("physical") // physical, magic, none
+  
+  // Weapon Requirement (for starter skills)
+  weaponRequirement String @default("any") // melee_only, ranged_only, magic_only, any
+  
+  // Magic Utility Mode (for magic skills used with non-magic weapons)
+  hasUtilityMode    Boolean @default(false)
+  utilityEffect     String?  // fire_enchant, ice_enchant, lightning_enchant, shadow_enchant, holy_enchant
+  utilityDuration   Int?     // turns or attacks the enchant lasts
 
   // Skill Tree Structure
   starterSkillName String   // Root skill name for tree tracking

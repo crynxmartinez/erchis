@@ -10,16 +10,38 @@ This document contains the complete skill system design for the turn-based game.
 
 Skills are **not locked to weapon categories**. Any player can learn any skill.
 
-### Starter Skills (~80 total)
+### Starter Skills (100 total in 9 categories)
 
-| Category | Count | Examples |
-|----------|-------|----------|
-| Melee Attacks | 20 | Slash, Thrust, Smash, Cleave, Chop |
-| Ranged Attacks | 15 | Shot, Volley, Snipe, Burst |
-| Magic Attacks | 20 | Fireball, Ice Spike, Lightning, Heal |
-| Defensive | 10 | Guard, Parry, Dodge, Counter, Brace |
-| Buffs | 8 | Empower, Haste, Fortify, Focus |
-| Debuffs | 7 | Slow, Weaken, Blind, Armor Break |
+| Category | Count | Weapon Req | Examples |
+|----------|-------|------------|----------|
+| Melee Attacks | 15 | melee_only | Slash, Thrust, Smash, Cleave, Chop |
+| Ranged Attacks | 15 | ranged_only | Shot, Volley, Snipe, Burst Fire |
+| Magic Attacks | 15 | magic_only* | Fireball, Ice Spike, Lightning Bolt |
+| Defensive | 10 | any | Guard, Parry, Block, Brace |
+| Buffs | 8 | any | Empower, Haste, Fortify, Focus |
+| Debuffs | 8 | any | Slow, Weaken, Blind, Armor Break |
+| Movement | 10 | any | Dash, Sprint, Jump, Roll, Sidestep |
+| Utility/Awareness | 10 | any | Detect, Inspect, Feint, Track |
+| Support | 9 | any | Meditate, Heal, Stabilize, Rally |
+
+*Magic skills have **Utility Mode**: When used with non-magic weapons, they become weapon enchants instead of direct damage.
+
+### Weapon Requirements:
+- **melee_only**: Requires Sword, Greatsword, Katana, Dagger, Axe, Greataxe, Mace, Greathammer, Spear, Fist
+- **ranged_only**: Requires Bow, Crossbow, Gun
+- **magic_only**: Requires Staff, Wand, Tome (or becomes enchant with other weapons)
+- **any**: Can be used with any weapon or no weapon
+
+### Magic Utility Mode:
+When a magic skill is used with a non-magic weapon, it becomes a weapon enchant:
+
+| Skill | Direct Effect (Magic Weapon) | Utility Effect (Other Weapons) |
+|-------|------------------------------|-------------------------------|
+| Fireball | Fire damage | Fire enchant (burn on hit) |
+| Ice Spike | Ice damage | Frost enchant (slow on hit) |
+| Lightning Bolt | Lightning damage | Shock enchant (stun chance) |
+| Shadow Strike | Dark damage | Shadow enchant (lifesteal) |
+| Holy Smite | Holy damage | Holy enchant (bonus vs undead) |
 
 ### Learning Skills:
 - **Starter skills** are free from Skill Trainer NPC

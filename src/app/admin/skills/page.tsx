@@ -17,6 +17,11 @@ interface Skill {
   skillType: string
   damageType: string
   variantType: string
+  // Weapon requirement
+  weaponRequirement: string
+  hasUtilityMode: boolean
+  utilityEffect?: string | null
+  utilityDuration?: number | null
   // Combat stats
   ampPercent: number
   apCost: number
@@ -121,15 +126,19 @@ export default function SkillDatabaseBuilder() {
           body: JSON.stringify({
             name: starter.name,
             description: starter.description,
-            skillType: category.name, // Use category name as skill type
+            skillType: category.name,
             damageType: starter.damageType,
+            weaponRequirement: starter.weaponRequirement,
+            hasUtilityMode: starter.hasUtilityMode || false,
+            utilityEffect: starter.utilityEffect || null,
+            utilityDuration: starter.utilityDuration || null,
             stage: 0,
             variantType: 'root',
-            ampPercent: 100,
+            ampPercent: starter.damageType === 'none' ? 0 : 100,
             apCost: 5,
             cooldown: 1,
             targetType: 'single',
-            range: 1,
+            range: starter.weaponRequirement === 'ranged_only' ? 3 : 1,
             hitCount: 1,
             passive: null,
             starterSkillName: starter.name,
