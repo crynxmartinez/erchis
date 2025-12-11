@@ -433,7 +433,7 @@ export default function SkillDatabaseBuilder() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-[#6eb5ff]">⚔️ Skill Database Builder</h1>
-            <p className="text-sm text-gray-400">Build skill trees one skill at a time</p>
+            <p className="text-sm text-gray-400">Build skill trees one skill at a time (Admin Tool)</p>
           </div>
           <a
             href="/floor/1/town"
