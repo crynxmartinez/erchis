@@ -92,6 +92,23 @@ export default function Sidebar({ maxUnlockedFloor = 1 }: SidebarProps) {
           </Link>
         </div>
       </div>
+
+      {/* Navigation Section */}
+      <div className="mb-2">
+        <div className="bg-[#2a2a2a] px-3 py-1.5 text-xs font-medium text-gray-400 uppercase tracking-wide border-y border-[#333]">
+          Navigation
+        </div>
+        <div className="py-1 px-3">
+          {/* Skill Database Link */}
+          <Link
+            href="/admin/skills"
+            className="flex items-center mt-1 px-3 py-2 text-sm text-gray-300 hover:bg-[#2a2a2a] hover:text-white rounded transition-colors"
+          >
+            <span className="mr-2">⚔️</span>
+            Skill Database
+          </Link>
+        </div>
+      </div>
     </aside>
   )
 }

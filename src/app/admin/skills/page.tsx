@@ -341,6 +341,39 @@ export default function SkillDatabaseBuilder() {
     setGenerating(false)
   }
 
+  // Reset entire skill tree (delete all children of starter skill)
+  const handleResetTree = async () => {
+    if (!currentSkill) return
+    
+    const starterName = currentSkill.starterSkillName || currentSkill.name
+    
+    if (!confirm(`Are you sure you want to delete ALL children of "${starterName}"? This cannot be undone.`)) {
+      return
+    }
+    
+    setMessage('🗑️ Deleting all children...')
+    
+    try {
+      const response = await fetch('/api/skills/delete-all-children', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ starterSkillName: starterName })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        setMessage(`✅ Deleted ${data.count} skills. Tree reset to starter skill only.`)
+        setChildSkills([])
+        await loadProgress(starterName)
+      } else {
+        setMessage(`❌ Error: ${data.error}`)
+      }
+    } catch (error) {
+      setMessage(`❌ Failed to reset: ${error}`)
+    }
+  }
+
   // ============================================
   // HELPER FUNCTIONS
   // ============================================
@@ -395,29 +428,20 @@ export default function SkillDatabaseBuilder() {
 
   return (
     <div className="min-h-screen bg-[#1a1a1a] text-white">
-      {/* Left Navigation Menu - Fixed Bottom Left */}
-      <nav className="fixed bottom-4 left-4 z-50">
-        <div className="bg-[#242424] border border-[#444] rounded-lg shadow-lg overflow-hidden">
-          <div className="px-3 py-2 bg-[#333] border-b border-[#444]">
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Navigation</span>
-          </div>
-          <div className="p-2">
-            <a
-              href="/admin/skills"
-              className="flex items-center gap-2 px-3 py-2 rounded bg-[#6eb5ff]/20 text-[#6eb5ff] border border-[#6eb5ff]/30"
-            >
-              <span>⚔️</span>
-              <span className="text-sm font-medium">Skill Database</span>
-            </a>
-          </div>
-        </div>
-      </nav>
-
       {/* Header */}
       <header className="bg-[#242424] border-b border-[#333] p-4">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-2xl font-bold text-[#6eb5ff]">⚔️ Skill Database Builder</h1>
-          <p className="text-sm text-gray-400">Build skill trees one skill at a time</p>
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-[#6eb5ff]">⚔️ Skill Database Builder</h1>
+            <p className="text-sm text-gray-400">Build skill trees one skill at a time</p>
+          </div>
+          <a
+            href="/floor/1/town"
+            className="flex items-center gap-2 px-4 py-2 bg-[#333] hover:bg-[#444] rounded-lg text-gray-300 hover:text-white transition-colors"
+          >
+            <span>🏠</span>
+            <span className="text-sm font-medium">Home</span>
+          </a>
         </div>
       </header>
 
@@ -579,15 +603,25 @@ export default function SkillDatabaseBuilder() {
                 
                 <div className="flex gap-2">
                   {!editMode ? (
-                    <button
-                      onClick={() => {
-                        setEditMode(true)
-                        setEditedSkill(currentSkill)
-                      }}
-                      className="px-4 py-2 bg-[#6eb5ff] text-black rounded font-medium hover:bg-[#5a9ee6] transition-colors"
-                    >
-                      ✏️ Edit
-                    </button>
+                    <>
+                      <button
+                        onClick={() => {
+                          setEditMode(true)
+                          setEditedSkill(currentSkill)
+                        }}
+                        className="px-4 py-2 bg-[#6eb5ff] text-black rounded font-medium hover:bg-[#5a9ee6] transition-colors"
+                      >
+                        ✏️ Edit
+                      </button>
+                      {currentSkill.stage === 0 && (
+                        <button
+                          onClick={handleResetTree}
+                          className="px-4 py-2 bg-red-600 text-white rounded font-medium hover:bg-red-700 transition-colors"
+                        >
+                          🗑️ Reset Tree
+                        </button>
+                      )}
+                    </>
                   ) : (
                     <>
                       <button
