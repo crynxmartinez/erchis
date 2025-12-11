@@ -66,7 +66,7 @@ export default function GameLayout({ children, playerData }: GameLayoutProps) {
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 p-4 min-h-[calc(100vh-48px)] pb-20">
+        <main className="flex-1 p-4 min-h-[calc(100vh-48px)]">
           {children}
         </main>
       </div>
