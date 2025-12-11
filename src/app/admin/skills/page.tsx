@@ -24,6 +24,30 @@ interface Skill {
   category?: { id: string; name: string } | null
   starterSkillName?: string
   categoryId?: string
+  // New variant fields
+  variantType?: string
+  buffType?: string | null
+  buffDuration?: number | null
+  debuffType?: string | null
+  debuffDuration?: number | null
+  lifestealPercent?: number | null
+  hitCount?: number | null
+  isSaved?: boolean
+}
+
+// Variant type configuration
+const VARIANT_CONFIG: Record<string, { icon: string; color: string; label: string }> = {
+  root:             { icon: '🌱', color: 'bg-green-900/50 border-green-500 text-green-300', label: 'Root' },
+  upgrade:          { icon: '⬆️', color: 'bg-green-900/50 border-green-500 text-green-300', label: 'Upgrade' },
+  original_variant: { icon: '🔄', color: 'bg-blue-900/50 border-blue-500 text-blue-300', label: 'Original Variant' },
+  buff_variant:     { icon: '💪', color: 'bg-yellow-900/50 border-yellow-500 text-yellow-300', label: 'Buff Variant' },
+  debuff_variant:   { icon: '💀', color: 'bg-purple-900/50 border-purple-500 text-purple-300', label: 'Debuff Variant' },
+  unique:           { icon: '✨', color: 'bg-orange-900/50 border-orange-500 text-orange-300', label: 'Unique' },
+  aoe_variant:      { icon: '💥', color: 'bg-red-900/50 border-red-500 text-red-300', label: 'AoE Variant' },
+  combo_variant:    { icon: '⛓️', color: 'bg-cyan-900/50 border-cyan-500 text-cyan-300', label: 'Combo Variant' },
+  counter_variant:  { icon: '🛡️', color: 'bg-gray-700/50 border-gray-400 text-gray-300', label: 'Counter Variant' },
+  mobility_variant: { icon: '💨', color: 'bg-pink-900/50 border-pink-500 text-pink-300', label: 'Mobility Variant' },
+  sustain_variant:  { icon: '❤️‍🩹', color: 'bg-slate-700/50 border-slate-400 text-slate-300', label: 'Sustain Variant' },
 }
 
 type ViewState = 
@@ -239,6 +263,82 @@ export default function SkillDatabaseBuilder() {
     } catch (error) {
       setMessage(`❌ Failed to save: ${error}`)
     }
+  }
+
+  // Save all generated children to database
+  const handleSaveAllChildren = async () => {
+    if (childSkills.length === 0) return
+    
+    setMessage('💾 Saving all children...')
+    
+    try {
+      const response = await fetch('/api/skills/save-children', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ skillIds: childSkills.map(s => s.id) })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        setMessage(`✅ Saved ${data.count} skills to database!`)
+        // Reload children to update isSaved status
+        if (currentSkill) {
+          await loadChildSkills(currentSkill.id)
+        }
+      } else {
+        setMessage(`❌ Error: ${data.error}`)
+      }
+    } catch (error) {
+      setMessage(`❌ Failed to save: ${error}`)
+    }
+  }
+
+  // Regenerate children (delete existing unsaved and generate new)
+  const handleRegenerateChildren = async () => {
+    if (!currentSkill) return
+    
+    setGenerating(true)
+    setMessage('🔄 Regenerating children...')
+    
+    try {
+      // Delete existing unsaved children
+      const deleteResponse = await fetch('/api/skills/delete-unsaved', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ parentId: currentSkill.id })
+      })
+      
+      if (!deleteResponse.ok) {
+        throw new Error('Failed to delete existing children')
+      }
+      
+      // Generate new children
+      const response = await fetch('/api/skills/generate-children', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          parentId: currentSkill.id,
+          parentName: currentSkill.name,
+          parentStage: currentSkill.stage,
+          categoryId: currentSkill.categoryId,
+          starterSkillName: currentSkill.starterSkillName,
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        setMessage(`✅ Regenerated ${data.children.length} child skills!`)
+        setChildSkills(data.children)
+      } else {
+        setMessage(`❌ Error: ${data.error}`)
+      }
+    } catch (error) {
+      setMessage(`❌ Failed to regenerate: ${error}`)
+    }
+    
+    setGenerating(false)
   }
 
   // ============================================
@@ -592,7 +692,7 @@ export default function SkillDatabaseBuilder() {
                   disabled={generating}
                   className="w-full py-4 bg-gradient-to-r from-[#6eb5ff] to-[#a855f7] text-white rounded-lg font-bold text-lg hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
-                  {generating ? '⏳ Generating...' : `🎲 Generate Stage ${currentSkill.stage + 1} Children (4 skills)`}
+                  {generating ? '⏳ Generating...' : `🎲 Generate Stage ${currentSkill.stage + 1} Children (1 Upgrade + 4 Random Variants)`}
                 </button>
               )}
 
@@ -607,30 +707,78 @@ export default function SkillDatabaseBuilder() {
             {childSkills.length > 0 && (
               <div>
                 <h3 className="text-lg font-semibold mb-4">
-                  Child Skills ({childSkills.length})
-                  <span className="text-sm font-normal text-gray-400 ml-2">Click to navigate</span>
+                  Generated Children ({childSkills.length})
+                  <span className="text-sm font-normal text-gray-400 ml-2">Click to navigate • Not saved yet</span>
                 </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {childSkills.map(child => (
-                    <button
-                      key={child.id}
-                      onClick={() => handleNavigateToSkill(child)}
-                      className={`border-2 rounded-lg p-4 text-left hover:scale-105 transition-transform ${getArchetypeColor(child.archetype)}`}
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-2xl">{getArchetypeIcon(child.archetype)}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded border ${getStageColor(child.stage)}`}>
-                          S{child.stage}
-                        </span>
-                      </div>
-                      <div className="font-semibold mb-1 line-clamp-1">{child.name}</div>
-                      <div className="text-xs opacity-70 capitalize">{child.archetype}</div>
-                      <div className="text-xs text-gray-400 mt-2 line-clamp-2">{child.description}</div>
-                      <div className="mt-3 text-xs text-center opacity-70">
-                        Click to view →
-                      </div>
-                    </button>
-                  ))}
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                  {childSkills.map(child => {
+                    const variantConfig = VARIANT_CONFIG[child.variantType || 'root'] || VARIANT_CONFIG.root
+                    return (
+                      <button
+                        key={child.id}
+                        onClick={() => handleNavigateToSkill(child)}
+                        className={`border-2 rounded-lg p-4 text-left hover:scale-105 transition-transform ${variantConfig.color}`}
+                      >
+                        {/* Variant Badge */}
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-2xl">{variantConfig.icon}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded border ${getStageColor(child.stage)}`}>
+                            S{child.stage}
+                          </span>
+                        </div>
+                        
+                        {/* Variant Type Label */}
+                        <div className="text-xs font-medium opacity-80 mb-1">{variantConfig.label}</div>
+                        
+                        {/* Skill Name */}
+                        <div className="font-semibold mb-2 line-clamp-1">{child.name}</div>
+                        
+                        {/* Stats Row */}
+                        <div className="flex gap-2 text-xs mb-2">
+                          <span className="text-red-400">{child.damage}</span>
+                          <span className="text-blue-400">{child.apCost} AP</span>
+                        </div>
+                        
+                        {/* Effect Preview */}
+                        <div className="text-xs text-gray-400 line-clamp-2">{child.description}</div>
+                        
+                        {/* Extra Info for special variants */}
+                        {child.buffType && (
+                          <div className="mt-2 text-xs text-yellow-400">💪 {child.buffType} ({child.buffDuration} turns)</div>
+                        )}
+                        {child.debuffType && (
+                          <div className="mt-2 text-xs text-purple-400">💀 {child.debuffType} ({child.debuffDuration} turns)</div>
+                        )}
+                        {child.hitCount && (
+                          <div className="mt-2 text-xs text-cyan-400">⛓️ {child.hitCount} hits</div>
+                        )}
+                        {child.lifestealPercent && (
+                          <div className="mt-2 text-xs text-slate-400">❤️‍🩹 {child.lifestealPercent}% lifesteal</div>
+                        )}
+                        
+                        <div className="mt-3 text-xs text-center opacity-70">
+                          Click to view →
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Save/Regenerate Buttons */}
+                <div className="flex gap-4 mt-6">
+                  <button
+                    onClick={handleSaveAllChildren}
+                    className="flex-1 py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition-colors"
+                  >
+                    💾 Save All to Database
+                  </button>
+                  <button
+                    onClick={handleRegenerateChildren}
+                    disabled={generating}
+                    className="flex-1 py-3 bg-orange-600 text-white rounded-lg font-bold hover:bg-orange-700 transition-colors disabled:opacity-50"
+                  >
+                    {generating ? '⏳ Regenerating...' : '🔄 Regenerate All'}
+                  </button>
                 </div>
               </div>
             )}

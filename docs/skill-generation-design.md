@@ -98,7 +98,7 @@ Debuff Turns = 2 + skill_stage
 
 | Buff | Effect |
 |------|--------|
-| Haste | +20% attack speed |
+| Haste | +20% CDR (Cooldown Reduction) |
 | Empower | +15% damage |
 | Fortify | +15% defense |
 | Focus | +10% crit chance |

@@ -192,6 +192,21 @@ model Skill {
   
   stage            Int      @default(0)  // 0-5
   archetype        String   @default("root") // root, power, speed, utility, mobility
+  
+  // Variant Type (for skill generation)
+  // upgrade, original_variant, buff_variant, debuff_variant, unique, aoe_variant, combo_variant, counter_variant, mobility_variant, sustain_variant
+  variantType      String   @default("root")
+  
+  // Buff/Debuff info (for buff_variant, debuff_variant, sustain_variant)
+  buffType         String?  // haste, empower, fortify, focus, regen
+  buffDuration     Int?     // turns
+  debuffType       String?  // slow, bleed, armor_break, weaken, blind
+  debuffDuration   Int?     // turns
+  lifestealPercent Int?     // for sustain variant
+  hitCount         Int?     // for combo variant (2-4)
+  
+  // State for admin builder
+  isSaved          Boolean  @default(false) // false until admin clicks Save
 
   skillType String // Attack, Attack / Combo, Attack / Movement, etc.
 
