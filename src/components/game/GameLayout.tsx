@@ -5,6 +5,28 @@ import TopNav from './TopNav'
 import Sidebar from './Sidebar'
 import PlayerInfo from './PlayerInfo'
 import PlayerModal from './PlayerModal'
+import SkillBar from './SkillBar'
+
+interface PlayerStats {
+  str: number
+  agi: number
+  vit: number
+  int: number
+  dex: number
+  luk: number
+}
+
+interface Race {
+  id: string
+  name: string
+  description: string
+  passive1Name: string
+  passive1Type: string
+  passive1Value: number
+  passive2Name: string
+  passive2Type: string
+  passive2Value: number
+}
 
 interface PlayerData {
   username: string
@@ -12,6 +34,9 @@ interface PlayerData {
   col: number
   life: { current: number; max: number }
   ap: { current: number; max: number }
+  stats: PlayerStats
+  race: Race | null
+  characterImage: string | null
 }
 
 interface GameLayoutProps {
@@ -41,16 +66,19 @@ export default function GameLayout({ children, playerData }: GameLayoutProps) {
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 p-4 min-h-[calc(100vh-48px)]">
+        <main className="flex-1 p-4 min-h-[calc(100vh-48px)] pb-20">
           {children}
         </main>
       </div>
+
+      {/* Skill Bar */}
+      <SkillBar />
 
       {/* Player Modal */}
       <PlayerModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        username={playerData.username}
+        playerData={playerData}
       />
     </div>
   )

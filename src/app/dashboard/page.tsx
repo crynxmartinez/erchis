@@ -2,7 +2,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import GameLayout from '@/components/game/GameLayout'
 import Announcements from '@/components/game/Announcements'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import { calculateMaxHp, calculateHpRegen, calculateApRegen } from '@/lib/player'
 
 interface SessionData {
@@ -26,14 +26,19 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 
-  // Fetch player data
+  // Fetch player data with race
   const player = await prisma.player.findUnique({
     where: { userId: session.userId },
+    include: { race: true },
   })
 
   if (!player) {
-    // Create player if doesn't exist (new user)
     redirect('/login')
+  }
+
+  // Redirect to character creation if no race selected
+  if (!player.raceId) {
+    redirect('/create-character')
   }
 
   // Calculate regen
@@ -60,6 +65,16 @@ export default async function DashboardPage() {
     col: player.col,
     life: { current: newHp, max: maxHp },
     ap: { current: newAp, max: player.maxAp },
+    stats: {
+      str: player.str,
+      agi: player.agi,
+      vit: player.vit,
+      int: player.int,
+      dex: player.dex,
+      luk: player.luk,
+    },
+    race: player.race,
+    characterImage: player.characterImage,
   }
 
   return (

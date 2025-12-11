@@ -5,12 +5,17 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
   provider = "postgresql"
 }
+
+// ============================================
+// USER & PLAYER
+// ============================================
 
 model User {
   id        String   @id @default(cuid())
@@ -20,7 +25,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Player data
   player    Player?
 }
 
@@ -28,6 +32,13 @@ model Player {
   id        String   @id @default(cuid())
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id])
+
+  // Race (null until character creation)
+  raceId    String?
+  race      Race?    @relation(fields: [raceId], references: [id])
+
+  // Character Image (user uploaded)
+  characterImage String?
 
   // Basic Info
   level     Int      @default(1)
@@ -41,20 +52,237 @@ model Player {
   int       Int      @default(0)
   dex       Int      @default(0)
   luk       Int      @default(0)
-  statPoints Int     @default(25) // Unspent stat points
+  statPoints Int     @default(25)
 
   // Resources
   currentHp Int      @default(100)
   currentAp Int      @default(100)
   maxAp     Int      @default(100)
 
-  // Regen tracking (store last regen time)
+  // Regen tracking
   lastHpRegen DateTime @default(now())
   lastApRegen DateTime @default(now())
 
   // Location
-  currentFloor Int   @default(1)
-  currentArea  String @default("town")
+  currentLocationId String?
+  currentLocation   Location? @relation(fields: [currentLocationId], references: [id])
+  isInSafeZone      Boolean   @default(true)
+
+  // Skill tracking
+  learnedSkillCount Int @default(0)
+
+  // Relations
+  skills        PlayerSkill[]
+  skillBar      PlayerSkillBar[]
+  inventory     PlayerInventory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================
+// RACE
+// ============================================
+
+model Race {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+
+  // Passive 1
+  passive1Name  String
+  passive1Type  String   // expGain, magicAmp, npcDiscount, craftingSuccess, physicalDamage, evasion, dropRate, critDamage
+  passive1Value Float    // 5 = 5%
+
+  // Passive 2
+  passive2Name  String
+  passive2Type  String   // cookingSuccess, accuracy, alchemySuccess, weightCapacity, maxHp, critChance, debuffResist, cdr
+  passive2Value Float    // 3 = 3%
+
+  players Player[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================
+// WEAPON CATEGORY & WEAPONS
+// ============================================
+
+model WeaponCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+
+  primaryStat   String   // STR, DEX, INT
+  secondaryStat String?  // Optional secondary stat
+
+  isRanged    Boolean @default(false)
+  isTwoHanded Boolean @default(false)
+  isMagic     Boolean @default(false)
+
+  weapons Weapon[]
+  skills  Skill[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Weapon {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+
+  categoryId String
+  category   WeaponCategory @relation(fields: [categoryId], references: [id])
+
+  rarity String @default("Common") // Common, Uncommon, Rare, Epic, Legendary
+
+  // Combat Stats
+  baseDamage   Int
+  attackSpeed  Float   @default(1.0)
+  critBonus    Float   @default(0)
+  range        Int     @default(1)
+
+  // Requirements
+  levelRequired Int @default(1)
+  strRequired   Int @default(0)
+  agiRequired   Int @default(0)
+  vitRequired   Int @default(0)
+  intRequired   Int @default(0)
+  dexRequired   Int @default(0)
+  lukRequired   Int @default(0)
+
+  // Physical
+  weight        Int
+  maxDurability Int @default(100)
+
+  // Economy
+  buyPrice  Int @default(0)
+  sellPrice Int @default(0)
+
+  // Flags
+  isBasic     Boolean @default(false)
+  isTradeable Boolean @default(true)
+
+  inventory PlayerInventory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================
+// SKILLS
+// ============================================
+
+model Skill {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+
+  // Category (null = universal skill)
+  categoryId String?
+  category   WeaponCategory? @relation(fields: [categoryId], references: [id])
+
+  skillType String // Attack, Defensive, Buff, Debuff, Movement, Utility, Recovery
+
+  // Combat Stats
+  baseDamage    Int   @default(0)
+  damageScaling Float @default(0)
+  scalingStat   String? // STR, DEX, INT
+  cooldown      Float @default(0)
+  apCost        Int   @default(0)
+
+  // Range & Area
+  range     Int     @default(1)
+  isAoE     Boolean @default(false)
+  aoeRadius Float   @default(0)
+
+  // Special Effects
+  effectType     String? // stun, slow, bleed, poison, burn, knockback
+  effectChance   Float   @default(0)
+  effectDuration Float   @default(0)
+  effectValue    Float   @default(0)
+
+  // Requirements
+  levelRequired       Int     @default(1)
+  prerequisiteSkillId String?
+
+  // Flags
+  isBasic   Boolean @default(true)
+  isPassive Boolean @default(false)
+
+  playerSkills PlayerSkill[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================
+// PLAYER SKILLS & SKILL BAR
+// ============================================
+
+model PlayerSkill {
+  id       String @id @default(cuid())
+  playerId String
+  player   Player @relation(fields: [playerId], references: [id])
+
+  skillId String
+  skill   Skill  @relation(fields: [skillId], references: [id])
+
+  useCount Int @default(0)
+  level    Int @default(1)
+
+  learnedAt DateTime @default(now())
+
+  skillBar PlayerSkillBar[]
+
+  @@unique([playerId, skillId])
+}
+
+model PlayerSkillBar {
+  id       String @id @default(cuid())
+  playerId String
+  player   Player @relation(fields: [playerId], references: [id])
+
+  slotPosition  Int
+  playerSkillId String
+  playerSkill   PlayerSkill @relation(fields: [playerSkillId], references: [id])
+
+  @@unique([playerId, slotPosition])
+}
+
+// ============================================
+// PLAYER INVENTORY
+// ============================================
+
+model PlayerInventory {
+  id       String @id @default(cuid())
+  playerId String
+  player   Player @relation(fields: [playerId], references: [id])
+
+  weaponId String
+  weapon   Weapon @relation(fields: [weaponId], references: [id])
+
+  currentDurability Int
+  isEquipped        Boolean @default(false)
+  equipSlot         String? // mainHand, offHand
+
+  acquiredAt DateTime @default(now())
+}
+
+// ============================================
+// LOCATIONS
+// ============================================
+
+model Location {
+  id          String  @id @default(cuid())
+  name        String
+  description String
+  floor       Int     @default(1)
+  isSafeZone  Boolean @default(false)
+
+  players Player[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
