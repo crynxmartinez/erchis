@@ -73,7 +73,6 @@ model Player {
 
   // Relations
   skills        PlayerSkill[]
-  skillBar      PlayerSkillBar[]
   inventory     PlayerInventory[]
 
   createdAt DateTime @default(now())
@@ -122,7 +121,6 @@ model WeaponCategory {
   isMagic     Boolean @default(false)
 
   weapons Weapon[]
-  skills  Skill[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -180,77 +178,63 @@ model Skill {
   name        String
   description String   // Effect description
 
-  // Category (null = universal skill)
-  categoryId String?
-  category   WeaponCategory? @relation(fields: [categoryId], references: [id])
+  // Type
+  skillType   String   // Attack, Defensive, Buff, Debuff, Utility
+  damageType  String   @default("physical") // physical, magic, none
 
   // Skill Tree Structure
-  starterSkillName String?  // e.g., "Quick Slash" - the root skill this belongs to
+  starterSkillName String   // Root skill name for tree tracking
   parentId         String?  // Parent skill ID in the tree
   parent           Skill?   @relation("SkillTree", fields: [parentId], references: [id])
   children         Skill[]  @relation("SkillTree")
-  
   stage            Int      @default(0)  // 0-5
-  archetype        String   @default("root") // root, power, speed, utility, mobility
   
-  // Variant Type (for skill generation)
-  // upgrade, original_variant, buff_variant, debuff_variant, unique, aoe_variant, combo_variant, counter_variant, mobility_variant, sustain_variant
+  // Variant Type
+  // root, upgrade, original_variant, buff_variant, debuff_variant, unique, aoe_variant, combo_variant, counter_variant, mobility_variant, sustain_variant
   variantType      String   @default("root")
   
-  // Buff/Debuff info (for buff_variant, debuff_variant, sustain_variant)
+  // Combat Stats (Amp-based system)
+  ampPercent    Int      @default(100) // 50-200% multiplier on weapon base
+  apCost        Int      @default(5)   // 3-10 AP
+  cooldown      Int      @default(1)   // 1-5 turns
+  
+  // Targeting
+  targetType    String   @default("single") // single, self, aoe_cone, aoe_circle, aoe_line, all_enemies
+  range         Int      @default(1)   // 1 = melee, 2+ = ranged
+  hitCount      Int      @default(1)   // 1-4 hits for combo skills
+  
+  // Buff Effects (for buff_variant)
   buffType         String?  // haste, empower, fortify, focus, regen
   buffDuration     Int?     // turns
-  debuffType       String?  // slow, bleed, armor_break, weaken, blind
-  debuffDuration   Int?     // turns
-  lifestealPercent Int?     // for sustain variant
-  hitCount         Int?     // for combo variant (2-4)
   
-  // State for admin builder
-  isSaved          Boolean  @default(false) // false until admin clicks Save
-
-  skillType String // Attack, Attack / Combo, Attack / Movement, etc.
-
-  // Combat Stats
-  damage        String   @default("100%") // e.g., "100% weapon damage", "50% x3 hits"
-  apCost        Int      @default(5)
-  cooldown      Int      @default(1) // Turns (minimum 1, round up)
-
+  // Debuff Effects (for debuff_variant)
+  debuffType       String?  // slow, bleed, armor_break, weaken, blind, stun
+  debuffDuration   Int?     // turns
+  debuffChance     Int?     @default(100) // % chance to apply
+  
+  // Special Effects
+  lifestealPercent Int?     // for sustain variant
+  armorPierce      Int?     // % of armor ignored
+  bonusVsGuard     Int?     // extra damage % vs guarding
+  bonusVsDebuffed  Int?     // extra damage % vs debuffed enemies
+  
+  // Counter/Reactive
+  isCounter        Boolean  @default(false)
+  triggerCondition String?  // after_dodge, after_parry, on_hit_taken
+  
   // Passive (unlocked at each stage)
   passive       String?  // e.g., "Quick Slash attacks are 5% faster"
+  
+  // State for admin builder
+  isSaved       Boolean  @default(false)
 
-  // Legacy fields for compatibility
-  baseDamage    Int   @default(0)
-  damageScaling Float @default(0)
-  scalingStat   String? // STR, DEX, INT
-  cooldownFloat Float @default(0)
-
-  // Range & Area
-  range     Int     @default(1)
-  isAoE     Boolean @default(false)
-  aoeRadius Float   @default(0)
-
-  // Special Effects
-  effectType     String? // stun, slow, bleed, poison, burn, knockback
-  effectChance   Float   @default(0)
-  effectDuration Float   @default(0)
-  effectValue    Float   @default(0)
-
-  // Requirements
-  levelRequired       Int     @default(1)
-  usesRequired        Int     @default(0) // Uses needed to unlock (100, 300, 500, 900, 1500)
-
-  // Flags
-  isBasic   Boolean @default(true)  // Starter skill (free from trainer)
-  isPassive Boolean @default(false)
-  isUniversal Boolean @default(false) // No weapon required
-
+  // Relations
   playerSkills PlayerSkill[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([starterSkillName])
-  @@index([categoryId])
   @@index([stage])
 }
 
@@ -266,26 +250,13 @@ model PlayerSkill {
   skillId String
   skill   Skill  @relation(fields: [skillId], references: [id])
 
-  useCount Int @default(0)
-  level    Int @default(1)
+  useCount    Int      @default(0)  // Times used (for evolution tracking)
+  isEquipped  Boolean  @default(false)
+  slotPosition Int?    // 1-20 skill bar slot
 
   learnedAt DateTime @default(now())
 
-  skillBar PlayerSkillBar[]
-
   @@unique([playerId, skillId])
-}
-
-model PlayerSkillBar {
-  id       String @id @default(cuid())
-  playerId String
-  player   Player @relation(fields: [playerId], references: [id])
-
-  slotPosition  Int
-  playerSkillId String
-  playerSkill   PlayerSkill @relation(fields: [playerSkillId], references: [id])
-
-  @@unique([playerId, slotPosition])
 }
 
 // ============================================

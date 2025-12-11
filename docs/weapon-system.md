@@ -57,25 +57,35 @@
 
 ### 3.1 Table (Quick Reference)
 
-| # | Category | Type | Primary Stat | Hands | Main Hand? | Off Hand? | Notes |
-|---|----------|------|--------------|-------|------------|-----------|-------|
-| 1 | Sword | Melee | STR | 1H | Yes | Yes | Balanced melee |
-| 2 | Greatsword | Melee | STR | 2H | Yes | No | Heavy, high damage |
-| 3 | Katana | Melee | STR / DEX | Versatile | Yes | Yes | 1H or 2H, finesse-style |
-| 4 | Dagger | Melee | DEX | 1H (Light) | Yes | Yes | Fast, ideal off-hand |
-| 5 | Axe | Melee | STR | 1H | Yes | Yes | Higher damage, less precise |
-| 6 | Greataxe | Melee | STR | 2H | Yes | No | Heavy, big crit potential |
-| 7 | Mace | Melee | STR | 1H | Yes | Yes | Blunt, good vs armor |
-| 8 | Hammer | Melee | STR | 2H | Yes | No | Heavy, stun/knockback style |
-| 9 | Spear | Melee | STR / DEX | Versatile | Yes | Yes | Reach; 1H+shield or 2H |
-| 10 | Fist | Melee | STR | 1H (Natural) | Yes | Yes | Brawler/Gauntlet weapons, can be dual fists |
-| 11 | Bow | Ranged | DEX | 2H | Yes | No | Standard ranged weapon |
-| 12 | Crossbow | Ranged | DEX | 2H | Yes | No | Ranged with reload flavor |
-| 13 | Gun | Ranged | DEX | 1H | Yes | Yes | Pistols, sidearms, etc. |
-| 14 | Staff | Magic | INT | 2H | Yes | No | Major spell focus |
-| 15 | Wand | Magic | INT | 1H | Yes | Yes | 1H casting, combo with off-hand |
-| 16 | Tome | Magic | INT | 1H | Yes | Yes | Spellbook, buffs & knowledge |
-| 17 | Shield | Defense | VIT | 1H | Yes | Yes | Block, guard, tanking |
+| # | Category | Type | Stat | Hands | Base Dmg | Passive | AoE Override |
+|---|----------|------|------|-------|----------|---------|--------------|
+| 1 | Sword | Melee | STR | 1H | 80% | +10% Parry | - |
+| 2 | Greatsword | Melee | STR | 2H | 120% | +25% Stagger | Cone (3) |
+| 3 | Katana | Melee | STR/DEX | Versatile | 75%/95% | +10%/+20% Counter | - / - |
+| 4 | Dagger | Melee | DEX | 1H | 60% | +15% Crit Chance | - |
+| 5 | Axe | Melee | STR | 1H | 85% | +15% vs Guard | - |
+| 6 | Greataxe | Melee | STR | 2H | 140% | +20% vs Low HP | Cone (3) |
+| 7 | Mace | Melee | STR | 1H | 80% | +15% Armor Pen | - |
+| 8 | Greathammer | Melee | STR | 2H | 130% | +20% Stun Chance | Circle (2) |
+| 9 | Spear | Melee | STR/DEX | Versatile | 75%/90% | +1 Range | - / Line (2) |
+| 10 | Fist | Melee | STR | 1H | 50% | +1 Hit Count | - |
+| 11 | Bow | Ranged | DEX | 2H | 85% | +2 Range | - |
+| 12 | Crossbow | Ranged | DEX | 2H | 100% | +25% Armor Pen | - |
+| 13 | Gun | Ranged | DEX | 1H | 75% | +10% Crit Damage | - |
+| 14 | Staff | Magic | INT | 2H | 90% | +20% AoE Size | - |
+| 15 | Wand | Magic | INT | 1H | 70% | -1 CD (magic) | - |
+| 16 | Tome | Magic | INT | 1H | 65% | +30% Buff Duration | - |
+| 17 | Shield | Defense | VIT | 1H | 40% | +30% Block Chance | - |
+
+### 3.2 Dual-Wield Bonus
+- When dual-wielding, **stack passives from both weapons**
+- Example: Sword + Dagger = +10% Parry + 15% Crit Chance
+
+### 3.3 2H AoE Override
+- 2H melee weapons force single-target skills to become AoE
+- **Cone (3)**: 90° arc hitting up to 3 targets
+- **Circle (2)**: 2-tile radius around caster
+- **Line (2)**: Straight line hitting 2 targets
 
 ---
 

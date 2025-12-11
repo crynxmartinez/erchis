@@ -5,49 +5,33 @@ export async function POST(request: Request) {
   try {
     const data = await request.json()
     
-    // First ensure the weapon category exists
-    let category = await prisma.weaponCategory.findUnique({
-      where: { id: data.categoryId }
-    })
-    
-    // If categoryId is a string name like 'sword', find or create by name
-    if (!category) {
-      category = await prisma.weaponCategory.findUnique({
-        where: { name: data.categoryId.charAt(0).toUpperCase() + data.categoryId.slice(1) }
-      })
-      
-      if (!category) {
-        // Create the category
-        category = await prisma.weaponCategory.create({
-          data: {
-            name: data.categoryId.charAt(0).toUpperCase() + data.categoryId.slice(1),
-            description: `${data.categoryId} weapon category`,
-            primaryStat: 'STR',
-            isRanged: false,
-            isTwoHanded: false,
-            isMagic: false,
-          }
-        })
-      }
-    }
-    
     const skill = await prisma.skill.create({
       data: {
         name: data.name,
         description: data.description,
         skillType: data.skillType,
-        categoryId: category.id,
+        damageType: data.damageType || 'physical',
         stage: data.stage || 0,
-        archetype: data.archetype || 'root',
-        damage: data.damage || '100% weapon damage',
+        variantType: data.variantType || 'root',
+        ampPercent: data.ampPercent || 100,
         apCost: data.apCost || 5,
         cooldown: data.cooldown || 1,
+        targetType: data.targetType || 'single',
+        range: data.range || 1,
+        hitCount: data.hitCount || 1,
+        buffType: data.buffType || null,
+        buffDuration: data.buffDuration || null,
+        debuffType: data.debuffType || null,
+        debuffDuration: data.debuffDuration || null,
+        lifestealPercent: data.lifestealPercent || null,
+        isCounter: data.isCounter || false,
+        triggerCondition: data.triggerCondition || null,
         passive: data.passive || null,
         starterSkillName: data.starterSkillName,
         parentId: data.parentId || null,
+        isSaved: data.isSaved || false,
       },
       include: {
-        category: true,
         children: true,
       }
     })

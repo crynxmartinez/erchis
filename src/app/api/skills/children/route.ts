@@ -12,29 +12,7 @@ export async function GET(request: Request) {
     
     const children = await prisma.skill.findMany({
       where: { parentId },
-      orderBy: { archetype: 'asc' },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        stage: true,
-        archetype: true,
-        skillType: true,
-        damage: true,
-        apCost: true,
-        cooldown: true,
-        passive: true,
-        starterSkillName: true,
-        categoryId: true,
-        variantType: true,
-        buffType: true,
-        buffDuration: true,
-        debuffType: true,
-        debuffDuration: true,
-        lifestealPercent: true,
-        hitCount: true,
-        isSaved: true,
-      }
+      orderBy: { variantType: 'asc' },
     })
     
     return NextResponse.json({ children })

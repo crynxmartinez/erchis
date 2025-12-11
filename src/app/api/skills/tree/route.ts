@@ -5,28 +5,15 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const starterSkill = searchParams.get('starter') || 'Quick Slash'
-    const categoryId = searchParams.get('categoryId')
-    
-    // Build where clause
-    const where: any = {}
-    
-    if (starterSkill) {
-      where.starterSkillName = starterSkill
-    }
-    
-    if (categoryId) {
-      where.categoryId = categoryId
-    }
     
     const skills = await prisma.skill.findMany({
-      where,
+      where: { starterSkillName: starterSkill },
       include: {
-        category: true,
         parent: {
           select: { id: true, name: true }
         },
         children: {
-          select: { id: true, name: true, stage: true, archetype: true }
+          select: { id: true, name: true, stage: true, variantType: true }
         }
       },
       orderBy: [

@@ -15,24 +15,34 @@ interface Skill {
   parent?: { id: string; name: string } | null
   stage: number
   skillType: string
-  archetype: string
-  damage: string
+  damageType: string
+  variantType: string
+  // Combat stats
+  ampPercent: number
   apCost: number
-  cooldown: number | string
-  passive: string | null
-  children?: Skill[]
-  category?: { id: string; name: string } | null
-  starterSkillName?: string
-  categoryId?: string
-  // New variant fields
-  variantType?: string
+  cooldown: number
+  // Targeting
+  targetType: string
+  range: number
+  hitCount: number
+  // Effects
   buffType?: string | null
   buffDuration?: number | null
   debuffType?: string | null
   debuffDuration?: number | null
+  debuffChance?: number | null
   lifestealPercent?: number | null
-  hitCount?: number | null
-  isSaved?: boolean
+  armorPierce?: number | null
+  bonusVsGuard?: number | null
+  bonusVsDebuffed?: number | null
+  // Counter
+  isCounter: boolean
+  triggerCondition?: string | null
+  // Other
+  passive: string | null
+  starterSkillName: string
+  isSaved: boolean
+  children?: Skill[]
 }
 
 // Variant type configuration
@@ -95,7 +105,7 @@ export default function SkillDatabaseBuilder() {
     
     try {
       // Check if this skill exists in database
-      const response = await fetch(`/api/skills/get?name=${encodeURIComponent(starter.name)}&categoryId=${category.id}`)
+      const response = await fetch(`/api/skills/get?name=${encodeURIComponent(starter.name)}`)
       const data = await response.json()
       
       let skill: Skill
@@ -112,12 +122,15 @@ export default function SkillDatabaseBuilder() {
             name: starter.name,
             description: starter.description,
             skillType: starter.type,
-            categoryId: category.id,
+            damageType: 'physical',
             stage: 0,
-            archetype: 'root',
-            damage: '100% weapon damage',
+            variantType: 'root',
+            ampPercent: 100,
             apCost: 5,
             cooldown: 1,
+            targetType: 'single',
+            range: 1,
+            hitCount: 1,
             passive: null,
             starterSkillName: starter.name,
           })
@@ -219,7 +232,6 @@ export default function SkillDatabaseBuilder() {
           parentId: currentSkill.id,
           parentName: currentSkill.name,
           parentStage: currentSkill.stage,
-          categoryId: currentSkill.categoryId,
           starterSkillName: currentSkill.starterSkillName,
         })
       })
@@ -229,7 +241,7 @@ export default function SkillDatabaseBuilder() {
       if (data.success) {
         setMessage(`✅ Generated ${data.children.length} child skills!`)
         setChildSkills(data.children)
-        await loadProgress(currentSkill.starterSkillName || currentSkill.name)
+        await loadProgress(currentSkill.starterSkillName)
       } else {
         setMessage(`❌ Error: ${data.error}`)
       }
@@ -321,7 +333,6 @@ export default function SkillDatabaseBuilder() {
           parentId: currentSkill.id,
           parentName: currentSkill.name,
           parentStage: currentSkill.stage,
-          categoryId: currentSkill.categoryId,
           starterSkillName: currentSkill.starterSkillName,
         })
       })
@@ -379,26 +390,14 @@ export default function SkillDatabaseBuilder() {
   // HELPER FUNCTIONS
   // ============================================
 
-  const getArchetypeColor = (archetype: string) => {
-    switch (archetype) {
-      case 'power': return 'bg-red-900/50 border-red-500 text-red-300'
-      case 'speed': return 'bg-yellow-900/50 border-yellow-500 text-yellow-300'
-      case 'utility': return 'bg-purple-900/50 border-purple-500 text-purple-300'
-      case 'mobility': return 'bg-blue-900/50 border-blue-500 text-blue-300'
-      case 'root': return 'bg-green-900/50 border-green-500 text-green-300'
-      default: return 'bg-gray-900/50 border-gray-500 text-gray-300'
-    }
+  const getVariantColor = (variantType: string) => {
+    const config = VARIANT_CONFIG[variantType]
+    return config?.color || 'bg-gray-900/50 border-gray-500 text-gray-300'
   }
 
-  const getArchetypeIcon = (archetype: string) => {
-    switch (archetype) {
-      case 'power': return '💥'
-      case 'speed': return '⚡'
-      case 'utility': return '🔮'
-      case 'mobility': return '💨'
-      case 'root': return '🌱'
-      default: return '❓'
-    }
+  const getVariantIcon = (variantType: string) => {
+    const config = VARIANT_CONFIG[variantType]
+    return config?.icon || '❓'
   }
 
   const getStageColor = (stage: number) => {
@@ -577,11 +576,11 @@ export default function SkillDatabaseBuilder() {
           <div className="space-y-6">
             
             {/* Current Skill Card */}
-            <div className={`bg-[#242424] border-2 rounded-xl p-6 ${getArchetypeColor(currentSkill.archetype)}`}>
+            <div className={`bg-[#242424] border-2 rounded-xl p-6 ${getVariantColor(currentSkill.variantType)}`}>
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-3xl">{getArchetypeIcon(currentSkill.archetype)}</span>
+                    <span className="text-3xl">{getVariantIcon(currentSkill.variantType)}</span>
                     {editMode ? (
                       <input
                         type="text"
@@ -598,7 +597,7 @@ export default function SkillDatabaseBuilder() {
                       Stage {currentSkill.stage}
                     </span>
                     <span className="text-gray-400">{currentSkill.skillType}</span>
-                    <span className="capitalize text-gray-400">• {currentSkill.archetype}</span>
+                    <span className="capitalize text-gray-400">• {currentSkill.variantType.replace('_', ' ')}</span>
                   </div>
                 </div>
                 
@@ -646,18 +645,18 @@ export default function SkillDatabaseBuilder() {
               </div>
 
               {/* Stats Grid */}
-              <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="grid grid-cols-4 gap-4 mb-4">
                 <div className="bg-black/20 rounded p-3">
-                  <div className="text-xs text-gray-400 mb-1">Damage</div>
+                  <div className="text-xs text-gray-400 mb-1">Amp %</div>
                   {editMode ? (
                     <input
-                      type="text"
-                      value={editedSkill?.damage || ''}
-                      onChange={(e) => setEditedSkill(prev => prev ? {...prev, damage: e.target.value} : null)}
+                      type="number"
+                      value={editedSkill?.ampPercent || 100}
+                      onChange={(e) => setEditedSkill(prev => prev ? {...prev, ampPercent: parseInt(e.target.value)} : null)}
                       className="w-full bg-transparent border-b border-white/30 font-bold text-red-400 focus:outline-none"
                     />
                   ) : (
-                    <div className="font-bold text-red-400">{currentSkill.damage}</div>
+                    <div className="font-bold text-red-400">{currentSkill.ampPercent}%</div>
                   )}
                 </div>
                 <div className="bg-black/20 rounded p-3">
@@ -677,18 +676,20 @@ export default function SkillDatabaseBuilder() {
                   <div className="text-xs text-gray-400 mb-1">Cooldown</div>
                   {editMode ? (
                     <input
-                      type="text"
-                      value={editedSkill?.cooldown || ''}
-                      onChange={(e) => setEditedSkill(prev => prev ? {...prev, cooldown: e.target.value} : null)}
+                      type="number"
+                      value={editedSkill?.cooldown || 1}
+                      onChange={(e) => setEditedSkill(prev => prev ? {...prev, cooldown: parseInt(e.target.value)} : null)}
                       className="w-full bg-transparent border-b border-white/30 font-bold text-yellow-400 focus:outline-none"
                     />
                   ) : (
                     <div className="font-bold text-yellow-400">
-                      {typeof currentSkill.cooldown === 'number' 
-                        ? `${currentSkill.cooldown} turn${currentSkill.cooldown !== 1 ? 's' : ''}`
-                        : currentSkill.cooldown}
+                      {currentSkill.cooldown} turn{currentSkill.cooldown !== 1 ? 's' : ''}
                     </div>
                   )}
+                </div>
+                <div className="bg-black/20 rounded p-3">
+                  <div className="text-xs text-gray-400 mb-1">Target</div>
+                  <div className="font-bold text-purple-400">{currentSkill.targetType}</div>
                 </div>
               </div>
 
@@ -774,8 +775,9 @@ export default function SkillDatabaseBuilder() {
                         
                         {/* Stats Row */}
                         <div className="flex gap-2 text-xs mb-2">
-                          <span className="text-red-400">{child.damage}</span>
+                          <span className="text-red-400">{child.ampPercent}%</span>
                           <span className="text-blue-400">{child.apCost} AP</span>
+                          <span className="text-yellow-400">{child.cooldown}T</span>
                         </div>
                         
                         {/* Effect Preview */}

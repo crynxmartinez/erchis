@@ -37,22 +37,24 @@ const RANDOM_VARIANTS: VariantType[] = [
 interface VariantConfig {
   icon: string
   color: string
-  damageModifier: number  // percentage modifier
+  ampModifier: number     // percentage modifier to amp
   apModifier: number      // flat AP modifier
-  skillTypePrefix: string
+  cdModifier: number      // flat CD modifier
+  skillType: string
+  targetType: string      // single, aoe_cone, aoe_circle, etc.
 }
 
 const VARIANT_CONFIGS: Record<VariantType, VariantConfig> = {
-  upgrade:          { icon: '⬆️', color: 'green',  damageModifier: 5,   apModifier: 0,  skillTypePrefix: 'Attack' },
-  original_variant: { icon: '🔄', color: 'blue',   damageModifier: 0,   apModifier: 0,  skillTypePrefix: 'Attack' },
-  buff_variant:     { icon: '💪', color: 'yellow', damageModifier: -5,  apModifier: 1,  skillTypePrefix: 'Attack / Buff' },
-  debuff_variant:   { icon: '💀', color: 'purple', damageModifier: -5,  apModifier: 1,  skillTypePrefix: 'Attack / Debuff' },
-  unique:           { icon: '✨', color: 'orange', damageModifier: 0,   apModifier: 0,  skillTypePrefix: 'Attack' },
-  aoe_variant:      { icon: '💥', color: 'red',    damageModifier: -10, apModifier: 2,  skillTypePrefix: 'Attack / AoE' },
-  combo_variant:    { icon: '⛓️', color: 'cyan',   damageModifier: -15, apModifier: 0,  skillTypePrefix: 'Attack / Combo' },
-  counter_variant:  { icon: '🛡️', color: 'white',  damageModifier: 10,  apModifier: 0,  skillTypePrefix: 'Counter' },
-  mobility_variant: { icon: '💨', color: 'pink',   damageModifier: -5,  apModifier: 1,  skillTypePrefix: 'Attack / Movement' },
-  sustain_variant:  { icon: '❤️‍🩹', color: 'gray',   damageModifier: -10, apModifier: 1,  skillTypePrefix: 'Attack / Drain' },
+  upgrade:          { icon: '⬆️', color: 'green',  ampModifier: 10,  apModifier: 0,  cdModifier: 0, skillType: 'Attack', targetType: 'single' },
+  original_variant: { icon: '🔄', color: 'blue',   ampModifier: 0,   apModifier: 0,  cdModifier: 0, skillType: 'Attack', targetType: 'single' },
+  buff_variant:     { icon: '💪', color: 'yellow', ampModifier: -10, apModifier: 1,  cdModifier: 0, skillType: 'Attack', targetType: 'single' },
+  debuff_variant:   { icon: '💀', color: 'purple', ampModifier: -10, apModifier: 1,  cdModifier: 0, skillType: 'Attack', targetType: 'single' },
+  unique:           { icon: '✨', color: 'orange', ampModifier: 15,  apModifier: 2,  cdModifier: 1, skillType: 'Attack', targetType: 'single' },
+  aoe_variant:      { icon: '💥', color: 'red',    ampModifier: -15, apModifier: 2,  cdModifier: 1, skillType: 'Attack', targetType: 'aoe_cone' },
+  combo_variant:    { icon: '⛓️', color: 'cyan',   ampModifier: -20, apModifier: 1,  cdModifier: 0, skillType: 'Attack', targetType: 'single' },
+  counter_variant:  { icon: '🛡️', color: 'white',  ampModifier: 15,  apModifier: 0,  cdModifier: 1, skillType: 'Defensive', targetType: 'single' },
+  mobility_variant: { icon: '💨', color: 'pink',   ampModifier: -10, apModifier: 1,  cdModifier: 0, skillType: 'Attack', targetType: 'single' },
+  sustain_variant:  { icon: '❤️‍🩹', color: 'gray',   ampModifier: -15, apModifier: 1,  cdModifier: 1, skillType: 'Attack', targetType: 'single' },
 }
 
 // ============================================
@@ -111,63 +113,63 @@ const VARIANT_PREFIXES: Record<VariantType, string[]> = {
 // ============================================
 
 const UPGRADE_EFFECTS = [
-  'Enhanced version dealing {damage}% weapon damage',
-  'Stronger strike dealing {damage}% weapon damage with improved accuracy',
-  'Perfected technique dealing {damage}% weapon damage',
+  'Enhanced version with {amp}% amp',
+  'Stronger strike with {amp}% amp and improved accuracy',
+  'Perfected technique with {amp}% amp',
 ]
 
 const ORIGINAL_EFFECTS = [
-  'Strikes twice in quick succession for {damage}% weapon damage each',
-  'A different angle of attack dealing {damage}% weapon damage',
-  'Modified execution dealing {damage}% weapon damage with altered timing',
+  'Strikes with a different angle at {amp}% amp',
+  'A modified execution with {amp}% amp',
+  'Alternate technique dealing {amp}% amp',
 ]
 
 const BUFF_EFFECTS = [
-  'Deals {damage}% weapon damage and grants {buff} buff',
-  'Strike dealing {damage}% weapon damage; empowers self with {buff}',
-  'Attack for {damage}% weapon damage while gaining {buff}',
+  'Deals {amp}% amp and grants {buff}',
+  'Strike with {amp}% amp; empowers self with {buff}',
+  'Attack at {amp}% amp while gaining {buff}',
 ]
 
 const DEBUFF_EFFECTS = [
-  'Deals {damage}% weapon damage and applies {debuff}',
-  'Strike dealing {damage}% weapon damage; afflicts target with {debuff}',
-  'Attack for {damage}% weapon damage while inflicting {debuff}',
+  'Deals {amp}% amp and applies {debuff}',
+  'Strike with {amp}% amp; afflicts target with {debuff}',
+  'Attack at {amp}% amp while inflicting {debuff}',
 ]
 
 const UNIQUE_EFFECTS = [
-  'Unleashes a completely different technique dealing {damage}% weapon damage',
-  'An unexpected maneuver dealing {damage}% weapon damage',
-  'Unconventional strike dealing {damage}% weapon damage with unique properties',
+  'Unleashes a completely different technique at {amp}% amp',
+  'An unexpected maneuver with {amp}% amp',
+  'Unconventional strike at {amp}% amp with unique properties',
 ]
 
 const AOE_EFFECTS = [
-  'Sweeps in a wide arc hitting all nearby enemies for {damage}% weapon damage',
-  'Explosive attack dealing {damage}% weapon damage to all enemies in range',
-  'Radiating strike dealing {damage}% weapon damage in an area',
+  'Sweeps in a wide arc hitting nearby enemies at {amp}% amp',
+  'Explosive attack at {amp}% amp to all enemies in range',
+  'Radiating strike at {amp}% amp in an area',
 ]
 
 const COMBO_EFFECTS = [
-  'Hits {hits} times rapidly for {damage}% weapon damage per hit',
-  'Chain of {hits} attacks dealing {damage}% weapon damage each',
-  'Flurry of {hits} strikes for {damage}% weapon damage per strike',
+  'Hits {hits} times rapidly at {amp}% amp per hit',
+  'Chain of {hits} attacks at {amp}% amp each',
+  'Flurry of {hits} strikes at {amp}% amp per strike',
 ]
 
 const COUNTER_EFFECTS = [
-  'Reactive strike triggered on enemy attack, dealing {damage}% weapon damage',
-  'Counter-attack dealing {damage}% weapon damage after successful block',
-  'Retaliating blow dealing {damage}% weapon damage when hit',
+  'Reactive strike triggered on enemy attack at {amp}% amp',
+  'Counter-attack at {amp}% amp after successful block',
+  'Retaliating blow at {amp}% amp when hit',
 ]
 
 const MOBILITY_EFFECTS = [
-  'Dash forward and strike for {damage}% weapon damage',
-  'Leap to target dealing {damage}% weapon damage on landing',
-  'Blink behind enemy and attack for {damage}% weapon damage',
+  'Dash forward and strike at {amp}% amp',
+  'Leap to target at {amp}% amp on landing',
+  'Blink behind enemy and attack at {amp}% amp',
 ]
 
 const SUSTAIN_EFFECTS = [
-  'Deals {damage}% weapon damage and heals for 10% of damage dealt',
-  'Life-draining strike dealing {damage}% weapon damage; restores HP',
-  'Vampiric attack for {damage}% weapon damage with 10% lifesteal',
+  'Deals {amp}% amp and heals for 10% of damage dealt',
+  'Life-draining strike at {amp}% amp; restores HP',
+  'Vampiric attack at {amp}% amp with 10% lifesteal',
 ]
 
 const VARIANT_EFFECTS: Record<VariantType, string[]> = {
@@ -200,11 +202,11 @@ function shuffleArray<T>(arr: T[]): T[] {
   return shuffled
 }
 
-function calculateDamage(stage: number, variantType: VariantType): number {
-  // Base: 25% + (2 × stage)%
-  const baseDamage = 25 + (2 * stage)
-  const modifier = VARIANT_CONFIGS[variantType].damageModifier
-  return baseDamage + modifier
+function calculateAmpPercent(stage: number, variantType: VariantType): number {
+  // Base: 100% + (5 × stage)% + variant modifier
+  const baseAmp = 100 + (5 * stage)
+  const modifier = VARIANT_CONFIGS[variantType].ampModifier
+  return baseAmp + modifier
 }
 
 function calculateApCost(stage: number, variantType: VariantType): number {
@@ -214,10 +216,11 @@ function calculateApCost(stage: number, variantType: VariantType): number {
   return baseAp + modifier
 }
 
-function calculateCooldown(stage: number): number {
-  // Base: 1 + (stage × 0.5) turns, minimum 1, round up
-  const cd = 1 + (stage * 0.5)
-  return Math.max(1, Math.ceil(cd))
+function calculateCooldown(stage: number, variantType: VariantType): number {
+  // Base: 1 + (stage × 0.5) turns + variant modifier, minimum 1, round up
+  const baseCd = 1 + (stage * 0.5)
+  const modifier = VARIANT_CONFIGS[variantType].cdModifier
+  return Math.max(1, Math.ceil(baseCd + modifier))
 }
 
 function calculateBuffDuration(stage: number): number {
@@ -242,7 +245,7 @@ function generateName(parentName: string, variantType: VariantType): string {
 
 function generateEffect(
   variantType: VariantType, 
-  damage: number, 
+  ampPercent: number, 
   buffType?: string, 
   debuffType?: string,
   buffDuration?: number,
@@ -252,7 +255,7 @@ function generateEffect(
   let template = getRandomElement(VARIANT_EFFECTS[variantType])
   
   // Replace placeholders
-  template = template.replace('{damage}', String(damage))
+  template = template.replace('{amp}', String(ampPercent))
   
   if (buffType && buffDuration) {
     const buffDesc = BUFF_DESCRIPTIONS[buffType].replace('{turns}', String(buffDuration))
@@ -321,9 +324,10 @@ export async function POST(request: Request) {
       usedNames.add(name)
       
       // Calculate stats
-      const damage = calculateDamage(newStage, variantType)
+      const ampPercent = calculateAmpPercent(newStage, variantType)
       const apCost = calculateApCost(newStage, variantType)
-      const cooldown = calculateCooldown(newStage)
+      const cooldown = calculateCooldown(newStage, variantType)
+      const config = VARIANT_CONFIGS[variantType]
       
       // Variant-specific fields
       let buffType: string | null = null
@@ -331,7 +335,9 @@ export async function POST(request: Request) {
       let debuffType: string | null = null
       let debuffDuration: number | null = null
       let lifestealPercent: number | null = null
-      let hitCount: number | null = null
+      let hitCount: number = 1
+      let isCounter = false
+      let triggerCondition: string | null = null
       
       if (variantType === 'buff_variant') {
         buffType = getRandomElement(BUFF_TYPES)
@@ -352,40 +358,46 @@ export async function POST(request: Request) {
         if (hitCount > 4) hitCount = 4
       }
       
+      if (variantType === 'counter_variant') {
+        isCounter = true
+        triggerCondition = getRandomElement(['after_dodge', 'after_parry', 'on_hit_taken'])
+      }
+      
       // Generate effect description
       const description = generateEffect(
         variantType, 
-        damage, 
+        ampPercent, 
         buffType || undefined, 
         debuffType || undefined,
         buffDuration || undefined,
         debuffDuration || undefined,
-        hitCount || undefined
+        hitCount > 1 ? hitCount : undefined
       )
-      
-      const config = VARIANT_CONFIGS[variantType]
       
       const child = await prisma.skill.create({
         data: {
           name,
           description,
-          skillType: config.skillTypePrefix,
-          categoryId,
+          skillType: config.skillType,
+          damageType: 'physical',
           stage: newStage,
-          archetype: variantType === 'upgrade' ? 'power' : variantType.replace('_variant', ''),
           variantType,
-          damage: `${damage}%`,
+          ampPercent,
           apCost,
           cooldown,
-          passive: null,
-          starterSkillName,
-          parentId,
+          targetType: config.targetType,
+          range: 1,
+          hitCount,
           buffType,
           buffDuration,
           debuffType,
           debuffDuration,
           lifestealPercent,
-          hitCount,
+          isCounter,
+          triggerCondition,
+          passive: null,
+          starterSkillName,
+          parentId,
           isSaved: false,
         }
       })
