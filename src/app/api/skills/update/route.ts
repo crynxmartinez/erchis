@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma'
 export async function POST(request: Request) {
   try {
     const data = await request.json()
+    console.log('Update API received:', JSON.stringify(data, null, 2))
     
     // Build update object with only provided fields
     const updateData: any = {}
@@ -32,6 +33,8 @@ export async function POST(request: Request) {
     if (data.isCounter !== undefined) updateData.isCounter = data.isCounter
     if (data.triggerCondition !== undefined) updateData.triggerCondition = data.triggerCondition
     
+    console.log('Update data to apply:', JSON.stringify(updateData, null, 2))
+    
     const skill = await prisma.skill.update({
       where: { id: data.id },
       data: updateData,
@@ -40,6 +43,7 @@ export async function POST(request: Request) {
       }
     })
     
+    console.log('Updated skill ampPercent:', skill.ampPercent)
     return NextResponse.json({ success: true, skill })
   } catch (error) {
     console.error('Error updating skill:', error)
