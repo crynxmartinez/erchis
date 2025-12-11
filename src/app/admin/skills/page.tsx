@@ -145,7 +145,14 @@ export default function SkillDatabaseBuilder() {
           })
         })
         const createData = await createResponse.json()
+        if (!createData.success || !createData.skill) {
+          throw new Error(createData.error || createData.details || 'Failed to create skill')
+        }
         skill = createData.skill
+      }
+      
+      if (!skill || !skill.id) {
+        throw new Error('Skill data is invalid')
       }
       
       setCurrentSkill(skill)
