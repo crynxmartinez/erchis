@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { WEAPON_CATEGORIES, WeaponCategory, StarterSkill } from '@/data/weapon-skills-data'
+import { SKILL_TYPE_CATEGORIES, SkillTypeCategory, StarterSkill } from '@/data/universal-skills-data'
 
 // ============================================
 // TYPES
@@ -62,7 +62,7 @@ const VARIANT_CONFIG: Record<string, { icon: string; color: string; label: strin
 
 type ViewState = 
   | { type: 'categories' }
-  | { type: 'starters'; category: WeaponCategory }
+  | { type: 'starters'; category: SkillTypeCategory }
   | { type: 'skill'; skill: Skill; breadcrumb: Skill[] }
 
 // ============================================
@@ -92,14 +92,14 @@ export default function SkillDatabaseBuilder() {
   // HANDLERS
   // ============================================
 
-  // Select a weapon category
-  const handleSelectCategory = (category: WeaponCategory) => {
+  // Select a skill type category
+  const handleSelectCategory = (category: SkillTypeCategory) => {
     setView({ type: 'starters', category })
     setMessage('')
   }
 
   // Select a starter skill
-  const handleSelectStarterSkill = async (category: WeaponCategory, starter: StarterSkill) => {
+  const handleSelectStarterSkill = async (category: SkillTypeCategory, starter: StarterSkill) => {
     setLoading(true)
     setMessage('')
     
@@ -121,8 +121,8 @@ export default function SkillDatabaseBuilder() {
           body: JSON.stringify({
             name: starter.name,
             description: starter.description,
-            skillType: starter.type,
-            damageType: 'physical',
+            skillType: category.name, // Use category name as skill type
+            damageType: starter.damageType,
             stage: 0,
             variantType: 'root',
             ampPercent: 100,
@@ -412,16 +412,6 @@ export default function SkillDatabaseBuilder() {
     return colors[stage] || colors[0]
   }
 
-  const getCategoryTypeColor = (type: string) => {
-    switch (type) {
-      case 'Melee': return 'bg-red-900/30 text-red-400'
-      case 'Ranged': return 'bg-green-900/30 text-green-400'
-      case 'Magic': return 'bg-purple-900/30 text-purple-400'
-      case 'Defense': return 'bg-blue-900/30 text-blue-400'
-      default: return 'bg-gray-900/30 text-gray-400'
-    }
-  }
-
   // ============================================
   // RENDER
   // ============================================
@@ -452,13 +442,13 @@ export default function SkillDatabaseBuilder() {
             onClick={() => handleBreadcrumbClick(-1)}
             className="text-[#6eb5ff] hover:underline"
           >
-            🏠 Categories
+            🏠 Skill Types
           </button>
           
           {view.type === 'starters' && (
             <>
               <span className="text-gray-500">›</span>
-              <span className="text-white">{view.category.icon} {view.category.name}</span>
+              <span className="text-white">{view.category.icon} {view.category.name} Skills</span>
             </>
           )}
           
@@ -521,24 +511,22 @@ export default function SkillDatabaseBuilder() {
           </div>
         )}
 
-        {/* VIEW: Categories */}
+        {/* VIEW: Skill Type Categories */}
         {!loading && view.type === 'categories' && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">Choose Weapon Category</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {WEAPON_CATEGORIES.map(category => (
+            <h2 className="text-xl font-semibold mb-4">Choose Skill Type</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {SKILL_TYPE_CATEGORIES.map(category => (
                 <button
                   key={category.id}
                   onClick={() => handleSelectCategory(category)}
-                  className="bg-[#242424] border border-[#444] rounded-lg p-6 text-center hover:border-[#6eb5ff] hover:bg-[#2a2a2a] transition-all group"
+                  className={`border-2 rounded-lg p-6 text-center hover:scale-105 transition-all ${category.color}`}
                 >
                   <div className="text-4xl mb-3">{category.icon}</div>
                   <div className="font-semibold text-lg mb-1">{category.name}</div>
-                  <div className={`text-xs px-2 py-1 rounded inline-block ${getCategoryTypeColor(category.type)}`}>
-                    {category.type} • {category.primaryStat}
-                  </div>
-                  <div className="text-xs text-gray-500 mt-2">
-                    {category.starterSkills.length} starter skills
+                  <div className="text-xs opacity-70 mb-2">{category.description}</div>
+                  <div className="text-xs text-gray-400 mt-2">
+                    {category.skills.length} skills
                   </div>
                 </button>
               ))}
@@ -550,20 +538,24 @@ export default function SkillDatabaseBuilder() {
         {!loading && view.type === 'starters' && (
           <div>
             <h2 className="text-xl font-semibold mb-4">
-              {view.category.icon} {view.category.name} - Choose Starter Skill
+              {view.category.icon} {view.category.name} Skills - Choose Starter
             </h2>
+            <p className="text-sm text-gray-400 mb-4">{view.category.description}</p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {view.category.starterSkills.map(starter => (
+              {view.category.skills.map((starter: StarterSkill) => (
                 <button
                   key={starter.name}
                   onClick={() => handleSelectStarterSkill(view.category, starter)}
                   className="bg-[#242424] border border-[#444] rounded-lg p-4 text-left hover:border-[#6eb5ff] hover:bg-[#2a2a2a] transition-all"
                 >
                   <div className="font-semibold mb-1">{starter.name}</div>
-                  <div className="text-xs text-gray-400 mb-2">{starter.type}</div>
+                  <div className="text-xs text-gray-400 mb-2">{starter.subtype}</div>
                   <div className="text-xs text-gray-500 line-clamp-2">{starter.description}</div>
-                  <div className="mt-2 text-xs px-2 py-1 rounded bg-green-900/30 text-green-400 inline-block">
-                    Stage 0
+                  <div className="flex gap-2 mt-2">
+                    <span className="text-xs px-2 py-1 rounded bg-green-900/30 text-green-400">Stage 0</span>
+                    <span className={`text-xs px-2 py-1 rounded ${starter.damageType === 'magic' ? 'bg-purple-900/30 text-purple-400' : starter.damageType === 'physical' ? 'bg-red-900/30 text-red-400' : 'bg-gray-900/30 text-gray-400'}`}>
+                      {starter.damageType}
+                    </span>
                   </div>
                 </button>
               ))}
