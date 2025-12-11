@@ -3,7 +3,22 @@ import prisma from '@/lib/prisma'
 
 export async function POST(request: Request) {
   try {
-    const { starterSkillName } = await request.json()
+    const { starterSkillName, deleteAll } = await request.json()
+    
+    if (deleteAll) {
+      // Nuclear option: delete ALL skills with stage > 0
+      const result = await prisma.skill.deleteMany({
+        where: {
+          stage: { gt: 0 }
+        }
+      })
+      
+      return NextResponse.json({ 
+        success: true, 
+        count: result.count,
+        message: `Deleted ${result.count} child skills (all trees)`
+      })
+    }
     
     if (!starterSkillName) {
       return NextResponse.json({ error: 'starterSkillName is required' }, { status: 400 })

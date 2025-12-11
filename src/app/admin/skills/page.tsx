@@ -347,23 +347,24 @@ export default function SkillDatabaseBuilder() {
     
     const starterName = currentSkill.starterSkillName || currentSkill.name
     
-    if (!confirm(`Are you sure you want to delete ALL children of "${starterName}"? This cannot be undone.`)) {
+    // Use deleteAll=true to delete ALL skills with stage > 0 (nuclear option for old data)
+    if (!confirm(`Are you sure you want to delete ALL generated skills? This will reset ALL skill trees. This cannot be undone.`)) {
       return
     }
     
-    setMessage('🗑️ Deleting all children...')
+    setMessage('🗑️ Deleting all generated skills...')
     
     try {
       const response = await fetch('/api/skills/delete-all-children', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ starterSkillName: starterName })
+        body: JSON.stringify({ deleteAll: true })
       })
       
       const data = await response.json()
       
       if (data.success) {
-        setMessage(`✅ Deleted ${data.count} skills. Tree reset to starter skill only.`)
+        setMessage(`✅ Deleted ${data.count} skills. All trees reset to starter skills only.`)
         setChildSkills([])
         await loadProgress(starterName)
       } else {
