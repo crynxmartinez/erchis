@@ -26,6 +26,14 @@ export async function GET(request: Request) {
         passive: true,
         starterSkillName: true,
         categoryId: true,
+        variantType: true,
+        buffType: true,
+        buffDuration: true,
+        debuffType: true,
+        debuffDuration: true,
+        lifestealPercent: true,
+        hitCount: true,
+        isSaved: true,
       }
     })
     

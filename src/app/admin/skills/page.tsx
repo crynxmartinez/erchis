@@ -117,7 +117,7 @@ export default function SkillDatabaseBuilder() {
             archetype: 'root',
             damage: '100% weapon damage',
             apCost: 5,
-            cooldown: '0.5s',
+            cooldown: 1,
             passive: null,
             starterSkillName: starter.name,
           })

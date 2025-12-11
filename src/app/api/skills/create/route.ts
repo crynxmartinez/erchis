@@ -41,7 +41,7 @@ export async function POST(request: Request) {
         archetype: data.archetype || 'root',
         damage: data.damage || '100% weapon damage',
         apCost: data.apCost || 5,
-        cooldown: data.cooldown || '0.5s',
+        cooldown: data.cooldown || 1,
         passive: data.passive || null,
         starterSkillName: data.starterSkillName,
         parentId: data.parentId || null,
