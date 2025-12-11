@@ -136,12 +136,6 @@ export default async function TownPage({ params }: TownPageProps) {
           ))}
         </div>
 
-        <div className="mt-6 p-3 bg-[#1a1a1a] rounded border border-[#333]">
-          <div className="flex items-center gap-2 text-green-400 text-sm">
-            <span>✓</span>
-            <span>Safe Zone - You can change skills and repair equipment here</span>
-          </div>
-        </div>
       </div>
     </GameLayout>
   )
