@@ -11,6 +11,7 @@ interface Skill {
   id: string
   name: string
   description: string
+  executionDescription?: string | null
   parentId: string | null
   parent?: { id: string; name: string } | null
   stage: number
@@ -845,6 +846,23 @@ export default function SkillDatabaseBuilder() {
                   />
                 ) : (
                   <div className="bg-black/20 rounded p-3">{currentSkill.description}</div>
+                )}
+              </div>
+
+              {/* Execution Description */}
+              <div className="mb-4">
+                <div className="text-xs text-gray-400 mb-1">Execution (Flavor Text)</div>
+                {editMode ? (
+                  <textarea
+                    value={editedSkill?.executionDescription || ''}
+                    onChange={(e) => setEditedSkill(prev => prev ? {...prev, executionDescription: e.target.value} : null)}
+                    className="w-full bg-black/20 rounded p-3 border border-white/10 focus:outline-none focus:border-[#6eb5ff] min-h-[80px] italic"
+                    placeholder="Describe how the skill looks and feels..."
+                  />
+                ) : (
+                  <div className="bg-black/20 rounded p-3 italic text-gray-300">
+                    {currentSkill.executionDescription || 'No execution description available.'}
+                  </div>
                 )}
               </div>
 
