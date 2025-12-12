@@ -152,70 +152,49 @@ const CONTROL_EFFECTS = ['Stuns', 'Slows', 'Knocks Back']
 const DEFENSIVE_BUFFS = ['Iron Skin', 'Evasion', 'Parry Chance']
 
 // ============================================
-// NAME GENERATION (Unique names, no parent reference)
+// NAME GENERATION (Tiered naming - simple early, epic late)
 // ============================================
 
-// Skill name parts by variant type - combines [Prefix] + [Core] + [Suffix (optional)]
-const VARIANT_NAME_PARTS: Record<VariantType, { prefixes: string[], cores: string[], suffixes: string[] }> = {
-  power: {
-    prefixes: ['Titan', 'Colossal', 'Mega', 'Ultra', 'Supreme', 'Grand', 'Apex', 'Prime', 'Omega', 'Divine'],
-    cores: ['Crusher', 'Breaker', 'Devastator', 'Annihilator', 'Obliterator', 'Destroyer', 'Wrecker', 'Smasher', 'Pulverizer', 'Demolisher'],
-    suffixes: ['Strike', 'Blow', 'Impact', 'Force', 'Might', 'Wrath', 'Fury', 'Ruin', 'Havoc', 'Doom']
-  },
-  multihit: {
-    prefixes: ['Echo', 'Phantom', 'Mirror', 'Shadow', 'Spectral', 'Twin', 'Triple', 'Quad', 'Infinite', 'Eternal'],
-    cores: ['Barrage', 'Flurry', 'Cascade', 'Torrent', 'Storm', 'Blitz', 'Rush', 'Volley', 'Salvo', 'Onslaught'],
-    suffixes: ['Dance', 'Combo', 'Chain', 'Sequence', 'Series', 'Burst', 'Wave', 'Assault', 'Rampage', 'Frenzy']
-  },
-  aoe: {
-    prefixes: ['Nova', 'Radiant', 'Expanding', 'Erupting', 'Surging', 'Pulsing', 'Rippling', 'Spreading', 'Bursting', 'Exploding'],
-    cores: ['Shockwave', 'Maelstrom', 'Tempest', 'Cataclysm', 'Upheaval', 'Eruption', 'Detonation', 'Blast', 'Surge', 'Quake'],
-    suffixes: ['Field', 'Zone', 'Domain', 'Radius', 'Sphere', 'Circle', 'Ring', 'Area', 'Expanse', 'Reach']
-  },
-  rapid: {
-    prefixes: ['Flash', 'Sonic', 'Hyper', 'Turbo', 'Mach', 'Instant', 'Swift', 'Blur', 'Warp', 'Lightning'],
-    cores: ['Dash', 'Sprint', 'Bolt', 'Streak', 'Zip', 'Zephyr', 'Gust', 'Breeze', 'Wind', 'Current'],
-    suffixes: ['Strike', 'Cut', 'Slash', 'Jab', 'Thrust', 'Pierce', 'Edge', 'Blade', 'Fang', 'Claw']
-  },
-  efficiency: {
-    prefixes: ['Zen', 'Flowing', 'Graceful', 'Serene', 'Tranquil', 'Balanced', 'Harmonic', 'Pure', 'Crystal', 'Clear'],
-    cores: ['Stream', 'Flow', 'Current', 'Tide', 'Wave', 'Ripple', 'Glide', 'Drift', 'Float', 'Breeze'],
-    suffixes: ['Art', 'Form', 'Style', 'Way', 'Path', 'Method', 'Technique', 'Motion', 'Grace', 'Finesse']
-  },
-  dot: {
-    prefixes: ['Venom', 'Toxic', 'Plague', 'Blight', 'Decay', 'Rot', 'Wither', 'Corrupt', 'Tainted', 'Festering'],
-    cores: ['Infection', 'Contagion', 'Pestilence', 'Miasma', 'Toxin', 'Poison', 'Venom', 'Bane', 'Curse', 'Hex'],
-    suffixes: ['Touch', 'Mark', 'Brand', 'Seal', 'Sign', 'Wound', 'Scar', 'Taint', 'Stain', 'Blight']
-  },
-  control: {
-    prefixes: ['Binding', 'Locking', 'Sealing', 'Freezing', 'Stunning', 'Paralyzing', 'Petrifying', 'Anchoring', 'Rooting', 'Gripping'],
-    cores: ['Shackle', 'Chain', 'Lock', 'Bind', 'Seal', 'Trap', 'Snare', 'Net', 'Web', 'Cage'],
-    suffixes: ['Hold', 'Grip', 'Grasp', 'Clutch', 'Vice', 'Prison', 'Restraint', 'Arrest', 'Halt', 'Stop']
-  },
-  sustain: {
-    prefixes: ['Vampiric', 'Draining', 'Siphoning', 'Leeching', 'Absorbing', 'Hungering', 'Thirsting', 'Devouring', 'Consuming', 'Feeding'],
-    cores: ['Drain', 'Siphon', 'Leech', 'Absorb', 'Devour', 'Consume', 'Feed', 'Harvest', 'Reap', 'Claim'],
-    suffixes: ['Fang', 'Bite', 'Kiss', 'Touch', 'Embrace', 'Grasp', 'Pull', 'Draw', 'Take', 'Steal']
-  },
-  defense: {
-    prefixes: ['Iron', 'Steel', 'Adamant', 'Diamond', 'Fortress', 'Bastion', 'Bulwark', 'Aegis', 'Guardian', 'Sentinel'],
-    cores: ['Shield', 'Wall', 'Barrier', 'Guard', 'Ward', 'Armor', 'Plate', 'Shell', 'Carapace', 'Aegis'],
-    suffixes: ['Stance', 'Form', 'Posture', 'Position', 'Defense', 'Block', 'Parry', 'Counter', 'Riposte', 'Return']
-  },
-  execute: {
-    prefixes: ['Final', 'Last', 'Ending', 'Terminal', 'Ultimate', 'Supreme', 'Absolute', 'Perfect', 'True', 'Divine'],
-    cores: ['Execution', 'Judgment', 'Verdict', 'Sentence', 'Doom', 'Fate', 'End', 'Finale', 'Climax', 'Conclusion'],
-    suffixes: ['Strike', 'Blow', 'Cut', 'Slash', 'Thrust', 'Edge', 'Point', 'Blade', 'Fang', 'Claw']
-  }
+// TIER 1 (Stages 1-2): Simple, short names
+const SIMPLE_NAMES: Record<VariantType, string[]> = {
+  power:      ['Heavy Strike', 'Strong Blow', 'Hard Hit', 'Big Slam', 'Power Smash', 'Brute Force', 'Mighty Swing', 'Crushing Blow', 'Solid Impact', 'Raw Power'],
+  multihit:   ['Double Hit', 'Twin Strike', 'Quick Combo', 'Rapid Jabs', 'Fast Flurry', 'Swift Cuts', 'Dual Slash', 'Two-Step', 'Quick One-Two', 'Burst Attack'],
+  aoe:        ['Wide Swing', 'Broad Strike', 'Sweep Attack', 'Arc Slash', 'Circle Cut', 'Spin Attack', 'Round Swing', 'Area Hit', 'Spread Strike', 'Fan Slash'],
+  rapid:      ['Quick Jab', 'Fast Strike', 'Swift Cut', 'Speed Hit', 'Hasty Blow', 'Snap Attack', 'Flash Jab', 'Nimble Strike', 'Agile Cut', 'Light Touch'],
+  efficiency: ['Smooth Cut', 'Clean Strike', 'Easy Flow', 'Light Swing', 'Soft Touch', 'Gentle Arc', 'Simple Form', 'Basic Flow', 'Calm Strike', 'Steady Hand'],
+  dot:        ['Poison Jab', 'Venom Cut', 'Toxic Strike', 'Acid Touch', 'Blight Hit', 'Tainted Blow', 'Sick Strike', 'Foul Cut', 'Bad Touch', 'Rot Jab'],
+  control:    ['Stun Hit', 'Lock Strike', 'Hold Blow', 'Freeze Jab', 'Stop Cut', 'Bind Strike', 'Trap Hit', 'Snare Blow', 'Root Jab', 'Pin Strike'],
+  sustain:    ['Drain Hit', 'Life Tap', 'Sap Strike', 'Leech Jab', 'Steal Cut', 'Feed Blow', 'Siphon Hit', 'Draw Strike', 'Take Jab', 'Pull Life'],
+  defense:    ['Guard Strike', 'Block Hit', 'Shield Bash', 'Parry Blow', 'Counter Jab', 'Deflect Cut', 'Ward Strike', 'Armor Hit', 'Brace Blow', 'Stand Firm'],
+  execute:    ['Finish Hit', 'End Strike', 'Kill Blow', 'Final Jab', 'Last Cut', 'Death Strike', 'Doom Hit', 'Fate Blow', 'Reap Jab', 'Cull Strike']
 }
 
-// Stage-based name modifiers (higher stages get more epic names)
-const STAGE_MODIFIERS: Record<number, string[]> = {
-  1: ['', 'Lesser', 'Minor', 'Basic', 'Simple'],
-  2: ['', 'Greater', 'Enhanced', 'Improved', 'Advanced'],
-  3: ['', 'Superior', 'Mighty', 'Potent', 'Fierce'],
-  4: ['', 'Legendary', 'Mythic', 'Ancient', 'Primal'],
-  5: ['', 'Transcendent', 'Ascended', 'Godly', 'Eternal', 'Infinite']
+// TIER 2 (Stages 3-4): Medium complexity names
+const MEDIUM_NAMES: Record<VariantType, string[]> = {
+  power:      ['Titan Crusher', 'Grand Smasher', 'Brutal Impact', 'Savage Blow', 'Fierce Destroyer', 'Raging Force', 'Violent Wrecker', 'Furious Slam', 'Primal Smash', 'Wild Devastation'],
+  multihit:   ['Shadow Barrage', 'Phantom Flurry', 'Storm Rush', 'Thunder Volley', 'Blade Dance', 'Steel Tempest', 'Whirlwind Combo', 'Cyclone Assault', 'Raging Torrent', 'Fury Chain'],
+  aoe:        ['Nova Burst', 'Shockwave Blast', 'Eruption Wave', 'Quake Strike', 'Tremor Field', 'Pulse Detonation', 'Ripple Force', 'Surge Explosion', 'Radiant Burst', 'Expanding Ring'],
+  rapid:      ['Lightning Dash', 'Sonic Bolt', 'Thunder Step', 'Storm Rush', 'Wind Cutter', 'Gale Strike', 'Tempest Edge', 'Hurricane Slash', 'Cyclone Pierce', 'Tornado Fang'],
+  efficiency: ['Flowing Stream', 'Graceful Current', 'Serene Tide', 'Tranquil Wave', 'Balanced Flow', 'Harmonic Motion', 'Pure Technique', 'Crystal Form', 'Clear Path', 'Zen Strike'],
+  dot:        ['Plague Touch', 'Blight Curse', 'Decay Mark', 'Wither Brand', 'Corrupt Seal', 'Festering Wound', 'Rotting Hex', 'Vile Infection', 'Toxic Miasma', 'Poison Cloud'],
+  control:    ['Binding Shackle', 'Freezing Chain', 'Petrifying Lock', 'Anchoring Seal', 'Rooting Trap', 'Gripping Snare', 'Paralyzing Web', 'Stunning Cage', 'Locking Vice', 'Sealing Prison'],
+  sustain:    ['Vampiric Drain', 'Soul Siphon', 'Life Leech', 'Essence Absorb', 'Spirit Devour', 'Vitality Consume', 'Energy Harvest', 'Force Reap', 'Power Claim', 'Strength Steal'],
+  defense:    ['Iron Fortress', 'Steel Bastion', 'Adamant Bulwark', 'Diamond Guard', 'Granite Wall', 'Obsidian Shield', 'Titanium Barrier', 'Bronze Aegis', 'Silver Ward', 'Gold Armor'],
+  execute:    ['Fatal Judgment', 'Lethal Verdict', 'Mortal Sentence', 'Deadly Doom', 'Killing Fate', 'Slaying End', 'Murder Finale', 'Deathly Climax', 'Grim Conclusion', 'Dark Execution']
+}
+
+// TIER 3 (Stage 5): Epic, legendary names
+const EPIC_NAMES: Record<VariantType, string[]> = {
+  power:      ['Omega Annihilator', 'Divine Obliterator', 'Godly Devastation', 'Eternal Destruction', 'Infinite Ruin', 'Transcendent Havoc', 'Ascended Cataclysm', 'Celestial Apocalypse', 'Supreme Armageddon', 'Ultimate Oblivion'],
+  multihit:   ['Infinite Onslaught', 'Eternal Storm Dance', 'Godly Blade Symphony', 'Divine Thousand Cuts', 'Transcendent Fury Chain', 'Ascended Shadow Ballet', 'Celestial Star Barrage', 'Supreme Phantom Waltz', 'Ultimate Chaos Cascade', 'Omega Death Spiral'],
+  aoe:        ['World Shatter', 'Reality Rupture', 'Dimension Collapse', 'Cosmic Detonation', 'Universal Quake', 'Existence Erasure', 'Creation Sundering', 'Primordial Cataclysm', 'Genesis Explosion', 'Apocalyptic Nova'],
+  rapid:      ['Light Speed Execution', 'Time Skip Assault', 'Warp Strike Omega', 'Dimensional Slash', 'Quantum Blade Dance', 'Photon Edge Storm', 'Tachyon Fang Fury', 'Hyperspace Cutter', 'Void Step Annihilation', 'Infinity Rush'],
+  efficiency: ['Enlightened Mastery', 'Transcendent Technique', 'Divine Flow State', 'Godly Perfection', 'Eternal Harmony', 'Infinite Grace', 'Celestial Balance', 'Supreme Finesse', 'Ultimate Zen', 'Ascended Form'],
+  dot:        ['Eternal Plague', 'Godly Corruption', 'Divine Pestilence', 'Transcendent Decay', 'Infinite Blight', 'Celestial Rot', 'Supreme Contagion', 'Ultimate Curse', 'Omega Hex', 'Ascended Miasma'],
+  control:    ['Eternal Prison', 'Godly Binding', 'Divine Petrification', 'Transcendent Seal', 'Infinite Lockdown', 'Celestial Cage', 'Supreme Restraint', 'Ultimate Paralysis', 'Omega Freeze', 'Ascended Shackle'],
+  sustain:    ['Soul Devourer Omega', 'Eternal Life Drain', 'Godly Essence Theft', 'Divine Vitality Reap', 'Transcendent Absorption', 'Infinite Consumption', 'Celestial Harvest', 'Supreme Siphon', 'Ultimate Leech', 'Ascended Vampirism'],
+  defense:    ['Eternal Aegis', 'Godly Fortress', 'Divine Bulwark', 'Transcendent Bastion', 'Infinite Guard', 'Celestial Shield', 'Supreme Barrier', 'Ultimate Ward', 'Omega Defense', 'Ascended Armor'],
+  execute:    ['Final Judgment Omega', 'Eternal Execution', 'Godly Verdict', 'Divine Sentence', 'Transcendent Doom', 'Infinite Death', 'Celestial End', 'Supreme Finale', 'Ultimate Reaping', 'Ascended Annihilation']
 }
 
 // ============================================
@@ -262,34 +241,18 @@ function calculateCooldown(parentCd: number, stage: number, variantType: Variant
 }
 
 function generateName(variantType: VariantType, stage: number): string {
-  const nameParts = VARIANT_NAME_PARTS[variantType]
-  const stageModifiers = STAGE_MODIFIERS[stage] || STAGE_MODIFIERS[1]
+  // Tiered naming based on stage
+  // Tier 1 (Stages 1-2): Simple names
+  // Tier 2 (Stages 3-4): Medium complexity
+  // Tier 3 (Stage 5): Epic legendary names
   
-  // Pick random parts
-  const prefix = getRandomElement(nameParts.prefixes)
-  const core = getRandomElement(nameParts.cores)
-  const stageModifier = getRandomElement(stageModifiers)
-  
-  // 50% chance to include a suffix for variety
-  const includeSuffix = Math.random() > 0.5
-  const suffix = includeSuffix ? getRandomElement(nameParts.suffixes) : ''
-  
-  // Build the name based on what we have
-  let name = ''
-  
-  if (stageModifier) {
-    // Format: "Legendary Titan Crusher" or "Mythic Echo Barrage Dance"
-    name = `${stageModifier} ${prefix} ${core}`
+  if (stage <= 2) {
+    return getRandomElement(SIMPLE_NAMES[variantType])
+  } else if (stage <= 4) {
+    return getRandomElement(MEDIUM_NAMES[variantType])
   } else {
-    // Format: "Titan Crusher" or "Echo Barrage Dance"
-    name = `${prefix} ${core}`
+    return getRandomElement(EPIC_NAMES[variantType])
   }
-  
-  if (suffix) {
-    name += ` ${suffix}`
-  }
-  
-  return name
 }
 
 function generateEffect(
