@@ -202,25 +202,52 @@ function shuffleArray<T>(arr: T[]): T[] {
   return shuffled
 }
 
-function calculateAmpPercent(stage: number, variantType: VariantType): number {
-  // Base: 100% + (5 × stage)% + variant modifier
-  const baseAmp = 100 + (5 * stage)
+function calculateAmpPercent(parentAmp: number, stage: number, variantType: VariantType, damageType: string): number {
+  // Logic: Parent Amp + Stage Bonus + Variant Modifier
+  // Physical/None: +5% per stage (reached ~125% at Stage 5)
+  // Magic: +20% per stage (starts at 100%, reaches 200% at Stage 5 to compensate for no crit)
+  
+  const isMagic = damageType === 'magic'
+  const stageBonus = isMagic ? 20 : 5
   const modifier = VARIANT_CONFIGS[variantType].ampModifier
-  return baseAmp + modifier
+  
+  return parentAmp + stageBonus + modifier
 }
 
-function calculateApCost(stage: number, variantType: VariantType): number {
-  // Base: 5 + stage
-  const baseAp = 5 + stage
+function calculateApCost(parentAp: number, stage: number, variantType: VariantType): number {
+  // Logic: Parent AP + Stage AP Increase + Variant Modifier
+  // Stage 2, 3, 4, 5 add +1 AP (cumulative). 
+  // But here we are just going from Parent -> Child (1 stage difference).
+  // So we just add the increment for the *new* stage if applicable.
+  
+  // Stage AP increases at stages 2, 4, 5?
+  // Docs say:
+  // Stage 0: +0
+  // Stage 1: +0
+  // Stage 2: +1
+  // Stage 3: +1
+  // Stage 4: +2
+  // Stage 5: +2
+  // This seems to be "total increase from base".
+  // Let's stick to a simpler incremental logic:
+  // AP increases by 1 at Stage 2 and Stage 4.
+  
+  let stageIncrease = 0
+  if (stage === 2 || stage === 4) stageIncrease = 1
+  
   const modifier = VARIANT_CONFIGS[variantType].apModifier
-  return baseAp + modifier
+  return parentAp + stageIncrease + modifier
 }
 
-function calculateCooldown(stage: number, variantType: VariantType): number {
-  // Base: 1 + (stage × 0.5) turns + variant modifier, minimum 1, round up
-  const baseCd = 1 + (stage * 0.5)
+function calculateCooldown(parentCd: number, stage: number, variantType: VariantType): number {
+  // Logic: Parent CD + Stage CD Increase + Variant Modifier
+  // CD increases by 1 at Stage 3 and Stage 5
+  
+  let stageIncrease = 0
+  if (stage === 3 || stage === 5) stageIncrease = 1
+  
   const modifier = VARIANT_CONFIGS[variantType].cdModifier
-  return Math.max(1, Math.ceil(baseCd + modifier))
+  return Math.max(1, parentCd + stageIncrease + modifier)
 }
 
 function calculateBuffDuration(stage: number): number {
@@ -333,9 +360,9 @@ export async function POST(request: Request) {
       usedNames.add(name)
       
       // Calculate stats
-      const ampPercent = calculateAmpPercent(newStage, variantType)
-      const apCost = calculateApCost(newStage, variantType)
-      const cooldown = calculateCooldown(newStage, variantType)
+      const ampPercent = calculateAmpPercent(parentSkill.ampPercent, newStage, variantType, parentSkill.damageType)
+      const apCost = calculateApCost(parentSkill.apCost, newStage, variantType)
+      const cooldown = calculateCooldown(parentSkill.cooldown, newStage, variantType)
       const config = VARIANT_CONFIGS[variantType]
       
       // Variant-specific fields

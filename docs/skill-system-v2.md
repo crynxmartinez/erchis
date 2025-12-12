@@ -27,7 +27,7 @@ Skills are **not locked to weapon categories**. Any player can learn any skill.
 *Magic skills have **Utility Mode**: When used with non-magic weapons, they become weapon enchants instead of direct damage.
 
 ### Weapon Requirements:
-- **melee_only**: Requires Sword, Greatsword, Katana, Dagger, Axe, Greataxe, Mace, Greathammer, Spear, Fist
+- **melee_only**: Requires Sword, Greatsword, Katana, Dagger, Axe, Greataxe, Mace, Greathammer, Spear, Fist, **Shield**
 - **ranged_only**: Requires Bow, Crossbow, Gun
 - **magic_only**: Requires Staff, Wand, Tome (or becomes enchant with other weapons)
 - **any**: Can be used with any weapon or no weapon
@@ -50,25 +50,23 @@ When a magic skill is used with a non-magic weapon, it becomes a weapon enchant:
 
 ---
 
-## 2. Damage Types
+## 2. Damage Types & Balance
 
-| Type | Can Crit? | Amp Range (Stage 0) |
-|------|-----------|---------------------|
-| **Physical** | Yes | 50-100% |
-| **Magic** | No | 100-150% |
-| **None** | No | 0% |
+| Type | Can Crit? | Amp Range (Stage 0) | Max Amp (Stage 5) | Notes |
+|------|-----------|---------------------|-------------------|-------|
+| **Physical** | Yes | 50-100% | ~125% | Lower amp, compensated by crit multiplier (1.5x+) |
+| **Magic** | No | 100-150% | **200%** | Higher consistent amp, no crit variance |
+| **None** | No | 0% | 0% | Utility, Buffs, Movement, etc. |
 
-### Why This Balance:
-- Physical has lower amp but can crit (burst potential)
-- Magic has higher consistent amp but no crit
-- Non-damage skills (buffs, movement, utility) have 0% amp
-- Stats are for **requirements only**, NOT damage calculation
+### Balance Philosophy:
+- **Physical** relies on Weapon Base + Crit for high burst ceilings.
+- **Magic** relies on high base Skill Amp (up to 200%) for reliable, consistent output.
+- **Stats (STR/DEX/INT)** are used for **Weapon/Skill Requirements ONLY**. They do NOT scale damage directly.
 
 ---
 
 ## 3. Damage Formula
 
-### Damage Formula:
 ```
 Damage = WeaponBase × SkillAmp
 ```
@@ -79,25 +77,82 @@ Damage = WeaponBase × SkillAmp × CritMultiplier
 ```
 
 ### Components:
-- **WeaponBase** = Weapon category's base damage % (40-140%)
-- **SkillAmp** = Skill's amplifier % (Physical: 50-100%, Magic: 100-150%)
-- **CritMultiplier** = 1.5x base (physical only, can be modified)
-- **Stats** = Used for requirements only, NOT damage calculation
+- **WeaponBase**: 40-140% (Depends on weapon category)
+- **SkillAmp**: 50-200% (Physical: 50-125%, Magic: 100-200%)
+- **CritMultiplier**: 1.5x base (Can be increased by items/passives)
+
+### Dual Wielding Rules:
+- **Main Hand:** Determines the **Base Damage** for skills.
+- **Off Hand:** Acts as a **Stat Stick**. You gain its Stats and Passive Bonus, but it does NOT attack separately or add its base damage to the skill.
+- **Example:** Sword (Main) + Dagger (Off).
+  - You get Sword's Base Damage (80%).
+  - You get Dagger's Passive (+15% Crit).
+  - You get Dagger's Stats (DEX).
 
 ---
 
-## 4. Skill Amp Tiers
+## 4. Weapon Base Damage Table
 
-| Tier | Amp % | AP Cost | Cooldown | Use Case |
-|------|-------|---------|----------|----------|
-| **Weak** | 50-80% | 2-3 | 1 | Fast attacks, multi-hit |
-| **Normal** | 90-110% | 4-5 | 1-2 | Standard attacks |
-| **Strong** | 120-150% | 5-6 | 2-3 | Heavy attacks |
-| **Power** | 160-200% | 7-10 | 3-5 | Finishers, ultimates |
+| Category | Type | Base Dmg | Passive Bonus |
+|----------|------|----------|---------------|
+| **Greataxe** | Melee (2H) | 140% | +20% vs Low HP |
+| **Greathammer** | Melee (2H) | 130% | +20% Stun Chance |
+| **Greatsword** | Melee (2H) | 120% | +25% Stagger |
+| **Crossbow** | Ranged (2H) | 100% | +25% Armor Pen |
+| **Staff** | Magic (2H) | 90% | +20% AoE Size |
+| **Axe** | Melee (1H) | 85% | +15% vs Guard |
+| **Bow** | Ranged (2H) | 85% | +2 Range |
+| **Sword** | Melee (1H) | 80% | +10% Parry |
+| **Mace** | Melee (1H) | 80% | +15% Armor Pen |
+| **Gun** | Ranged (1H) | 75% | +10% Crit Damage |
+| **Katana** | Versatile | 75%/95% | +10%/20% Counter |
+| **Spear** | Versatile | 75%/90% | +1 Range |
+| **Wand** | Magic (1H) | 70% | -1 Cooldown (Magic) |
+| **Tome** | Magic (1H) | 65% | +30% Buff Duration |
+| **Dagger** | Melee (1H) | 60% | +15% Crit Chance |
+| **Shield** | Defense | **60%** | +30% Block Chance |
+| **Fist** | Melee (1H) | 50% | +1 Hit Count |
 
 ---
 
-## 5. Variant Modifiers
+## 5. Skill Amp Tiers (Stage 0)
+
+### Physical Skills (50-100%)
+| Tier | Amp % | AP | CD | Use Case |
+|------|-------|----|----|----------|
+| **Weak/Fast** | 50-60% | 2-3 | 1 | Multi-hit, speed, utility |
+| **Normal** | 65-80% | 4-5 | 1-2 | Standard bread-and-butter attacks |
+| **Heavy** | 85-95% | 5-6 | 2-3 | Hard hitting, setup required |
+| **Finisher** | 100% | 6+ | 3+ | Ultimate moves |
+
+### Magic Skills (100-150%)
+| Tier | Amp % | AP | CD | Use Case |
+|------|-------|----|----|----------|
+| **Basic** | 100-110% | 3-4 | 1 | Basic spells, cantrips |
+| **Strong** | 115-130% | 4-5 | 2 | Main damage spells |
+| **Power** | 135-150% | 6+ | 3+ | Big nukes, AoE bursts |
+
+---
+
+## 6. Stage Scaling
+
+Skills grow stronger as they evolve. Scaling is **additive** to the Base Amp.
+
+| Stage | Amp Bonus | AP Cost | Cooldown |
+|-------|-----------|---------|----------|
+| **0** | +0% | +0 | +0 |
+| **1** | +5% | +0 | +0 |
+| **2** | +10% | +1 | +0 |
+| **3** | +15% | +1 | +1 |
+| **4** | +20% | +2 | +1 |
+| **5** | +25% | +2 | +1 |
+
+*Example:*
+> **Slash (Stage 0):** 60% Amp
+>
+> **Slash III (Stage 3):** 60% Base + 15% Stage Bonus = **75% Amp**
+
+---
 
 When generating child skills, apply these modifiers:
 
@@ -296,24 +351,24 @@ As skills evolve, their stats scale:
 
 ### Slash (Stage 0, Starter)
 - **Type:** Attack (Physical)
-- **Amp:** 100%
-- **AP:** 4
+- **Amp:** 60%
+- **AP:** 3
 - **CD:** 1 turn
 - **Target:** Single
 - **Description:** A basic horizontal cut.
 
 ### Power Slash (Stage 1, Upgrade)
 - **Type:** Attack (Physical)
-- **Amp:** 115%
-- **AP:** 4
+- **Amp:** 65% (60% Base + 5% Stage)
+- **AP:** 3
 - **CD:** 1 turn
 - **Target:** Single
 - **Description:** A stronger horizontal cut with more force.
 
 ### Bleeding Slash (Stage 1, Debuff Variant)
 - **Type:** Attack (Physical)
-- **Amp:** 90%
-- **AP:** 5
+- **Amp:** 55% (60% Base + 5% Stage - 10% Variant)
+- **AP:** 4
 - **CD:** 1 turn
 - **Target:** Single
 - **Debuff:** Bleed (5% HP/turn, 2 turns)
@@ -321,8 +376,8 @@ As skills evolve, their stats scale:
 
 ### Sweeping Slash (Stage 1, AoE Variant)
 - **Type:** Attack (Physical)
-- **Amp:** 85%
-- **AP:** 6
+- **Amp:** 50% (60% Base + 5% Stage - 15% Variant)
+- **AP:** 5
 - **CD:** 2 turns
 - **Target:** AoE Cone (3)
 - **Description:** A wide arc that hits multiple enemies.
@@ -360,7 +415,6 @@ As skills evolve, their stats scale:
 5. Calculate damage:
    - Get weapon base damage
    - Multiply by skill amp
-   - Add stat scaling
    - Check for crit (physical only)
    - Apply weapon passive bonuses
    - Apply 2H AoE override if applicable

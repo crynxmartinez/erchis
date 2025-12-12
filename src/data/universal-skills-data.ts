@@ -16,6 +16,9 @@ export interface StarterSkill {
   hasUtilityMode?: boolean
   utilityEffect?: string // fire_enchant, ice_enchant, etc.
   utilityDuration?: number
+  // Counter logic
+  isCounter?: boolean
+  triggerCondition?: string // after_dodge, after_parry, on_hit_taken
 }
 
 export interface SkillTypeCategory {
@@ -32,13 +35,14 @@ export const SKILL_TYPE_CATEGORIES: SkillTypeCategory[] = [
   // ============================================
   // MELEE ATTACKS (15) - melee_only
   // Physical: 50-100% amp, can crit
+  // Includes Shield skills (Bash, etc.)
   // ============================================
   {
     id: 'melee_attack',
     name: 'Melee Attacks',
     icon: '⚔️',
     color: 'bg-red-900/50 border-red-500 text-red-300',
-    description: 'Physical close-range attacks requiring melee weapons',
+    description: 'Physical close-range attacks requiring melee weapons (or Shield)',
     weaponRequirement: 'melee_only',
     skills: [
       { name: 'Slash', subtype: 'Basic', description: 'A basic horizontal cut.', damageType: 'physical', weaponRequirement: 'melee_only', ampPercent: 60, apCost: 3, cooldown: 1, range: 1 },
@@ -132,9 +136,9 @@ export const SKILL_TYPE_CATEGORIES: SkillTypeCategory[] = [
       { name: 'Parry', subtype: 'Deflect', description: 'Deflect an incoming attack.', damageType: 'none', weaponRequirement: 'any', ampPercent: 0, apCost: 2, cooldown: 1, range: 0 },
       { name: 'Block', subtype: 'Block', description: 'Block with weapon or shield.', damageType: 'none', weaponRequirement: 'any', ampPercent: 0, apCost: 2, cooldown: 1, range: 0 },
       { name: 'Brace', subtype: 'Stance', description: 'Brace for heavy impact.', damageType: 'none', weaponRequirement: 'any', ampPercent: 0, apCost: 2, cooldown: 2, range: 0 },
-      { name: 'Deflect', subtype: 'Deflect', description: 'Redirect incoming attack.', damageType: 'none', weaponRequirement: 'any', ampPercent: 0, apCost: 2, cooldown: 1, range: 0 },
+      { name: 'Deflect', subtype: 'Deflect', description: 'Redirect incoming attack back at enemy.', damageType: 'physical', weaponRequirement: 'any', ampPercent: 50, apCost: 2, cooldown: 1, range: 1, isCounter: true, triggerCondition: 'on_hit_taken' },
       { name: 'Shield Wall', subtype: 'Block', description: 'Maximum defensive stance.', damageType: 'none', weaponRequirement: 'any', ampPercent: 0, apCost: 3, cooldown: 2, range: 0 },
-      { name: 'Counter Stance', subtype: 'Counter', description: 'Prepare to counter next attack.', damageType: 'none', weaponRequirement: 'any', ampPercent: 0, apCost: 3, cooldown: 2, range: 0 },
+      { name: 'Counter Stance', subtype: 'Counter', description: 'Prepare to counter next attack.', damageType: 'physical', weaponRequirement: 'any', ampPercent: 60, apCost: 3, cooldown: 2, range: 1, isCounter: true, triggerCondition: 'on_hit_taken' },
       { name: 'Iron Skin', subtype: 'Buff', description: 'Harden body to resist damage.', damageType: 'none', weaponRequirement: 'any', ampPercent: 0, apCost: 3, cooldown: 3, range: 0 },
       { name: 'Evasive Stance', subtype: 'Stance', description: 'Increase evasion chance.', damageType: 'none', weaponRequirement: 'any', ampPercent: 0, apCost: 2, cooldown: 2, range: 0 },
       { name: 'Cover', subtype: 'Protect', description: 'Take cover to reduce damage.', damageType: 'none', weaponRequirement: 'any', ampPercent: 0, apCost: 2, cooldown: 1, range: 0 },

@@ -75,11 +75,17 @@
 | 14 | Staff | Magic | INT | 2H | 90% | +20% AoE Size | - |
 | 15 | Wand | Magic | INT | 1H | 70% | -1 CD (magic) | - |
 | 16 | Tome | Magic | INT | 1H | 65% | +30% Buff Duration | - |
-| 17 | Shield | Defense | VIT | 1H | 40% | +30% Block Chance | - |
+| 17 | Shield | Defense | VIT | 1H | 60% | +30% Block Chance | - |
+
+**Note:** The "Stat" column indicates the **Requirement** to equip/use effectively. Stats do NOT scale damage directly.
 
 ### 3.2 Dual-Wield Bonus
-- When dual-wielding, **stack passives from both weapons**
-- Example: Sword + Dagger = +10% Parry + 15% Crit Chance
+- **Passives Stack:** When dual-wielding, you gain the passive bonuses of **both** weapons.
+- **Damage Source:** Skills generally use the **Main Hand** weapon's Base Damage. Off-hand provides stats/utility only (Stat Stick).
+- **Example:** Sword (Main) + Dagger (Off).
+  - You get Sword's Base Damage (80%).
+  - You get Dagger's Passive (+15% Crit).
+  - You get Dagger's Stats (DEX).
 
 ### 3.3 2H AoE Override
 - 2H melee weapons force single-target skills to become AoE

@@ -106,21 +106,23 @@ Damage = WeaponBase × SkillAmp × CritMultiplier
 ```
 
 ### Physical vs Magic:
-| Type | Can Crit? | Amp Range (Stage 0) |
-|------|-----------|---------------------|
-| Physical | Yes | 50-100% |
-| Magic | No | 100-150% |
-| None | No | 0% |
+| Type | Can Crit? | Amp Range (Stage 0) | Max Amp (Stage 5) |
+|------|-----------|---------------------|-------------------|
+| Physical | Yes | 50-100% | ~125% |
+| Magic | No | 100-150% | **200%** |
+| None | No | 0% | 0% |
 
 **Note:** Stats are for requirements only, NOT damage calculation.
 
-### Skill Amp Tiers:
+### Skill Amp Tiers (Stage 0):
 | Tier | Physical Amp | Magic Amp | Use Case |
 |------|--------------|-----------|----------|
-| Weak | 50-60% | 100-110% | Fast/utility, multi-hit |
-| Normal | 65-75% | 115-125% | Standard attacks |
-| Strong | 80-90% | 130-140% | Heavy/slow skills |
-| Power | 95-100% | 145-150% | Finishers, high cost |
+| **Weak** | 50-60% | 100-110% | Fast/utility, multi-hit |
+| **Normal** | 65-80% | 115-130% | Standard attacks |
+| **Strong** | 85-95% | 135-145% | Heavy/slow skills |
+| **Power** | 100% | 150% | Finishers, high cost |
+
+**Note:** Stats (STR/DEX/INT) are for **Weapon/Skill Requirements ONLY**. They do NOT scale damage directly.
 
 ---
 

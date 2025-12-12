@@ -1,5 +1,4 @@
-// Weapon Categories and their Starter Skills
-// Based on docs/weapon-skills-starter.md
+import { WEAPON_STATS } from './weapon-config'
 
 export interface StarterSkill {
   name: string
@@ -14,15 +13,19 @@ export interface WeaponCategory {
   type: 'Melee' | 'Ranged' | 'Magic' | 'Defense'
   primaryStat: string
   starterSkills: StarterSkill[]
+  baseDamage?: string // Display string like '140%'
+  passiveDescription?: string
 }
 
 export const WEAPON_CATEGORIES: WeaponCategory[] = [
   {
     id: 'sword',
-    name: 'Sword',
+    name: WEAPON_STATS.sword.name,
     icon: '⚔️',
     type: 'Melee',
-    primaryStat: 'STR',
+    primaryStat: WEAPON_STATS.sword.stat,
+    baseDamage: `${WEAPON_STATS.sword.baseDamage * 100}%`,
+    passiveDescription: WEAPON_STATS.sword.passiveDescription,
     starterSkills: [
       { name: 'Quick Slash', type: 'Attack', description: 'Fast, light attack with high accuracy.' },
       { name: 'Heavy Slash', type: 'Attack / Power', description: 'Slow but powerful overhead swing.' },
@@ -38,10 +41,12 @@ export const WEAPON_CATEGORIES: WeaponCategory[] = [
   },
   {
     id: 'greatsword',
-    name: 'Greatsword',
+    name: WEAPON_STATS.greatsword.name,
     icon: '🗡️',
     type: 'Melee',
-    primaryStat: 'STR',
+    primaryStat: WEAPON_STATS.greatsword.stat,
+    baseDamage: `${WEAPON_STATS.greatsword.baseDamage * 100}%`,
+    passiveDescription: WEAPON_STATS.greatsword.passiveDescription,
     starterSkills: [
       { name: 'Cleave', type: 'Attack / AoE', description: 'Massive horizontal swing.' },
       { name: 'Crushing Blow', type: 'Attack / Power', description: 'Overhead slam with immense force.' },
@@ -57,10 +62,12 @@ export const WEAPON_CATEGORIES: WeaponCategory[] = [
   },
   {
     id: 'katana',
-    name: 'Katana',
+    name: WEAPON_STATS.katana.name,
     icon: '🔪',
     type: 'Melee',
-    primaryStat: 'STR/DEX',
+    primaryStat: WEAPON_STATS.katana.stat,
+    baseDamage: `${WEAPON_STATS.katana.baseDamage * 100}% / 95%`, // Hardcoded dual value for versatile display
+    passiveDescription: WEAPON_STATS.katana.passiveDescription,
     starterSkills: [
       { name: 'Iaijutsu Draw', type: 'Attack / Burst', description: 'Lightning-fast draw attack.' },
       { name: 'Quick Cut', type: 'Attack', description: 'Rapid slashing attack.' },
@@ -76,10 +83,12 @@ export const WEAPON_CATEGORIES: WeaponCategory[] = [
   },
   {
     id: 'dagger',
-    name: 'Dagger',
+    name: WEAPON_STATS.dagger.name,
     icon: '🗡️',
     type: 'Melee',
-    primaryStat: 'DEX',
+    primaryStat: WEAPON_STATS.dagger.stat,
+    baseDamage: `${WEAPON_STATS.dagger.baseDamage * 100}%`,
+    passiveDescription: WEAPON_STATS.dagger.passiveDescription,
     starterSkills: [
       { name: 'Quick Stab', type: 'Attack', description: 'Fast piercing attack.' },
       { name: 'Flurry', type: 'Attack / Combo', description: 'Rapid series of stabs.' },
@@ -95,10 +104,12 @@ export const WEAPON_CATEGORIES: WeaponCategory[] = [
   },
   {
     id: 'axe',
-    name: 'Axe',
+    name: WEAPON_STATS.axe.name,
     icon: '🪓',
     type: 'Melee',
-    primaryStat: 'STR',
+    primaryStat: WEAPON_STATS.axe.stat,
+    baseDamage: `${WEAPON_STATS.axe.baseDamage * 100}%`,
+    passiveDescription: WEAPON_STATS.axe.passiveDescription,
     starterSkills: [
       { name: 'Chop', type: 'Attack', description: 'Basic chopping attack.' },
       { name: 'Split Shield', type: 'Attack / Anti-Guard', description: 'Break through shields.' },
@@ -114,10 +125,12 @@ export const WEAPON_CATEGORIES: WeaponCategory[] = [
   },
   {
     id: 'greataxe',
-    name: 'Greataxe',
+    name: WEAPON_STATS.greataxe.name,
     icon: '🪓',
     type: 'Melee',
-    primaryStat: 'STR',
+    primaryStat: WEAPON_STATS.greataxe.stat,
+    baseDamage: `${WEAPON_STATS.greataxe.baseDamage * 100}%`,
+    passiveDescription: WEAPON_STATS.greataxe.passiveDescription,
     starterSkills: [
       { name: 'Massive Cleave', type: 'Attack / AoE', description: 'Enormous sweeping attack.' },
       { name: 'Skull Splitter', type: 'Attack / Power', description: 'Devastating overhead strike.' },
@@ -133,10 +146,12 @@ export const WEAPON_CATEGORIES: WeaponCategory[] = [
   },
   {
     id: 'mace',
-    name: 'Mace',
+    name: WEAPON_STATS.mace.name,
     icon: '🔨',
     type: 'Melee',
-    primaryStat: 'STR',
+    primaryStat: WEAPON_STATS.mace.stat,
+    baseDamage: `${WEAPON_STATS.mace.baseDamage * 100}%`,
+    passiveDescription: WEAPON_STATS.mace.passiveDescription,
     starterSkills: [
       { name: 'Bash', type: 'Attack', description: 'Basic bashing attack.' },
       { name: 'Skull Bash', type: 'Attack / Stun', description: 'Strike to head, chance to stun.' },
@@ -152,10 +167,12 @@ export const WEAPON_CATEGORIES: WeaponCategory[] = [
   },
   {
     id: 'hammer',
-    name: 'Hammer',
+    name: WEAPON_STATS.greathammer.name, // Mapping hammer to greathammer config for now or should create separate config? Assuming "Hammer" in list meant 2H Greathammer based on skills
     icon: '🔨',
     type: 'Melee',
-    primaryStat: 'STR',
+    primaryStat: WEAPON_STATS.greathammer.stat,
+    baseDamage: `${WEAPON_STATS.greathammer.baseDamage * 100}%`,
+    passiveDescription: WEAPON_STATS.greathammer.passiveDescription,
     starterSkills: [
       { name: 'Heavy Slam', type: 'Attack / Power', description: 'Massive downward slam.' },
       { name: 'Shockwave Slam', type: 'Attack / AoE', description: 'Ground pound creating shockwave.' },
@@ -171,10 +188,12 @@ export const WEAPON_CATEGORIES: WeaponCategory[] = [
   },
   {
     id: 'spear',
-    name: 'Spear',
+    name: WEAPON_STATS.spear.name,
     icon: '🔱',
     type: 'Melee',
-    primaryStat: 'STR/DEX',
+    primaryStat: WEAPON_STATS.spear.stat,
+    baseDamage: `${WEAPON_STATS.spear.baseDamage * 100}% / 90%`,
+    passiveDescription: WEAPON_STATS.spear.passiveDescription,
     starterSkills: [
       { name: 'Piercing Thrust', type: 'Attack', description: 'Long-range piercing attack.' },
       { name: 'Long Lunge', type: 'Attack / Movement', description: 'Extended reach thrust.' },
@@ -190,10 +209,12 @@ export const WEAPON_CATEGORIES: WeaponCategory[] = [
   },
   {
     id: 'fist',
-    name: 'Fist',
+    name: WEAPON_STATS.fist.name,
     icon: '👊',
     type: 'Melee',
-    primaryStat: 'STR',
+    primaryStat: WEAPON_STATS.fist.stat,
+    baseDamage: `${WEAPON_STATS.fist.baseDamage * 100}%`,
+    passiveDescription: WEAPON_STATS.fist.passiveDescription,
     starterSkills: [
       { name: 'Jab', type: 'Attack', description: 'Quick straight punch.' },
       { name: 'Cross', type: 'Attack / Power', description: 'Powerful cross punch.' },
@@ -209,10 +230,12 @@ export const WEAPON_CATEGORIES: WeaponCategory[] = [
   },
   {
     id: 'bow',
-    name: 'Bow',
+    name: WEAPON_STATS.bow.name,
     icon: '🏹',
     type: 'Ranged',
-    primaryStat: 'DEX',
+    primaryStat: WEAPON_STATS.bow.stat,
+    baseDamage: `${WEAPON_STATS.bow.baseDamage * 100}%`,
+    passiveDescription: WEAPON_STATS.bow.passiveDescription,
     starterSkills: [
       { name: 'Standard Shot', type: 'Attack', description: 'Basic arrow shot.' },
       { name: 'Aimed Shot', type: 'Attack / Precision', description: 'Careful aimed shot, high damage.' },
@@ -228,10 +251,12 @@ export const WEAPON_CATEGORIES: WeaponCategory[] = [
   },
   {
     id: 'crossbow',
-    name: 'Crossbow',
+    name: WEAPON_STATS.crossbow.name,
     icon: '🎯',
     type: 'Ranged',
-    primaryStat: 'DEX',
+    primaryStat: WEAPON_STATS.crossbow.stat,
+    baseDamage: `${WEAPON_STATS.crossbow.baseDamage * 100}%`,
+    passiveDescription: WEAPON_STATS.crossbow.passiveDescription,
     starterSkills: [
       { name: 'Bolt Shot', type: 'Attack', description: 'Fire crossbow bolt.' },
       { name: 'Crank & Fire', type: 'Attack / Power', description: 'Fully cranked powerful shot.' },
@@ -247,10 +272,12 @@ export const WEAPON_CATEGORIES: WeaponCategory[] = [
   },
   {
     id: 'gun',
-    name: 'Gun',
+    name: WEAPON_STATS.gun.name,
     icon: '🔫',
     type: 'Ranged',
-    primaryStat: 'DEX',
+    primaryStat: WEAPON_STATS.gun.stat,
+    baseDamage: `${WEAPON_STATS.gun.baseDamage * 100}%`,
+    passiveDescription: WEAPON_STATS.gun.passiveDescription,
     starterSkills: [
       { name: 'Single Shot', type: 'Attack', description: 'Fire single bullet.' },
       { name: 'Aimed Fire', type: 'Attack / Precision', description: 'Careful aimed shot.' },
@@ -266,10 +293,12 @@ export const WEAPON_CATEGORIES: WeaponCategory[] = [
   },
   {
     id: 'staff',
-    name: 'Staff',
+    name: WEAPON_STATS.staff.name,
     icon: '🪄',
     type: 'Magic',
-    primaryStat: 'INT',
+    primaryStat: WEAPON_STATS.staff.stat,
+    baseDamage: `${WEAPON_STATS.staff.baseDamage * 100}%`,
+    passiveDescription: WEAPON_STATS.staff.passiveDescription,
     starterSkills: [
       { name: 'Staff Strike', type: 'Attack', description: 'Basic staff swing.' },
       { name: 'Sweep Staff', type: 'Attack / AoE', description: 'Sweeping staff attack.' },
@@ -285,10 +314,12 @@ export const WEAPON_CATEGORIES: WeaponCategory[] = [
   },
   {
     id: 'wand',
-    name: 'Wand',
+    name: WEAPON_STATS.wand.name,
     icon: '✨',
     type: 'Magic',
-    primaryStat: 'INT',
+    primaryStat: WEAPON_STATS.wand.stat,
+    baseDamage: `${WEAPON_STATS.wand.baseDamage * 100}%`,
+    passiveDescription: WEAPON_STATS.wand.passiveDescription,
     starterSkills: [
       { name: 'Wand Tap', type: 'Attack', description: 'Basic magic tap.' },
       { name: 'Channel Gesture', type: 'Buff', description: 'Prepare for spell.' },
@@ -304,10 +335,12 @@ export const WEAPON_CATEGORIES: WeaponCategory[] = [
   },
   {
     id: 'tome',
-    name: 'Tome',
+    name: WEAPON_STATS.tome.name,
     icon: '📖',
     type: 'Magic',
-    primaryStat: 'INT',
+    primaryStat: WEAPON_STATS.tome.stat,
+    baseDamage: `${WEAPON_STATS.tome.baseDamage * 100}%`,
+    passiveDescription: WEAPON_STATS.tome.passiveDescription,
     starterSkills: [
       { name: 'Book Bash', type: 'Attack', description: 'Hit with heavy tome.' },
       { name: 'Page Guard', type: 'Defensive', description: 'Block with book.' },
@@ -323,10 +356,12 @@ export const WEAPON_CATEGORIES: WeaponCategory[] = [
   },
   {
     id: 'shield',
-    name: 'Shield',
+    name: WEAPON_STATS.shield.name,
     icon: '🛡️',
     type: 'Defense',
-    primaryStat: 'VIT',
+    primaryStat: WEAPON_STATS.shield.stat,
+    baseDamage: `${WEAPON_STATS.shield.baseDamage * 100}%`,
+    passiveDescription: WEAPON_STATS.shield.passiveDescription,
     starterSkills: [
       { name: 'Shield Block', type: 'Defensive', description: 'Block incoming attack.' },
       { name: 'Shield Bash', type: 'Attack / Stun', description: 'Bash with shield to stun.' },
