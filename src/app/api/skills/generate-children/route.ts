@@ -152,20 +152,70 @@ const CONTROL_EFFECTS = ['Stuns', 'Slows', 'Knocks Back']
 const DEFENSIVE_BUFFS = ['Iron Skin', 'Evasion', 'Parry Chance']
 
 // ============================================
-// NAME GENERATION
+// NAME GENERATION (Unique names, no parent reference)
 // ============================================
 
-const VARIANT_PREFIXES: Record<VariantType, string[]> = {
-  power:      ['Great', 'Heavy', 'Massive', 'Destructive', 'Ultimate', 'Titan', 'Crushing', 'Fatal', 'Mighty', 'Giga'],
-  multihit:   ['Double', 'Triple', 'Flurry', 'Chain', 'Infinite', 'Echoing', 'Rapid', 'Twin', 'Multi', 'Omni'],
-  aoe:        ['Sweeping', 'Erupting', 'Wide', 'Blast', 'Storm', 'Nova', 'Zone', 'Wave', 'Radial', 'Universal'],
-  rapid:      ['Quick', 'Swift', 'Flash', 'Instant', 'Sonic', 'Light', 'Rush', 'Blink', 'Turbo', 'Mach'],
-  efficiency: ['Efficient', 'Flowing', 'Endless', 'Masterful', 'Light', 'Graceful', 'Focused', 'Balanced', 'Fluid', 'Zen'],
-  dot:        ['Venomous', 'Burning', 'Corrosive', 'Bleeding', 'Cursed', 'Toxic', 'Searing', 'Rotting', 'Caustic', 'Vile'],
-  control:    ['Stunning', 'Slowing', 'Binding', 'Harying', 'Impact', 'Concussive', 'Freezing', 'Arresting', 'Lockdown', 'Static'],
-  sustain:    ['Vampiric', 'Draining', 'Siphoning', 'Parasitic', 'Blood', 'Hungry', 'Thirsty', 'Reaping', 'Leeching', 'Vital'],
-  defense:    ['Guarding', 'Shielded', 'Iron', 'Deflecting', 'Counter', 'Warded', 'Armored', 'Bastion', 'Fortified', 'Wall'],
-  execute:    ['Fatal', 'Lethal', 'Executing', 'Final', 'Killing', 'Mortal', 'Decapitating', 'Ending', 'Terminating', 'Last']
+// Skill name parts by variant type - combines [Prefix] + [Core] + [Suffix (optional)]
+const VARIANT_NAME_PARTS: Record<VariantType, { prefixes: string[], cores: string[], suffixes: string[] }> = {
+  power: {
+    prefixes: ['Titan', 'Colossal', 'Mega', 'Ultra', 'Supreme', 'Grand', 'Apex', 'Prime', 'Omega', 'Divine'],
+    cores: ['Crusher', 'Breaker', 'Devastator', 'Annihilator', 'Obliterator', 'Destroyer', 'Wrecker', 'Smasher', 'Pulverizer', 'Demolisher'],
+    suffixes: ['Strike', 'Blow', 'Impact', 'Force', 'Might', 'Wrath', 'Fury', 'Ruin', 'Havoc', 'Doom']
+  },
+  multihit: {
+    prefixes: ['Echo', 'Phantom', 'Mirror', 'Shadow', 'Spectral', 'Twin', 'Triple', 'Quad', 'Infinite', 'Eternal'],
+    cores: ['Barrage', 'Flurry', 'Cascade', 'Torrent', 'Storm', 'Blitz', 'Rush', 'Volley', 'Salvo', 'Onslaught'],
+    suffixes: ['Dance', 'Combo', 'Chain', 'Sequence', 'Series', 'Burst', 'Wave', 'Assault', 'Rampage', 'Frenzy']
+  },
+  aoe: {
+    prefixes: ['Nova', 'Radiant', 'Expanding', 'Erupting', 'Surging', 'Pulsing', 'Rippling', 'Spreading', 'Bursting', 'Exploding'],
+    cores: ['Shockwave', 'Maelstrom', 'Tempest', 'Cataclysm', 'Upheaval', 'Eruption', 'Detonation', 'Blast', 'Surge', 'Quake'],
+    suffixes: ['Field', 'Zone', 'Domain', 'Radius', 'Sphere', 'Circle', 'Ring', 'Area', 'Expanse', 'Reach']
+  },
+  rapid: {
+    prefixes: ['Flash', 'Sonic', 'Hyper', 'Turbo', 'Mach', 'Instant', 'Swift', 'Blur', 'Warp', 'Lightning'],
+    cores: ['Dash', 'Sprint', 'Bolt', 'Streak', 'Zip', 'Zephyr', 'Gust', 'Breeze', 'Wind', 'Current'],
+    suffixes: ['Strike', 'Cut', 'Slash', 'Jab', 'Thrust', 'Pierce', 'Edge', 'Blade', 'Fang', 'Claw']
+  },
+  efficiency: {
+    prefixes: ['Zen', 'Flowing', 'Graceful', 'Serene', 'Tranquil', 'Balanced', 'Harmonic', 'Pure', 'Crystal', 'Clear'],
+    cores: ['Stream', 'Flow', 'Current', 'Tide', 'Wave', 'Ripple', 'Glide', 'Drift', 'Float', 'Breeze'],
+    suffixes: ['Art', 'Form', 'Style', 'Way', 'Path', 'Method', 'Technique', 'Motion', 'Grace', 'Finesse']
+  },
+  dot: {
+    prefixes: ['Venom', 'Toxic', 'Plague', 'Blight', 'Decay', 'Rot', 'Wither', 'Corrupt', 'Tainted', 'Festering'],
+    cores: ['Infection', 'Contagion', 'Pestilence', 'Miasma', 'Toxin', 'Poison', 'Venom', 'Bane', 'Curse', 'Hex'],
+    suffixes: ['Touch', 'Mark', 'Brand', 'Seal', 'Sign', 'Wound', 'Scar', 'Taint', 'Stain', 'Blight']
+  },
+  control: {
+    prefixes: ['Binding', 'Locking', 'Sealing', 'Freezing', 'Stunning', 'Paralyzing', 'Petrifying', 'Anchoring', 'Rooting', 'Gripping'],
+    cores: ['Shackle', 'Chain', 'Lock', 'Bind', 'Seal', 'Trap', 'Snare', 'Net', 'Web', 'Cage'],
+    suffixes: ['Hold', 'Grip', 'Grasp', 'Clutch', 'Vice', 'Prison', 'Restraint', 'Arrest', 'Halt', 'Stop']
+  },
+  sustain: {
+    prefixes: ['Vampiric', 'Draining', 'Siphoning', 'Leeching', 'Absorbing', 'Hungering', 'Thirsting', 'Devouring', 'Consuming', 'Feeding'],
+    cores: ['Drain', 'Siphon', 'Leech', 'Absorb', 'Devour', 'Consume', 'Feed', 'Harvest', 'Reap', 'Claim'],
+    suffixes: ['Fang', 'Bite', 'Kiss', 'Touch', 'Embrace', 'Grasp', 'Pull', 'Draw', 'Take', 'Steal']
+  },
+  defense: {
+    prefixes: ['Iron', 'Steel', 'Adamant', 'Diamond', 'Fortress', 'Bastion', 'Bulwark', 'Aegis', 'Guardian', 'Sentinel'],
+    cores: ['Shield', 'Wall', 'Barrier', 'Guard', 'Ward', 'Armor', 'Plate', 'Shell', 'Carapace', 'Aegis'],
+    suffixes: ['Stance', 'Form', 'Posture', 'Position', 'Defense', 'Block', 'Parry', 'Counter', 'Riposte', 'Return']
+  },
+  execute: {
+    prefixes: ['Final', 'Last', 'Ending', 'Terminal', 'Ultimate', 'Supreme', 'Absolute', 'Perfect', 'True', 'Divine'],
+    cores: ['Execution', 'Judgment', 'Verdict', 'Sentence', 'Doom', 'Fate', 'End', 'Finale', 'Climax', 'Conclusion'],
+    suffixes: ['Strike', 'Blow', 'Cut', 'Slash', 'Thrust', 'Edge', 'Point', 'Blade', 'Fang', 'Claw']
+  }
+}
+
+// Stage-based name modifiers (higher stages get more epic names)
+const STAGE_MODIFIERS: Record<number, string[]> = {
+  1: ['', 'Lesser', 'Minor', 'Basic', 'Simple'],
+  2: ['', 'Greater', 'Enhanced', 'Improved', 'Advanced'],
+  3: ['', 'Superior', 'Mighty', 'Potent', 'Fierce'],
+  4: ['', 'Legendary', 'Mythic', 'Ancient', 'Primal'],
+  5: ['', 'Transcendent', 'Ascended', 'Godly', 'Eternal', 'Infinite']
 }
 
 // ============================================
@@ -211,22 +261,35 @@ function calculateCooldown(parentCd: number, stage: number, variantType: Variant
   return Math.max(1, parentCd + stageIncrease + modifier)
 }
 
-function generateName(parentName: string, variantType: VariantType): string {
-  const prefix = getRandomElement(VARIANT_PREFIXES[variantType])
+function generateName(variantType: VariantType, stage: number): string {
+  const nameParts = VARIANT_NAME_PARTS[variantType]
+  const stageModifiers = STAGE_MODIFIERS[stage] || STAGE_MODIFIERS[1]
   
-  // Simple heuristic: If parent name is "Fireball", child is "Great Fireball".
-  // If parent is "Great Fireball", we replace "Great" with "Massive" or append?
-  // Ideally, we keep the core name.
+  // Pick random parts
+  const prefix = getRandomElement(nameParts.prefixes)
+  const core = getRandomElement(nameParts.cores)
+  const stageModifier = getRandomElement(stageModifiers)
   
-  // Simplest approach: Always prefix. 
-  // "Slash" -> "Double Slash" -> "Infinite Double Slash" (gets long)
-  // Better: Try to identify core name.
+  // 50% chance to include a suffix for variety
+  const includeSuffix = Math.random() > 0.5
+  const suffix = includeSuffix ? getRandomElement(nameParts.suffixes) : ''
   
-  // For now, let's just append prefix to the START of the parent name, 
-  // but if the parent name already has 3+ words, maybe we replace the first word?
-  // Let's stick to prefixing for now, admin can edit.
+  // Build the name based on what we have
+  let name = ''
   
-  return `${prefix} ${parentName}`
+  if (stageModifier) {
+    // Format: "Legendary Titan Crusher" or "Mythic Echo Barrage Dance"
+    name = `${stageModifier} ${prefix} ${core}`
+  } else {
+    // Format: "Titan Crusher" or "Echo Barrage Dance"
+    name = `${prefix} ${core}`
+  }
+  
+  if (suffix) {
+    name += ` ${suffix}`
+  }
+  
+  return name
 }
 
 function generateEffect(
@@ -385,7 +448,7 @@ export async function POST(request: Request) {
       }
       
       // Name & Description
-      const name = generateName(parentName, variantType)
+      const name = generateName(variantType, newStage)
       const description = generateEffect(variantType, ampPercent, parentSkill.damageType, newStage, hitCount)
       
       // Inheritance
