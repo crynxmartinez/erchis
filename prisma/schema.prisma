@@ -176,7 +176,8 @@ model Weapon {
 model Skill {
   id          String   @id @default(cuid())
   name        String
-  description String   // Effect description
+  description String   // Effect description (what it does mechanically)
+  executionDescription String? // Narrative description of how the skill is performed (for game events)
 
   // Type
   skillType   String   // Attack, Defensive, Buff, Debuff, Movement, Utility, Support
