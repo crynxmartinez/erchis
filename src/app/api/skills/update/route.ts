@@ -29,6 +29,7 @@ export async function POST(request: Request) {
     if (data.buffDuration !== undefined) updateData.buffDuration = data.buffDuration
     if (data.debuffType !== undefined) updateData.debuffType = data.debuffType
     if (data.debuffDuration !== undefined) updateData.debuffDuration = data.debuffDuration
+    if (data.debuffChance !== undefined) updateData.debuffChance = data.debuffChance
     if (data.lifestealPercent !== undefined) updateData.lifestealPercent = data.lifestealPercent
     if (data.isCounter !== undefined) updateData.isCounter = data.isCounter
     if (data.triggerCondition !== undefined) updateData.triggerCondition = data.triggerCondition

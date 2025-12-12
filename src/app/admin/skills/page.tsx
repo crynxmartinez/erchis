@@ -813,12 +813,14 @@ export default function SkillDatabaseBuilder() {
                     {currentSkill.damageType}
                   </div>
                 </div>
-                <div className="bg-black/20 rounded p-3">
-                  <div className="text-xs text-gray-400 mb-1">Utility Mode</div>
-                  <div className={`font-bold ${currentSkill.hasUtilityMode ? 'text-cyan-400' : 'text-gray-500'}`}>
-                    {currentSkill.hasUtilityMode ? '🔮 Yes' : 'No'}
+                {(currentSkill.damageType === 'magic' || currentSkill.hasUtilityMode) && (
+                  <div className="bg-black/20 rounded p-3">
+                    <div className="text-xs text-gray-400 mb-1">Utility Mode</div>
+                    <div className={`font-bold ${currentSkill.hasUtilityMode ? 'text-cyan-400' : 'text-gray-500'}`}>
+                      {currentSkill.hasUtilityMode ? '🔮 Yes' : 'No'}
+                    </div>
                   </div>
-                </div>
+                )}
                 <div className="bg-black/20 rounded p-3">
                   <div className="text-xs text-gray-400 mb-1">Range</div>
                   <div className="font-bold text-orange-400">{currentSkill.range} tile{currentSkill.range !== 1 ? 's' : ''}</div>
@@ -865,6 +867,68 @@ export default function SkillDatabaseBuilder() {
                   </div>
                 )}
               </div>
+
+              {/* Buffs & Debuffs Configuration (Edit Mode) */}
+              {editMode && (
+                <div className="mb-4 bg-black/20 rounded p-3 border border-white/10">
+                  <div className="text-xs text-gray-400 mb-2 font-bold">Status Effects Configuration</div>
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Buff Config */}
+                    <div className="space-y-2">
+                      <div className="text-xs text-yellow-400">Buff Settings</div>
+                      <input
+                        type="text"
+                        placeholder="Buff Type (e.g. haste)"
+                        value={editedSkill?.buffType || ''}
+                        onChange={(e) => setEditedSkill(prev => prev ? {...prev, buffType: e.target.value || null} : null)}
+                        className="w-full bg-black/40 rounded px-2 py-1 border border-white/10 text-xs"
+                      />
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500">Duration:</span>
+                        <input
+                          type="number"
+                          placeholder="Turns"
+                          value={editedSkill?.buffDuration || ''}
+                          onChange={(e) => setEditedSkill(prev => prev ? {...prev, buffDuration: parseInt(e.target.value) || null} : null)}
+                          className="w-20 bg-black/40 rounded px-2 py-1 border border-white/10 text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Debuff Config */}
+                    <div className="space-y-2">
+                      <div className="text-xs text-purple-400">Debuff Settings</div>
+                      <input
+                        type="text"
+                        placeholder="Debuff Type (e.g. bleed)"
+                        value={editedSkill?.debuffType || ''}
+                        onChange={(e) => setEditedSkill(prev => prev ? {...prev, debuffType: e.target.value || null} : null)}
+                        className="w-full bg-black/40 rounded px-2 py-1 border border-white/10 text-xs"
+                      />
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500">Duration:</span>
+                        <input
+                          type="number"
+                          placeholder="Turns"
+                          value={editedSkill?.debuffDuration || ''}
+                          onChange={(e) => setEditedSkill(prev => prev ? {...prev, debuffDuration: parseInt(e.target.value) || null} : null)}
+                          className="w-20 bg-black/40 rounded px-2 py-1 border border-white/10 text-xs"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500">Chance %:</span>
+                        <input
+                          type="number"
+                          placeholder="100"
+                          value={editedSkill?.debuffChance || ''}
+                          onChange={(e) => setEditedSkill(prev => prev ? {...prev, debuffChance: parseInt(e.target.value) || null} : null)}
+                          className="w-20 bg-black/40 rounded px-2 py-1 border border-white/10 text-xs"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Passive */}
               {(currentSkill.passive || editMode) && (

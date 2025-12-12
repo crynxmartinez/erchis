@@ -28,6 +28,7 @@ export async function POST(request: Request) {
         buffDuration: data.buffDuration || null,
         debuffType: data.debuffType || null,
         debuffDuration: data.debuffDuration || null,
+        debuffChance: data.debuffChance || null,
         lifestealPercent: data.lifestealPercent || null,
         isCounter: data.isCounter || false,
         triggerCondition: data.triggerCondition || null,

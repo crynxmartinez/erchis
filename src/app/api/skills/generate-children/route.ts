@@ -633,6 +633,12 @@ export async function POST(request: Request) {
       let hitCount = 1
       let targetType = 'single'
       let isCounter = false
+      let buffType: string | null = null
+      let buffDuration: number | null = null
+      let debuffType: string | null = null
+      let debuffDuration: number | null = null
+      let debuffChance: number | null = null
+      let lifestealPercent: number | null = null
       
       if (variantType === 'multihit') {
         // Stage 1-2: 2 hits, Stage 3-4: 3 hits, Stage 5: 4 hits
@@ -645,6 +651,37 @@ export async function POST(request: Request) {
       
       if (variantType === 'defense') {
         isCounter = true // flag as counter for potential mechanics
+        // Add defensive buff
+        const possibleBuffs = ['Iron Skin', 'Evasion', 'Parry Chance']
+        const selectedBuff = getRandomElement(possibleBuffs)
+        
+        // Map friendly name to code key
+        if (selectedBuff === 'Iron Skin') buffType = 'defense_up'
+        if (selectedBuff === 'Evasion') buffType = 'evasion'
+        if (selectedBuff === 'Parry Chance') buffType = 'parry_stance'
+        
+        buffDuration = 2
+      }
+
+      if (variantType === 'dot') {
+        debuffDuration = 2 + Math.floor(newStage / 2)
+        debuffChance = 100
+        if (parentSkill.damageType === 'magic') debuffType = 'burn'
+        else if (parentSkill.damageType === 'physical') debuffType = 'bleed'
+        else debuffType = 'weaken'
+      }
+
+      if (variantType === 'control') {
+        const effects = ['Stuns', 'Slows', 'Knocks Back']
+        const selected = getRandomElement(effects)
+        
+        if (selected === 'Stuns') { debuffType = 'stun'; debuffDuration = 1; debuffChance = 50 + (newStage * 10); }
+        if (selected === 'Slows') { debuffType = 'slow'; debuffDuration = 2; debuffChance = 100; }
+        if (selected === 'Knocks Back') { debuffType = 'knockback'; debuffDuration = 0; debuffChance = 100; }
+      }
+
+      if (variantType === 'sustain') {
+        lifestealPercent = 20 + (newStage * 5)
       }
       
       // Name & Description
@@ -680,6 +717,12 @@ export async function POST(request: Request) {
           starterSkillName,
           parentId,
           isSaved: false,
+          buffType,
+          buffDuration,
+          debuffType,
+          debuffDuration,
+          debuffChance,
+          lifestealPercent,
         }
       })
       
