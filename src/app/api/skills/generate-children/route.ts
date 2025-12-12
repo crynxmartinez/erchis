@@ -352,74 +352,74 @@ const MEDIUM_EXECUTIONS: Record<VariantType, string[]> = {
 // TIER 3 (Stage 5): Epic execution descriptions
 const EPIC_EXECUTIONS: Record<VariantType, string[]> = {
   power: [
-    'You transcend mortal limits, channeling the fury of colliding stars into a single apocalyptic strike that tears reality asunder. The very fabric of existence screams as your weapon descends with the force of a dying sun.',
-    'Summoning the strength of ancient titans, you unleash a blow so devastating that the world itself seems to shatter around the impact point. Nothing can withstand this absolute force.',
-    'You become an avatar of destruction, your strike carrying the weight of mountains. The impact generates a cataclysmic shockwave that obliterates matter and spirit alike.',
-    'With godlike power, you execute a strike that defies physics, hitting with infinite mass. The devastation left in your wake is absolute and total.',
-    'You channel the primordial energy of creation\'s end into one final, world-ending smash. The target is not merely hit, but unmade.'
+    'You transcend mortal limits, channeling the fury of colliding stars into a single apocalyptic strike. The very fabric of existence screams as your weapon descends with the force of a dying sun, obliterating everything in its path.',
+    'Summoning the strength of ancient titans, you unleash a blow so devastating that the world itself seems to shatter around the impact point. The ground liquefies, and the air turns to plasma from the sheer kinetic energy released.',
+    'You become an avatar of destruction, your strike carrying the weight of mountains. The impact generates a cataclysmic shockwave that obliterates matter and spirit alike, leaving nothing but a crater of absolute ruin.',
+    'With godlike power, you execute a strike that defies physics, hitting with infinite mass. The devastation left in your wake is absolute and total, a permanent scar on reality itself.',
+    'You channel the primordial energy of creation\'s end into one final, world-ending smash. The target is not merely hit, but unmade, erased from existence by the overwhelming force of your blow.'
   ],
   multihit: [
-    'You fracture time itself, existing in multiple moments simultaneously to strike your foe a thousand times in a single heartbeat. The air turns to plasma from the sheer friction of your onslaught.',
-    'Your blade becomes a river of infinite steel, flowing around defenses like water. You are everywhere at once, a localized storm of cutting edges that leaves nothing uncut.',
-    'You unleash a combo that transcends human capability, a perfect sequence of destruction that continues eternally until the target is reduced to dust.',
-    'Moving faster than causality, you deliver an infinite cascade of blows. To the observer, your enemy simply disintegrates under the weight of a million unseen strikes.',
-    'You perform the dance of the death god, a mesmerizing display of violence where every movement is a lethal cut. The sky darkens as your flurry blots out the sun.'
+    'You fracture time itself, existing in multiple moments simultaneously to strike your foe a thousand times in a single heartbeat. The air turns to plasma from the sheer friction of your onslaught, creating a localized storm of destruction.',
+    'Your blade becomes a river of infinite steel, flowing around defenses like water. You are everywhere at once, a localized storm of cutting edges that leaves nothing uncut, turning your opponent into dust.',
+    'You unleash a combo that transcends human capability, a perfect sequence of destruction that continues eternally until the target is reduced to atoms. Each strike lands with the force of a thunderbolt.',
+    'Moving faster than causality, you deliver an infinite cascade of blows. To the observer, your enemy simply disintegrates under the weight of a million unseen strikes, vanished in a mist of blood and steel.',
+    'You perform the dance of the death god, a mesmerizing display of violence where every movement is a lethal cut. The sky darkens as your flurry blots out the sun, leaving only the gleam of your weapon.'
   ],
   aoe: [
-    'You unleash a wave of force that ruptures the dimensional barrier, flooding the battlefield with chaotic energy. Everything within the horizon is consumed by the expanding sphere of annihilation.',
-    'Striking the ground, you trigger a tectonic upheaval that reshapes the geography of the battlefield. Magma erupts and the earth splits as your power encompasses the entire region.',
-    'You detonate your spiritual pressure in a supernova of power, vaporizing all opposition in a radius measured in miles. You stand alone in the center of a crater of glass.',
-    'Your attack creates a singularity, a black hole of force that drags all enemies into oblivion. The very light is bent by the gravity of your devastating area strike.',
-    'You summon a celestial storm, raining down destruction upon the entire battlefield. There is no escape, no shelter, only the purifying light of your total devastation.'
+    'You unleash a wave of force that ruptures the dimensional barrier, flooding the battlefield with chaotic energy. Everything within the horizon is consumed by the expanding sphere of annihilation, rewritten by the void.',
+    'Striking the ground, you trigger a tectonic upheaval that reshapes the geography of the battlefield. Magma erupts and the earth splits as your power encompasses the entire region in a cataclysm of fire and stone.',
+    'You detonate your spiritual pressure in a supernova of power, vaporizing all opposition in a radius measured in miles. You stand alone in the center of a crater of glass, the only survivor of your own apocalypse.',
+    'Your attack creates a singularity, a black hole of force that drags all enemies into oblivion. The very light is bent by the gravity of your devastating area strike, consuming all matter in its reach.',
+    'You summon a celestial storm, raining down destruction upon the entire battlefield. Meteors fall, lightning strikes, and the earth burns—there is no escape, no shelter, only the purifying light of your total devastation.'
   ],
   rapid: [
-    'You move so fast that you arrive at your destination before you left, violating the laws of physics. Your strike lands in the past, present, and future simultaneously.',
-    'You become a being of pure light, traversing the battlefield instantaneously. Your attack is delivered at light speed, turning your weapon into a lance of pure photons.',
-    'Stepping through the gaps between moments, you strike your enemy in the frozen time between heartbeats. To them, you were simply there, and they were already dead.',
-    'You accelerate beyond the event horizon, moving with infinite velocity. The friction of your passage ignites the atmosphere as you deliver a strike of impossible speed.',
-    'You transcend speed, becoming omnipresent. Your strike comes from everywhere at once, a unified assault from every possible angle in the same instant.'
+    'You move so fast that you arrive at your destination before you left, violating the laws of physics. Your strike lands in the past, present, and future simultaneously, erasing the target from the timeline.',
+    'You become a being of pure light, traversing the battlefield instantaneously. Your attack is delivered at light speed, turning your weapon into a lance of pure photons that pierces through any defense.',
+    'Stepping through the gaps between moments, you strike your enemy in the frozen time between heartbeats. To them, you were simply there, and then they were already dead, cut down by an invisible phantom.',
+    'You accelerate beyond the event horizon, moving with infinite velocity. The friction of your passage ignites the atmosphere as you deliver a strike of impossible speed, hitting with the force of a relativistic projectile.',
+    'You transcend speed, becoming omnipresent. Your strike comes from everywhere at once, a unified assault from every possible angle in the same instant, overwhelming the senses and the body completely.'
   ],
   efficiency: [
-    'You achieve the perfect state of "Mushin", acting without thought or hesitation. Your strike is the platonic ideal of an attack, flawless, unstoppable, and infinitely efficient.',
-    'Your movement is the stillness of the universe, your strike the turning of the wheel. It requires no energy, yet carries infinite momentum. It is the inevitable end.',
-    'You align your strike with the flow of destiny itself. You do not hit the target; you simply actualize the reality where the target has already been struck.',
-    'With absolute minimal effort, you achieve absolute maximum effect. A simple flick of the wrist unleashes power equivalent to a falling star, perfectly focused.',
-    'You perceive the flaw in all things and strike it with divine precision. The universe parts before your blade, offering no resistance to your perfect technique.'
+    'You achieve the perfect state of "Mushin", acting without thought or hesitation. Your strike is the platonic ideal of an attack—flawless, unstoppable, and infinitely efficient, wasting not a single joule of energy.',
+    'Your movement is the stillness of the universe, your strike the turning of the wheel. It requires no energy, yet carries infinite momentum. It is the inevitable end, executed with the tranquility of a falling leaf.',
+    'You align your strike with the flow of destiny itself. You do not hit the target; you simply actualize the reality where the target has already been struck, bypassing the need for physical interaction entirely.',
+    'With absolute minimal effort, you achieve absolute maximum effect. A simple flick of the wrist unleashes power equivalent to a falling star, perfectly focused into a single, needle-point of destruction.',
+    'You perceive the flaw in all things and strike it with divine precision. The universe parts before your blade, offering no resistance to your perfect technique, allowing you to cut through reality effortlessly.'
   ],
   dot: [
-    'You inflict a curse so vile it stains the target\'s soul, rotting them from the spiritual plane outwards. The corruption spreads through their lineage, a blight that never ends.',
-    'Your weapon carries the essence of entropy, accelerating the target\'s decay by a billion years in a second. They crumble to dust as time itself ravages their physical form.',
-    'You unleash a plague of biblical proportions, a living darkness that devours flesh, bone, and magic. It creates a zone of absolute death that lingers for eternity.',
-    'Your strike injects a fractal poison that multiplies infinitely. Every cell in the target\'s body becomes a factory for more toxin, resulting in instant, total biological collapse.',
-    'You brand the target with the mark of the Void. Their very existence begins to unravel, fading from reality like a bad dream as the nothingness consumes them.'
+    'You inflict a curse so vile it stains the target\'s soul, rotting them from the spiritual plane outwards. The corruption spreads through their lineage, a blight that never ends, consuming their very essence.',
+    'Your weapon carries the essence of entropy, accelerating the target\'s decay by a billion years in a second. They crumble to dust as time itself ravages their physical form, leaving nothing but memories.',
+    'You unleash a plague of biblical proportions, a living darkness that devours flesh, bone, and magic. It creates a zone of absolute death that lingers for eternity, poisoning the land itself.',
+    'Your strike injects a fractal poison that multiplies infinitely. Every cell in the target\'s body becomes a factory for more toxin, resulting in instant, total biological collapse and a horrific dissolution.',
+    'You brand the target with the mark of the Void. Their very existence begins to unravel, fading from reality like a bad dream as the nothingness consumes them piece by piece.'
   ],
   control: [
-    'You invoke the laws of stasis, freezing the target in absolute zero time. They are locked in a moment forever, conscious but unable to act, trapped in a statue of their own flesh.',
-    'Your strike chains the target\'s soul to the bedrock of the world. The weight of the planet itself holds them down, making movement physically impossible.',
-    'You shatter the target\'s will, imposing your own reality upon them. They are a puppet in your hands, unable to twitch a muscle without your express permission.',
-    'You weave a cage of dimensional barriers around the foe. Space itself curves back on them, creating a prison from which there is no escape, only endless confinement.',
-    'Your blow severs the connection between the target\'s mind and body. They are a passenger in their own form, screaming silently as their limbs refuse to obey.'
+    'You invoke the laws of stasis, freezing the target in absolute zero time. They are locked in a moment forever, conscious but unable to act, trapped in a statue of their own frozen flesh.',
+    'Your strike chains the target\'s soul to the bedrock of the world. The weight of the planet itself holds them down, making movement physically impossible as gravity crushes them into the earth.',
+    'You shatter the target\'s will, imposing your own reality upon them. They are a puppet in your hands, unable to twitch a muscle without your express permission, their mind broken and enslaved.',
+    'You weave a cage of dimensional barriers around the foe. Space itself curves back on them, creating a prison from which there is no escape, only endless confinement in a pocket universe.',
+    'Your blow severs the connection between the target\'s mind and body. They are a passenger in their own form, screaming silently as their limbs refuse to obey, locked in a prison of their own making.'
   ],
   sustain: [
-    'You become a vortex of life, drinking the vitality of the world. Your strike consumes the target entirely, adding their years, strength, and memories to your own eternal existence.',
+    'You become a vortex of life, drinking the vitality of the world. Your strike consumes the target entirely, adding their years, strength, and memories to your own eternal existence, making you stronger with every kill.',
     'Your weapon becomes a bridge to the plane of blood. One hit, and the target\'s entire essence is vacuumed out, leaving a dry husk while you glow with the power of a thousand souls.',
-    'You feast upon the concept of life itself. The target does not just die; their vitality is retroactively erased and added to your own, healing wounds you haven\'t even suffered yet.',
-    'You strike with the hunger of a black hole. Light, magic, and life are all pulled into your weapon, empowering you with the stolen essence of the universe.',
-    'You execute the ultimate exchange: their total existence for your eternal renewal. As they fade into nothingness, you are reborn, stronger and more vibrant than ever before.'
+    'You feast upon the concept of life itself. The target does not just die; their vitality is retroactively erased and added to your own, healing wounds you haven\'t even suffered yet, granting you immortality.',
+    'You strike with the hunger of a black hole. Light, magic, and life are all pulled into your weapon, empowering you with the stolen essence of the universe, leaving only void in your wake.',
+    'You execute the ultimate exchange: their total existence for your eternal renewal. As they fade into nothingness, you are reborn, stronger and more vibrant than ever before, fueled by their extinguished spark.'
   ],
   defense: [
-    'You become the Immovable Object, the anchor of reality. Your defense is absolute; infinite force crashes against you and breaks like water on rock. You are invincible.',
-    'You manifest a shield of conceptual rejection. You simply deny the reality where you are harmed. Attacks cease to exist before they can touch you.',
-    'Your guard is a fortress of divine light, impenetrable to any force in the cosmos. You stand unharmed in the center of armageddon, a bastion of eternal safety.',
-    'You weave a defense from the fabric of space-time. Attacks are shunted into pocket dimensions or deflected into the past. Nothing can cross the event horizon of your guard.',
-    'You achieve defensive transcendence. You are not blocking; you are simply untouchesble. The universe bends to accommodate your safety, warping attacks around you automatically.'
+    'You become the Immovable Object, the anchor of reality. Your defense is absolute; infinite force crashes against you and breaks like water on rock. You are invincible, a singularity of unyielding will.',
+    'You manifest a shield of conceptual rejection. You simply deny the reality where you are harmed. Attacks cease to exist before they can touch you, erased by the sheer force of your denial.',
+    'Your guard is a fortress of divine light, impenetrable to any force in the cosmos. You stand unharmed in the center of armageddon, a bastion of eternal safety amidst the end of the world.',
+    'You weave a defense from the fabric of space-time. Attacks are shunted into pocket dimensions or deflected into the past. Nothing can cross the event horizon of your guard, lost forever in the void.',
+    'You achieve defensive transcendence. You are not blocking; you are simply untouchable. The universe bends to accommodate your safety, warping attacks around you automatically as if nature itself refuses to let you be harmed.'
   ],
   execute: [
-    'You deliver the stroke that ends the kalpa. It is not an attack; it is a decree of termination. The target\'s time is up, their thread cut by the shears of fate.',
-    'You channel the inevitability of death. Your strike cannot be dodged, blocked, or endured. It is the final period at the end of the target\'s sentence.',
-    'You see the singular point of shattering in the target\'s existence and strike it. They unmake instantly, their form collapsing into its component atoms.',
-    'Your weapon becomes the scythe of the reaper. One swing, and the soul is severed from the body with surgical perfection. The body drops, but the soul is already gone.',
-    'You execute the ultimate technique: The End of All Things. The target is erased from the past, present, and future. History rewrites itself to accommodate their absence.'
+    'You deliver the stroke that ends the kalpa. It is not an attack; it is a decree of termination. The target\'s time is up, their thread cut by the shears of fate, their existence concluded.',
+    'You channel the inevitability of death. Your strike cannot be dodged, blocked, or endured. It is the final period at the end of the target\'s sentence, the absolute certainty of the grave.',
+    'You see the singular point of shattering in the target\'s existence and strike it. They unmake instantly, their form collapsing into its component atoms as the universe corrects the error of their survival.',
+    'Your weapon becomes the scythe of the reaper. One swing, and the soul is severed from the body with surgical perfection. The body drops, but the soul is already gone, claimed by the void.',
+    'You execute the ultimate technique: The End of All Things. The target is erased from the past, present, and future. History rewrites itself to accommodate their absence, as if they never existed at all.'
   ]
 }
 
