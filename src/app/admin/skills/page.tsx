@@ -947,7 +947,14 @@ export default function SkillDatabaseBuilder() {
                       >
                         {/* Variant Badge */}
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-2xl">{variantConfig.icon}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl">{variantConfig.icon}</span>
+                            {child.isSaved && (
+                              <span className="text-[10px] bg-green-900/80 text-green-300 px-1.5 py-0.5 rounded border border-green-700/50" title="Saved to database (Live in game)">
+                                ✅ Saved
+                              </span>
+                            )}
+                          </div>
                           <span className={`text-xs px-2 py-0.5 rounded border ${getStageColor(child.stage)}`}>
                             S{child.stage}
                           </span>
@@ -995,9 +1002,10 @@ export default function SkillDatabaseBuilder() {
                 <div className="flex gap-4 mt-6">
                   <button
                     onClick={handleSaveAllChildren}
-                    className="flex-1 py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition-colors"
+                    disabled={childSkills.every(c => c.isSaved)}
+                    className="flex-1 py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:bg-gray-600"
                   >
-                    💾 Save All to Database
+                    {childSkills.every(c => c.isSaved) ? '✅ All Saved' : '💾 Save All to Database'}
                   </button>
                   <button
                     onClick={handleRegenerateChildren}
