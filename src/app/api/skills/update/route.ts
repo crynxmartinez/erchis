@@ -11,6 +11,7 @@ export async function POST(request: Request) {
     if (data.name !== undefined) updateData.name = data.name
     if (data.description !== undefined) updateData.description = data.description
     if (data.executionDescription !== undefined) updateData.executionDescription = data.executionDescription
+    if (data.stage !== undefined) updateData.stage = data.stage
     if (data.skillType !== undefined) updateData.skillType = data.skillType
     if (data.damageType !== undefined) updateData.damageType = data.damageType
     if (data.weaponRequirement !== undefined) updateData.weaponRequirement = data.weaponRequirement
@@ -31,6 +32,9 @@ export async function POST(request: Request) {
     if (data.debuffDuration !== undefined) updateData.debuffDuration = data.debuffDuration
     if (data.debuffChance !== undefined) updateData.debuffChance = data.debuffChance
     if (data.lifestealPercent !== undefined) updateData.lifestealPercent = data.lifestealPercent
+    if (data.armorPierce !== undefined) updateData.armorPierce = data.armorPierce
+    if (data.bonusVsGuard !== undefined) updateData.bonusVsGuard = data.bonusVsGuard
+    if (data.bonusVsDebuffed !== undefined) updateData.bonusVsDebuffed = data.bonusVsDebuffed
     if (data.isCounter !== undefined) updateData.isCounter = data.isCounter
     if (data.triggerCondition !== undefined) updateData.triggerCondition = data.triggerCondition
     

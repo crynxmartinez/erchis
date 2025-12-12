@@ -65,6 +65,14 @@ const ALL_VARIANTS = [
   'execute',
 ]
 
+// ============================================
+// CONSTANTS
+// ============================================
+
+const DAMAGE_TYPES = ['physical', 'magic', 'none']
+const WEAPON_REQS = ['melee_only', 'ranged_only', 'magic_only', 'any']
+const TARGET_TYPES = ['single', 'self', 'aoe_circle', 'aoe_cone', 'aoe_line', 'all_enemies']
+
 // Variant type configuration
 const VARIANT_CONFIG: Record<string, { icon: string; color: string; label: string }> = {
   root:       { icon: '🌱', color: 'bg-green-900/50 border-green-500 text-green-300', label: 'Root' },
@@ -84,6 +92,95 @@ type ViewState =
   | { type: 'categories' }
   | { type: 'starters'; category: SkillTypeCategory }
   | { type: 'skill'; skill: Skill; breadcrumb: Skill[] }
+
+// ============================================
+// UI SECTIONS COMPONENT (Internal)
+// ============================================
+
+const SectionHeader = ({ title, icon }: { title: string, icon: string }) => (
+  <div className="flex items-center gap-2 mb-4 pb-2 border-b border-white/10">
+    <span className="text-xl">{icon}</span>
+    <h3 className="text-lg font-bold text-gray-200">{title}</h3>
+  </div>
+)
+
+const InputField = ({ 
+  label, 
+  value, 
+  onChange, 
+  type = "text", 
+  placeholder = "", 
+  min,
+  color = "text-white",
+  width = "w-full"
+}: { 
+  label: string, 
+  value: string | number, 
+  onChange: (val: string) => void, 
+  type?: string, 
+  placeholder?: string,
+  min?: number,
+  color?: string,
+  width?: string
+}) => (
+  <div className="bg-black/20 rounded p-3 border border-white/5">
+    <div className="text-xs text-gray-400 mb-1 font-medium">{label}</div>
+    <input
+      type={type}
+      min={min}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className={`${width} bg-transparent border-b border-white/30 font-bold ${color} focus:outline-none focus:border-[#6eb5ff] transition-colors`}
+    />
+  </div>
+)
+
+const SelectField = ({ 
+  label, 
+  value, 
+  options, 
+  onChange, 
+  color = "text-white" 
+}: { 
+  label: string, 
+  value: string, 
+  options: string[], 
+  onChange: (val: string) => void, 
+  color?: string 
+}) => (
+  <div className="bg-black/20 rounded p-3 border border-white/5">
+    <div className="text-xs text-gray-400 mb-1 font-medium">{label}</div>
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`w-full bg-black/40 rounded px-2 py-1 border border-white/20 font-bold ${color} focus:outline-none focus:border-[#6eb5ff]`}
+    >
+      {options.map(opt => (
+        <option key={opt} value={opt} className="bg-[#242424]">{opt.replace(/_/g, ' ')}</option>
+      ))}
+    </select>
+  </div>
+)
+
+const BooleanToggle = ({
+  label,
+  value,
+  onChange,
+  color = "text-cyan-400"
+}: {
+  label: string,
+  value: boolean,
+  onChange: (val: boolean) => void,
+  color?: string
+}) => (
+  <div className="bg-black/20 rounded p-3 border border-white/5 flex items-center justify-between cursor-pointer hover:bg-black/30 transition-colors" onClick={() => onChange(!value)}>
+    <div className="text-xs text-gray-400 font-medium">{label}</div>
+    <div className={`font-bold ${value ? color : 'text-gray-600'}`}>
+      {value ? 'YES' : 'NO'}
+    </div>
+  </div>
+)
 
 // ============================================
 // MAIN COMPONENT
@@ -669,22 +766,326 @@ export default function SkillDatabaseBuilder() {
         {!loading && view.type === 'skill' && currentSkill && (
           <div className="space-y-6">
             
-            {/* Current Skill Card */}
+            {/* =====================================================================================
+                EDIT MODE: COMPREHENSIVE BUILDER
+                ===================================================================================== */}
+            {editMode && editedSkill ? (
+              <div className="space-y-6">
+                
+                {/* 1. IDENTITY & CORE */}
+                <div className={`bg-[#242424] border-2 rounded-xl p-6 ${getVariantColor(editedSkill.variantType)}`}>
+                  <SectionHeader title="Core Identity" icon="🆔" />
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <InputField 
+                      label="Skill Name" 
+                      value={editedSkill.name} 
+                      onChange={(v) => setEditedSkill({...editedSkill, name: v})} 
+                      color="text-2xl"
+                    />
+                    <SelectField
+                      label="Variant Type"
+                      value={editedSkill.variantType}
+                      options={['root', ...ALL_VARIANTS]}
+                      onChange={(v) => setEditedSkill({...editedSkill, variantType: v})}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-4 gap-4">
+                    <InputField 
+                      label="Stage" 
+                      value={editedSkill.stage} 
+                      onChange={(v) => setEditedSkill({...editedSkill, stage: parseInt(v) || 0})} 
+                      type="number"
+                      min={0}
+                    />
+                    <InputField 
+                      label="Skill Type" 
+                      value={editedSkill.skillType} 
+                      onChange={(v) => setEditedSkill({...editedSkill, skillType: v})} 
+                    />
+                    <SelectField
+                      label="Weapon Req"
+                      value={editedSkill.weaponRequirement}
+                      options={WEAPON_REQS}
+                      onChange={(v) => setEditedSkill({...editedSkill, weaponRequirement: v})}
+                      color={
+                        editedSkill.weaponRequirement === 'melee_only' ? 'text-red-400' :
+                        editedSkill.weaponRequirement === 'ranged_only' ? 'text-green-400' :
+                        editedSkill.weaponRequirement === 'magic_only' ? 'text-purple-400' : 'text-gray-400'
+                      }
+                    />
+                    <SelectField
+                      label="Damage Type"
+                      value={editedSkill.damageType}
+                      options={DAMAGE_TYPES}
+                      onChange={(v) => setEditedSkill({...editedSkill, damageType: v})}
+                      color={
+                        editedSkill.damageType === 'physical' ? 'text-red-400' :
+                        editedSkill.damageType === 'magic' ? 'text-purple-400' : 'text-gray-400'
+                      }
+                    />
+                  </div>
+                </div>
+
+                {/* 2. COMBAT STATS */}
+                <div className="bg-[#2a2a2a] border border-gray-700 rounded-xl p-6">
+                  <SectionHeader title="Combat Mechanics" icon="⚔️" />
+                  
+                  <div className="grid grid-cols-4 gap-4 mb-6">
+                    <InputField 
+                      label="Amp % (Damage)" 
+                      value={editedSkill.ampPercent} 
+                      onChange={(v) => setEditedSkill({...editedSkill, ampPercent: parseInt(v) || 0})} 
+                      type="number"
+                      color="text-red-400"
+                    />
+                    <InputField 
+                      label="AP Cost" 
+                      value={editedSkill.apCost} 
+                      onChange={(v) => setEditedSkill({...editedSkill, apCost: parseInt(v) || 0})} 
+                      type="number"
+                      color="text-blue-400"
+                    />
+                    <InputField 
+                      label="Cooldown (Turns)" 
+                      value={editedSkill.cooldown} 
+                      onChange={(v) => setEditedSkill({...editedSkill, cooldown: parseInt(v) || 0})} 
+                      type="number"
+                      color="text-yellow-400"
+                    />
+                    <InputField 
+                      label="Range (Tiles)" 
+                      value={editedSkill.range} 
+                      onChange={(v) => setEditedSkill({...editedSkill, range: parseInt(v) || 0})} 
+                      type="number"
+                      color="text-orange-400"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-4 gap-4">
+                    <SelectField
+                      label="Target Type"
+                      value={editedSkill.targetType}
+                      options={TARGET_TYPES}
+                      onChange={(v) => setEditedSkill({...editedSkill, targetType: v})}
+                      color="text-purple-400"
+                    />
+                    <InputField 
+                      label="Hit Count" 
+                      value={editedSkill.hitCount} 
+                      onChange={(v) => setEditedSkill({...editedSkill, hitCount: Math.max(1, parseInt(v) || 1)})} 
+                      type="number"
+                      min={1}
+                      color="text-cyan-400"
+                    />
+                    <BooleanToggle
+                      label="Is Counter?"
+                      value={editedSkill.isCounter}
+                      onChange={(v) => setEditedSkill({...editedSkill, isCounter: v})}
+                      color="text-green-400"
+                    />
+                    {editedSkill.isCounter && (
+                      <InputField 
+                        label="Trigger Condition" 
+                        value={editedSkill.triggerCondition || ''} 
+                        onChange={(v) => setEditedSkill({...editedSkill, triggerCondition: v})} 
+                        placeholder="e.g. on_dodge"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* 3. ADVANCED STATS */}
+                <div className="bg-[#2a2a2a] border border-gray-700 rounded-xl p-6">
+                  <SectionHeader title="Advanced Stats" icon="📊" />
+                  
+                  <div className="grid grid-cols-4 gap-4">
+                    <InputField 
+                      label="Armor Pierce %" 
+                      value={editedSkill.armorPierce || 0} 
+                      onChange={(v) => setEditedSkill({...editedSkill, armorPierce: parseInt(v) || 0})} 
+                      type="number"
+                      color="text-gray-300"
+                    />
+                    <InputField 
+                      label="Lifesteal %" 
+                      value={editedSkill.lifestealPercent || 0} 
+                      onChange={(v) => setEditedSkill({...editedSkill, lifestealPercent: parseInt(v) || 0})} 
+                      type="number"
+                      color="text-pink-400"
+                    />
+                    <InputField 
+                      label="Bonus vs Guard %" 
+                      value={editedSkill.bonusVsGuard || 0} 
+                      onChange={(v) => setEditedSkill({...editedSkill, bonusVsGuard: parseInt(v) || 0})} 
+                      type="number"
+                      color="text-blue-300"
+                    />
+                    <InputField 
+                      label="Bonus vs Debuffed %" 
+                      value={editedSkill.bonusVsDebuffed || 0} 
+                      onChange={(v) => setEditedSkill({...editedSkill, bonusVsDebuffed: parseInt(v) || 0})} 
+                      type="number"
+                      color="text-purple-300"
+                    />
+                  </div>
+                </div>
+
+                {/* 4. UTILITY & MAGIC */}
+                <div className="bg-[#1e293b] border border-cyan-900 rounded-xl p-6">
+                  <SectionHeader title="Utility & Magic Infusion" icon="🔮" />
+                  
+                  <div className="grid grid-cols-4 gap-4 mb-4">
+                    <BooleanToggle
+                      label="Has Utility Mode?"
+                      value={editedSkill.hasUtilityMode}
+                      onChange={(v) => setEditedSkill({...editedSkill, hasUtilityMode: v})}
+                      color="text-cyan-400"
+                    />
+                  </div>
+
+                  {editedSkill.hasUtilityMode && (
+                    <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
+                      <InputField 
+                        label="Utility Effect (Code)" 
+                        value={editedSkill.utilityEffect || ''} 
+                        onChange={(v) => setEditedSkill({...editedSkill, utilityEffect: v})} 
+                        placeholder="e.g. fire_enchant"
+                        color="text-cyan-300"
+                      />
+                      <InputField 
+                        label="Utility Duration (Turns)" 
+                        value={editedSkill.utilityDuration || 0} 
+                        onChange={(v) => setEditedSkill({...editedSkill, utilityDuration: parseInt(v) || 0})} 
+                        type="number"
+                        color="text-cyan-300"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* 5. STATUS EFFECTS */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* BUFFS */}
+                  <div className="bg-[#3f2c2c] border border-yellow-900 rounded-xl p-6">
+                    <SectionHeader title="Buffs (On Self)" icon="💪" />
+                    <div className="space-y-4">
+                      <InputField 
+                        label="Buff Type" 
+                        value={editedSkill.buffType || ''} 
+                        onChange={(v) => setEditedSkill({...editedSkill, buffType: v || null})} 
+                        placeholder="e.g. haste"
+                        color="text-yellow-400"
+                      />
+                      <InputField 
+                        label="Buff Duration" 
+                        value={editedSkill.buffDuration || 0} 
+                        onChange={(v) => setEditedSkill({...editedSkill, buffDuration: parseInt(v) || null})} 
+                        type="number"
+                        color="text-yellow-400"
+                      />
+                    </div>
+                  </div>
+
+                  {/* DEBUFFS */}
+                  <div className="bg-[#2c2035] border border-purple-900 rounded-xl p-6">
+                    <SectionHeader title="Debuffs (On Enemy)" icon="💀" />
+                    <div className="space-y-4">
+                      <InputField 
+                        label="Debuff Type" 
+                        value={editedSkill.debuffType || ''} 
+                        onChange={(v) => setEditedSkill({...editedSkill, debuffType: v || null})} 
+                        placeholder="e.g. bleed"
+                        color="text-purple-400"
+                      />
+                      <div className="grid grid-cols-2 gap-4">
+                        <InputField 
+                          label="Duration" 
+                          value={editedSkill.debuffDuration || 0} 
+                          onChange={(v) => setEditedSkill({...editedSkill, debuffDuration: parseInt(v) || null})} 
+                          type="number"
+                          color="text-purple-400"
+                        />
+                        <InputField 
+                          label="Chance %" 
+                          value={editedSkill.debuffChance || 100} 
+                          onChange={(v) => setEditedSkill({...editedSkill, debuffChance: parseInt(v) || null})} 
+                          type="number"
+                          color="text-purple-400"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 6. FLAVOR & DESCRIPTION */}
+                <div className="bg-[#242424] border border-gray-700 rounded-xl p-6">
+                  <SectionHeader title="Flavor & Descriptions" icon="📝" />
+                  
+                  <div className="space-y-6">
+                    <div>
+                      <div className="text-sm text-gray-400 mb-2 font-bold">Skill Description (Tooltip)</div>
+                      <textarea
+                        value={editedSkill.description}
+                        onChange={(e) => setEditedSkill({...editedSkill, description: e.target.value})}
+                        className="w-full bg-black/20 rounded p-4 border border-white/10 focus:outline-none focus:border-[#6eb5ff] min-h-[80px]"
+                        placeholder="What does the skill do?"
+                      />
+                    </div>
+                    
+                    <div>
+                      <div className="text-sm text-gray-400 mb-2 font-bold">Execution Description (Narrative)</div>
+                      <textarea
+                        value={editedSkill.executionDescription || ''}
+                        onChange={(e) => setEditedSkill({...editedSkill, executionDescription: e.target.value})}
+                        className="w-full bg-black/20 rounded p-4 border border-white/10 focus:outline-none focus:border-[#6eb5ff] min-h-[100px] italic font-serif text-lg text-gray-300"
+                        placeholder="Describe the action vividly..."
+                      />
+                    </div>
+
+                    <div>
+                      <div className="text-sm text-gray-400 mb-2 font-bold">Passive Effect (Optional)</div>
+                      <textarea
+                        value={editedSkill.passive || ''}
+                        onChange={(e) => setEditedSkill({...editedSkill, passive: e.target.value})}
+                        className="w-full bg-purple-900/10 rounded p-4 border border-purple-500/20 focus:outline-none focus:border-purple-500 min-h-[60px]"
+                        placeholder="Passive bonus description..."
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* ACTION BAR */}
+                <div className="sticky bottom-6 bg-[#1a1a1a]/95 backdrop-blur border border-[#333] p-4 rounded-xl flex gap-4 shadow-2xl z-10">
+                  <button
+                    onClick={handleSaveSkill}
+                    className="flex-1 py-4 bg-green-600 text-white rounded-lg font-bold text-lg hover:bg-green-700 transition-colors shadow-lg hover:shadow-green-900/50"
+                  >
+                    💾 SAVE CHANGES
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditMode(false)
+                      setEditedSkill(null)
+                    }}
+                    className="flex-1 py-4 bg-gray-700 text-white rounded-lg font-bold text-lg hover:bg-gray-600 transition-colors"
+                  >
+                    ❌ CANCEL
+                  </button>
+                </div>
+
+              </div>
+            ) : (
+            /* =====================================================================================
+               VIEW MODE: READ ONLY DISPLAY
+               ===================================================================================== */
             <div className={`bg-[#242424] border-2 rounded-xl p-6 ${getVariantColor(currentSkill.variantType)}`}>
-              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start justify-between mb-4">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
                     <span className="text-3xl">{getVariantIcon(currentSkill.variantType)}</span>
-                    {editMode ? (
-                      <input
-                        type="text"
-                        value={editedSkill?.name || ''}
-                        onChange={(e) => setEditedSkill(prev => prev ? {...prev, name: e.target.value} : null)}
-                        className="text-2xl font-bold bg-transparent border-b border-white/30 focus:outline-none focus:border-[#6eb5ff]"
-                      />
-                    ) : (
-                      <h2 className="text-2xl font-bold">{currentSkill.name}</h2>
-                    )}
+                    <h2 className="text-2xl font-bold">{currentSkill.name}</h2>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <span className={`px-2 py-1 rounded border ${getStageColor(currentSkill.stage)}`}>
@@ -696,44 +1097,22 @@ export default function SkillDatabaseBuilder() {
                 </div>
                 
                 <div className="flex gap-2">
-                  {!editMode ? (
-                    <>
-                      <button
-                        onClick={() => {
-                          setEditMode(true)
-                          setEditedSkill(currentSkill)
-                        }}
-                        className="px-4 py-2 bg-[#6eb5ff] text-black rounded font-medium hover:bg-[#5a9ee6] transition-colors"
-                      >
-                        ✏️ Edit
-                      </button>
-                      {currentSkill.stage === 0 && (
-                        <button
-                          onClick={handleResetTree}
-                          className="px-4 py-2 bg-red-600 text-white rounded font-medium hover:bg-red-700 transition-colors"
-                        >
-                          🗑️ Reset Tree
-                        </button>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        onClick={handleSaveSkill}
-                        className="px-4 py-2 bg-green-600 text-white rounded font-medium hover:bg-green-700 transition-colors"
-                      >
-                        💾 Save
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditMode(false)
-                          setEditedSkill(null)
-                        }}
-                        className="px-4 py-2 bg-gray-600 text-white rounded font-medium hover:bg-gray-700 transition-colors"
-                      >
-                        ❌ Cancel
-                      </button>
-                    </>
+                  <button
+                    onClick={() => {
+                      setEditMode(true)
+                      setEditedSkill(currentSkill)
+                    }}
+                    className="px-4 py-2 bg-[#6eb5ff] text-black rounded font-medium hover:bg-[#5a9ee6] transition-colors"
+                  >
+                    ✏️ Edit
+                  </button>
+                  {currentSkill.stage === 0 && (
+                    <button
+                      onClick={handleResetTree}
+                      className="px-4 py-2 bg-red-600 text-white rounded font-medium hover:bg-red-700 transition-colors"
+                    >
+                      🗑️ Reset Tree
+                    </button>
                   )}
                 </div>
               </div>
@@ -742,44 +1121,17 @@ export default function SkillDatabaseBuilder() {
               <div className="grid grid-cols-4 gap-4 mb-4">
                 <div className="bg-black/20 rounded p-3">
                   <div className="text-xs text-gray-400 mb-1">Amp %</div>
-                  {editMode ? (
-                    <input
-                      type="number"
-                      value={editedSkill?.ampPercent || 100}
-                      onChange={(e) => setEditedSkill(prev => prev ? {...prev, ampPercent: parseInt(e.target.value)} : null)}
-                      className="w-full bg-transparent border-b border-white/30 font-bold text-red-400 focus:outline-none"
-                    />
-                  ) : (
-                    <div className="font-bold text-red-400">{currentSkill.ampPercent}%</div>
-                  )}
+                  <div className="font-bold text-red-400">{currentSkill.ampPercent}%</div>
                 </div>
                 <div className="bg-black/20 rounded p-3">
                   <div className="text-xs text-gray-400 mb-1">AP Cost</div>
-                  {editMode ? (
-                    <input
-                      type="number"
-                      value={editedSkill?.apCost || 0}
-                      onChange={(e) => setEditedSkill(prev => prev ? {...prev, apCost: parseInt(e.target.value)} : null)}
-                      className="w-full bg-transparent border-b border-white/30 font-bold text-blue-400 focus:outline-none"
-                    />
-                  ) : (
-                    <div className="font-bold text-blue-400">{currentSkill.apCost}</div>
-                  )}
+                  <div className="font-bold text-blue-400">{currentSkill.apCost}</div>
                 </div>
                 <div className="bg-black/20 rounded p-3">
                   <div className="text-xs text-gray-400 mb-1">Cooldown</div>
-                  {editMode ? (
-                    <input
-                      type="number"
-                      value={editedSkill?.cooldown || 1}
-                      onChange={(e) => setEditedSkill(prev => prev ? {...prev, cooldown: parseInt(e.target.value)} : null)}
-                      className="w-full bg-transparent border-b border-white/30 font-bold text-yellow-400 focus:outline-none"
-                    />
-                  ) : (
-                    <div className="font-bold text-yellow-400">
-                      {currentSkill.cooldown} turn{currentSkill.cooldown !== 1 ? 's' : ''}
-                    </div>
-                  )}
+                  <div className="font-bold text-yellow-400">
+                    {currentSkill.cooldown} turn{currentSkill.cooldown !== 1 ? 's' : ''}
+                  </div>
                 </div>
                 <div className="bg-black/20 rounded p-3">
                   <div className="text-xs text-gray-400 mb-1">Target</div>
@@ -813,17 +1165,58 @@ export default function SkillDatabaseBuilder() {
                     {currentSkill.damageType}
                   </div>
                 </div>
-                {(currentSkill.damageType === 'magic' || currentSkill.hasUtilityMode) && (
-                  <div className="bg-black/20 rounded p-3">
-                    <div className="text-xs text-gray-400 mb-1">Utility Mode</div>
-                    <div className={`font-bold ${currentSkill.hasUtilityMode ? 'text-cyan-400' : 'text-gray-500'}`}>
-                      {currentSkill.hasUtilityMode ? '🔮 Yes' : 'No'}
-                    </div>
+                <div className="bg-black/20 rounded p-3">
+                  <div className="text-xs text-gray-400 mb-1">Utility Mode</div>
+                  <div className={`font-bold ${currentSkill.hasUtilityMode ? 'text-cyan-400' : 'text-gray-500'}`}>
+                    {currentSkill.hasUtilityMode ? '🔮 Yes' : 'No'}
                   </div>
-                )}
+                </div>
                 <div className="bg-black/20 rounded p-3">
                   <div className="text-xs text-gray-400 mb-1">Range</div>
                   <div className="font-bold text-orange-400">{currentSkill.range} tile{currentSkill.range !== 1 ? 's' : ''}</div>
+                </div>
+              </div>
+
+              {/* Stats Grid - Row 3: Advanced Stats */}
+              <div className="grid grid-cols-4 gap-4 mb-4">
+                <div className="bg-black/20 rounded p-3">
+                  <div className="text-xs text-gray-400 mb-1">Hit Count</div>
+                  <div className="font-bold text-cyan-400">{currentSkill.hitCount}x</div>
+                </div>
+                
+                <div className="bg-black/20 rounded p-3">
+                  <div className="text-xs text-gray-400 mb-1">Lifesteal %</div>
+                  <div className="font-bold text-pink-400">{currentSkill.lifestealPercent || 0}%</div>
+                </div>
+
+                <div className="bg-black/20 rounded p-3">
+                    <div className="text-xs text-gray-400 mb-1">Is Counter</div>
+                    <div className={`font-bold ${currentSkill.isCounter ? 'text-green-400' : 'text-gray-500'}`}>
+                        {currentSkill.isCounter ? '🛡️ YES' : 'No'}
+                    </div>
+                </div>
+
+                {currentSkill.isCounter && (
+                    <div className="bg-black/20 rounded p-3">
+                        <div className="text-xs text-gray-400 mb-1">Trigger</div>
+                        <div className="font-bold text-green-300 text-xs">{currentSkill.triggerCondition || 'Any'}</div>
+                    </div>
+                )}
+              </div>
+
+              {/* Stats Grid - Row 4: Bonuses */}
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="bg-black/20 rounded p-3">
+                  <div className="text-xs text-gray-400 mb-1">Armor Pierce %</div>
+                  <div className="font-bold text-gray-300">{currentSkill.armorPierce || 0}%</div>
+                </div>
+                <div className="bg-black/20 rounded p-3">
+                  <div className="text-xs text-gray-400 mb-1">Vs Guard %</div>
+                  <div className="font-bold text-blue-300">{currentSkill.bonusVsGuard || 0}%</div>
+                </div>
+                <div className="bg-black/20 rounded p-3">
+                  <div className="text-xs text-gray-400 mb-1">Vs Debuffed %</div>
+                  <div className="font-bold text-purple-300">{currentSkill.bonusVsDebuffed || 0}%</div>
                 </div>
               </div>
 
@@ -840,111 +1233,54 @@ export default function SkillDatabaseBuilder() {
               {/* Effect */}
               <div className="mb-4">
                 <div className="text-xs text-gray-400 mb-1">Effect</div>
-                {editMode ? (
-                  <textarea
-                    value={editedSkill?.description || ''}
-                    onChange={(e) => setEditedSkill(prev => prev ? {...prev, description: e.target.value} : null)}
-                    className="w-full bg-black/20 rounded p-3 border border-white/10 focus:outline-none focus:border-[#6eb5ff] min-h-[80px]"
-                  />
-                ) : (
-                  <div className="bg-black/20 rounded p-3">{currentSkill.description}</div>
-                )}
+                <div className="bg-black/20 rounded p-3">{currentSkill.description}</div>
               </div>
 
               {/* Execution Description */}
               <div className="mb-4">
                 <div className="text-xs text-gray-400 mb-1">Execution (Flavor Text)</div>
-                {editMode ? (
-                  <textarea
-                    value={editedSkill?.executionDescription || ''}
-                    onChange={(e) => setEditedSkill(prev => prev ? {...prev, executionDescription: e.target.value} : null)}
-                    className="w-full bg-black/20 rounded p-3 border border-white/10 focus:outline-none focus:border-[#6eb5ff] min-h-[80px] italic"
-                    placeholder="Describe how the skill looks and feels..."
-                  />
-                ) : (
-                  <div className="bg-black/20 rounded p-3 italic text-gray-300">
-                    {currentSkill.executionDescription || 'No execution description available.'}
-                  </div>
-                )}
+                <div className="bg-black/20 rounded p-3 italic text-gray-300 font-serif text-lg">
+                  {currentSkill.executionDescription || 'No execution description available.'}
+                </div>
               </div>
 
-              {/* Buffs & Debuffs Configuration (Edit Mode) */}
-              {editMode && (
-                <div className="mb-4 bg-black/20 rounded p-3 border border-white/10">
-                  <div className="text-xs text-gray-400 mb-2 font-bold">Status Effects Configuration</div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Buff Config */}
-                    <div className="space-y-2">
-                      <div className="text-xs text-yellow-400">Buff Settings</div>
-                      <input
-                        type="text"
-                        placeholder="Buff Type (e.g. haste)"
-                        value={editedSkill?.buffType || ''}
-                        onChange={(e) => setEditedSkill(prev => prev ? {...prev, buffType: e.target.value || null} : null)}
-                        className="w-full bg-black/40 rounded px-2 py-1 border border-white/10 text-xs"
-                      />
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500">Duration:</span>
-                        <input
-                          type="number"
-                          placeholder="Turns"
-                          value={editedSkill?.buffDuration || ''}
-                          onChange={(e) => setEditedSkill(prev => prev ? {...prev, buffDuration: parseInt(e.target.value) || null} : null)}
-                          className="w-20 bg-black/40 rounded px-2 py-1 border border-white/10 text-xs"
-                        />
+              {/* Buffs & Debuffs Display (View Mode) */}
+              {(currentSkill.buffType || currentSkill.debuffType) && (
+                <div className="mb-4 grid grid-cols-2 gap-4">
+                  {currentSkill.buffType && (
+                    <div className="bg-yellow-900/20 border border-yellow-500/30 rounded p-3">
+                      <div className="text-xs text-yellow-400 mb-1">🔼 Buff Effect</div>
+                      <div className="text-yellow-200 font-bold capitalize">
+                        {currentSkill.buffType.replace(/_/g, ' ')}
+                      </div>
+                      <div className="text-xs text-yellow-500/70 mt-1">
+                        Duration: {currentSkill.buffDuration} turns
                       </div>
                     </div>
-
-                    {/* Debuff Config */}
-                    <div className="space-y-2">
-                      <div className="text-xs text-purple-400">Debuff Settings</div>
-                      <input
-                        type="text"
-                        placeholder="Debuff Type (e.g. bleed)"
-                        value={editedSkill?.debuffType || ''}
-                        onChange={(e) => setEditedSkill(prev => prev ? {...prev, debuffType: e.target.value || null} : null)}
-                        className="w-full bg-black/40 rounded px-2 py-1 border border-white/10 text-xs"
-                      />
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500">Duration:</span>
-                        <input
-                          type="number"
-                          placeholder="Turns"
-                          value={editedSkill?.debuffDuration || ''}
-                          onChange={(e) => setEditedSkill(prev => prev ? {...prev, debuffDuration: parseInt(e.target.value) || null} : null)}
-                          className="w-20 bg-black/40 rounded px-2 py-1 border border-white/10 text-xs"
-                        />
+                  )}
+                  
+                  {currentSkill.debuffType && (
+                    <div className="bg-purple-900/20 border border-purple-500/30 rounded p-3">
+                      <div className="text-xs text-purple-400 mb-1">🔽 Debuff Effect</div>
+                      <div className="text-purple-200 font-bold capitalize">
+                        {currentSkill.debuffType.replace(/_/g, ' ')}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500">Chance %:</span>
-                        <input
-                          type="number"
-                          placeholder="100"
-                          value={editedSkill?.debuffChance || ''}
-                          onChange={(e) => setEditedSkill(prev => prev ? {...prev, debuffChance: parseInt(e.target.value) || null} : null)}
-                          className="w-20 bg-black/40 rounded px-2 py-1 border border-white/10 text-xs"
-                        />
+                      <div className="text-xs text-purple-500/70 mt-1 flex gap-3">
+                        <span>Duration: {currentSkill.debuffDuration} turns</span>
+                        {currentSkill.debuffChance && <span>Chance: {currentSkill.debuffChance}%</span>}
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
 
               {/* Passive */}
-              {(currentSkill.passive || editMode) && (
+              {currentSkill.passive && (
                 <div className="mb-4">
                   <div className="text-xs text-gray-400 mb-1">Passive (Stage {currentSkill.stage})</div>
-                  {editMode ? (
-                    <textarea
-                      value={editedSkill?.passive || ''}
-                      onChange={(e) => setEditedSkill(prev => prev ? {...prev, passive: e.target.value} : null)}
-                      className="w-full bg-purple-900/20 rounded p-3 border border-purple-500/30 focus:outline-none focus:border-purple-500"
-                    />
-                  ) : (
-                    <div className="bg-purple-900/20 rounded p-3 border border-purple-500/30 text-purple-300">
-                      {currentSkill.passive}
-                    </div>
-                  )}
+                  <div className="bg-purple-900/20 rounded p-3 border border-purple-500/30 text-purple-300">
+                    {currentSkill.passive}
+                  </div>
                 </div>
               )}
 
@@ -992,6 +1328,7 @@ export default function SkillDatabaseBuilder() {
                 </div>
               )}
             </div>
+            )}
 
             {/* Child Skills */}
             {childSkills.length > 0 && (

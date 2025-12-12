@@ -639,6 +639,9 @@ export async function POST(request: Request) {
       let debuffDuration: number | null = null
       let debuffChance: number | null = null
       let lifestealPercent: number | null = null
+      let armorPierce: number | null = null
+      let bonusVsGuard: number | null = null
+      let bonusVsDebuffed: number | null = null
       
       if (variantType === 'multihit') {
         // Stage 1-2: 2 hits, Stage 3-4: 3 hits, Stage 5: 4 hits
@@ -649,8 +652,17 @@ export async function POST(request: Request) {
         targetType = 'aoe_circle' // or cone, simplify to circle for now
       }
       
+      if (variantType === 'power') {
+        armorPierce = 10 + (newStage * 5)
+      }
+      
+      if (variantType === 'execute') {
+        bonusVsDebuffed = 20 + (newStage * 5)
+      }
+      
       if (variantType === 'defense') {
         isCounter = true // flag as counter for potential mechanics
+        bonusVsGuard = 20 + (newStage * 5)
         // Add defensive buff
         const possibleBuffs = ['Iron Skin', 'Evasion', 'Parry Chance']
         const selectedBuff = getRandomElement(possibleBuffs)
@@ -723,6 +735,9 @@ export async function POST(request: Request) {
           debuffDuration,
           debuffChance,
           lifestealPercent,
+          armorPierce,
+          bonusVsGuard,
+          bonusVsDebuffed,
         }
       })
       
