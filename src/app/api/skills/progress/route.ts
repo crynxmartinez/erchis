@@ -5,14 +5,20 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const starter = searchParams.get('starter')
+    const onlySaved = searchParams.get('onlySaved') === 'true'
     
     if (!starter) {
       return NextResponse.json({ error: 'starter is required' }, { status: 400 })
     }
     
+    const whereClause: any = { starterSkillName: starter }
+    if (onlySaved) {
+      whereClause.isSaved = true
+    }
+
     // Get all skills for this starter skill tree
     const skills = await prisma.skill.findMany({
-      where: { starterSkillName: starter },
+      where: whereClause,
       select: { stage: true }
     })
     

@@ -5,9 +5,15 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const starterSkill = searchParams.get('starter') || 'Quick Slash'
+    const onlySaved = searchParams.get('onlySaved') === 'true'
     
+    const whereClause: any = { starterSkillName: starterSkill }
+    if (onlySaved) {
+      whereClause.isSaved = true
+    }
+
     const skills = await prisma.skill.findMany({
-      where: { starterSkillName: starterSkill },
+      where: whereClause,
       include: {
         parent: {
           select: { id: true, name: true }

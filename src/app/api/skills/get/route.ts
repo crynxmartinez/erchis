@@ -6,8 +6,10 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
     const name = searchParams.get('name')
+    const onlySaved = searchParams.get('onlySaved') === 'true'
     
     let skill = null
+    const childrenWhere = onlySaved ? { isSaved: true } : {}
     
     if (id) {
       // Get by ID
@@ -15,7 +17,7 @@ export async function GET(request: Request) {
         where: { id },
         include: {
           parent: { select: { id: true, name: true } },
-          children: true,
+          children: { where: childrenWhere },
         }
       })
     } else if (name) {
@@ -27,7 +29,7 @@ export async function GET(request: Request) {
         },
         include: {
           parent: { select: { id: true, name: true } },
-          children: true,
+          children: { where: childrenWhere },
         }
       })
     }
