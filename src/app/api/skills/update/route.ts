@@ -10,6 +10,7 @@ export async function POST(request: Request) {
     
     if (data.name !== undefined) updateData.name = data.name
     if (data.description !== undefined) updateData.description = data.description
+    if (data.executionDescription !== undefined) updateData.executionDescription = data.executionDescription
     if (data.skillType !== undefined) updateData.skillType = data.skillType
     if (data.damageType !== undefined) updateData.damageType = data.damageType
     if (data.weaponRequirement !== undefined) updateData.weaponRequirement = data.weaponRequirement
