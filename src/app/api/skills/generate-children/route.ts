@@ -2,32 +2,33 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
 // ============================================
-// VARIANT TYPES (10 total)
+// VARIANT TYPES (10 Evolution Paths)
 // ============================================
 
 type VariantType = 
-  | 'upgrade'           // Always included - direct stat boost
-  | 'original_variant'  // Similar but different execution
-  | 'buff_variant'      // Adds self-buff
-  | 'debuff_variant'    // Adds enemy debuff
-  | 'unique'            // Completely different
-  | 'aoe_variant'       // Area effect
-  | 'combo_variant'     // Multi-hit chain
-  | 'counter_variant'   // Reactive/defensive
-  | 'mobility_variant'  // Adds movement
-  | 'sustain_variant'   // Lifesteal/heal
+  | 'power'       // Nuke (Meteor path)
+  | 'multihit'    // Chain (Omnislash path)
+  | 'aoe'         // Clear (Firestorm path)
+  | 'rapid'       // Speed (Flash Step path)
+  | 'efficiency'  // Sustain (Endless path)
+  | 'dot'         // Affliction (Venom path)
+  | 'control'     // CC (Earthshatter path)
+  | 'sustain'     // Drain (Blood Feast path)
+  | 'defense'     // Counter (Tank path)
+  | 'execute'     // Finisher (Guillotine path)
 
-// 9 variants to randomly pick 4 from (upgrade is always included)
-const RANDOM_VARIANTS: VariantType[] = [
-  'original_variant',
-  'buff_variant', 
-  'debuff_variant',
-  'unique',
-  'aoe_variant',
-  'combo_variant',
-  'counter_variant',
-  'mobility_variant',
-  'sustain_variant',
+// All available variants
+const ALL_VARIANTS: VariantType[] = [
+  'power',
+  'multihit',
+  'aoe',
+  'rapid',
+  'efficiency',
+  'dot',
+  'control',
+  'sustain',
+  'defense',
+  'execute',
 ]
 
 // ============================================
@@ -37,152 +38,134 @@ const RANDOM_VARIANTS: VariantType[] = [
 interface VariantConfig {
   icon: string
   color: string
+  label: string
   ampModifier: number     // percentage modifier to amp
   apModifier: number      // flat AP modifier
   cdModifier: number      // flat CD modifier
-  skillType: string
-  targetType: string      // single, aoe_cone, aoe_circle, etc.
+  descriptionTemplate: string
 }
 
 const VARIANT_CONFIGS: Record<VariantType, VariantConfig> = {
-  upgrade:          { icon: '⬆️', color: 'green',  ampModifier: 10,  apModifier: 0,  cdModifier: 0, skillType: 'Attack', targetType: 'single' },
-  original_variant: { icon: '🔄', color: 'blue',   ampModifier: 0,   apModifier: 0,  cdModifier: 0, skillType: 'Attack', targetType: 'single' },
-  buff_variant:     { icon: '💪', color: 'yellow', ampModifier: -10, apModifier: 1,  cdModifier: 0, skillType: 'Attack', targetType: 'single' },
-  debuff_variant:   { icon: '💀', color: 'purple', ampModifier: -10, apModifier: 1,  cdModifier: 0, skillType: 'Attack', targetType: 'single' },
-  unique:           { icon: '✨', color: 'orange', ampModifier: 15,  apModifier: 2,  cdModifier: 1, skillType: 'Attack', targetType: 'single' },
-  aoe_variant:      { icon: '💥', color: 'red',    ampModifier: -15, apModifier: 2,  cdModifier: 1, skillType: 'Attack', targetType: 'aoe_cone' },
-  combo_variant:    { icon: '⛓️', color: 'cyan',   ampModifier: -20, apModifier: 1,  cdModifier: 0, skillType: 'Attack', targetType: 'single' },
-  counter_variant:  { icon: '🛡️', color: 'white',  ampModifier: 15,  apModifier: 0,  cdModifier: 1, skillType: 'Defensive', targetType: 'single' },
-  mobility_variant: { icon: '💨', color: 'pink',   ampModifier: -10, apModifier: 1,  cdModifier: 0, skillType: 'Attack', targetType: 'single' },
-  sustain_variant:  { icon: '❤️‍🩹', color: 'gray',   ampModifier: -15, apModifier: 1,  cdModifier: 1, skillType: 'Attack', targetType: 'single' },
+  power: { 
+    icon: '💥', 
+    color: 'text-red-500 border-red-500 bg-red-900/20', 
+    label: 'Power Evolution',
+    ampModifier: 25,  
+    apModifier: 2,  
+    cdModifier: 1,
+    descriptionTemplate: 'Massive strike dealing {amp}% damage.'
+  },
+  multihit: { 
+    icon: '⚔️', 
+    color: 'text-cyan-500 border-cyan-500 bg-cyan-900/20', 
+    label: 'Multi-Hit Evolution',
+    ampModifier: -30, // Per hit reduction
+    apModifier: 1,  
+    cdModifier: 0,
+    descriptionTemplate: 'Unleashes {hits} rapid strikes, each dealing {amp}% damage.'
+  },
+  aoe: { 
+    icon: '🌊', 
+    color: 'text-blue-500 border-blue-500 bg-blue-900/20', 
+    label: 'AoE Evolution',
+    ampModifier: -15, 
+    apModifier: 2,  
+    cdModifier: 1,
+    descriptionTemplate: 'Strikes all enemies in an area for {amp}% damage.'
+  },
+  rapid: { 
+    icon: '⚡', 
+    color: 'text-yellow-500 border-yellow-500 bg-yellow-900/20', 
+    label: 'Rapid Evolution',
+    ampModifier: -15, 
+    apModifier: 0,  
+    cdModifier: -1, // Reduces CD
+    descriptionTemplate: 'Quick attack dealing {amp}% damage with reduced cooldown.'
+  },
+  efficiency: { 
+    icon: '💧', 
+    color: 'text-emerald-500 border-emerald-500 bg-emerald-900/20', 
+    label: 'Efficiency Evolution',
+    ampModifier: -10, 
+    apModifier: -2, // Reduces AP
+    cdModifier: 0,
+    descriptionTemplate: 'Efficient strike dealing {amp}% damage for low AP cost.'
+  },
+  dot: { 
+    icon: '☠️', 
+    color: 'text-purple-500 border-purple-500 bg-purple-900/20', 
+    label: 'Affliction Evolution',
+    ampModifier: -10, 
+    apModifier: 1,  
+    cdModifier: 0,
+    descriptionTemplate: 'Deals {amp}% damage and inflicts {status} for {duration} turns.'
+  },
+  control: { 
+    icon: '🛑', 
+    color: 'text-orange-500 border-orange-500 bg-orange-900/20', 
+    label: 'Control Evolution',
+    ampModifier: -10, 
+    apModifier: 1,  
+    cdModifier: 1,
+    descriptionTemplate: 'Deals {amp}% damage and {control} the target.'
+  },
+  sustain: { 
+    icon: '🩸', 
+    color: 'text-rose-500 border-rose-500 bg-rose-900/20', 
+    label: 'Vampiric Evolution',
+    ampModifier: -15, 
+    apModifier: 1,  
+    cdModifier: 0,
+    descriptionTemplate: 'Deals {amp}% damage and heals user for {heal}% of damage dealt.'
+  },
+  defense: { 
+    icon: '🛡️', 
+    color: 'text-slate-400 border-slate-500 bg-slate-900/20', 
+    label: 'Defensive Evolution',
+    ampModifier: -10, 
+    apModifier: 0,  
+    cdModifier: 0,
+    descriptionTemplate: 'Deals {amp}% damage and grants {buff} for {duration} turns.'
+  },
+  execute: { 
+    icon: '💀', 
+    color: 'text-gray-200 border-gray-500 bg-gray-900/20', 
+    label: 'Execute Evolution',
+    ampModifier: 10,  
+    apModifier: 1,  
+    cdModifier: 1,
+    descriptionTemplate: 'Deals {amp}% damage. Deals +50% bonus damage to targets below 30% HP.'
+  }
 }
 
 // ============================================
-// BUFF/DEBUFF TYPES
+// CONFIGS
 // ============================================
 
-const BUFF_TYPES = ['haste', 'empower', 'fortify', 'focus', 'regen']
-const DEBUFF_TYPES = ['slow', 'bleed', 'armor_break', 'weaken', 'blind']
-
-const BUFF_DESCRIPTIONS: Record<string, string> = {
-  haste: '+20% CDR for {turns} turns',
-  empower: '+15% damage for {turns} turns',
-  fortify: '+15% defense for {turns} turns',
-  focus: '+10% crit chance for {turns} turns',
-  regen: '+3% HP per turn for {turns} turns',
+const STATUS_EFFECTS = {
+  physical: 'Bleed',
+  magic: 'Burn',
+  none: 'Weaken'
 }
 
-const DEBUFF_DESCRIPTIONS: Record<string, string> = {
-  slow: 'Slows target by 20% for {turns} turns',
-  bleed: 'Target bleeds for 5% max HP per turn for {turns} turns',
-  armor_break: 'Reduces target defense by 15% for {turns} turns',
-  weaken: 'Reduces target damage by 10% for {turns} turns',
-  blind: 'Reduces target accuracy by 20% for {turns} turns',
-}
+const CONTROL_EFFECTS = ['Stuns', 'Slows', 'Knocks Back']
+const DEFENSIVE_BUFFS = ['Iron Skin', 'Evasion', 'Parry Chance']
 
 // ============================================
 // NAME GENERATION
 // ============================================
 
-const UPGRADE_PREFIXES = ['Greater', 'Superior', 'Enhanced', 'Improved', 'Advanced', 'Perfected', 'Masterful', 'Elite', 'Refined', 'Empowered']
-const ORIGINAL_PREFIXES = ['Twin', 'Double', 'Dual', 'Split', 'Mirrored', 'Echoing', 'Repeated', 'Chained', 'Linked', 'Paired']
-const BUFF_PREFIXES = ['Empowering', 'Invigorating', 'Strengthening', 'Bolstering', 'Energizing', 'Fortifying', 'Hastening', 'Focusing', 'Regenerating', 'Vitalizing']
-const DEBUFF_PREFIXES = ['Crippling', 'Weakening', 'Draining', 'Sapping', 'Enfeebling', 'Corroding', 'Withering', 'Poisoning', 'Cursing', 'Blighting']
-const UNIQUE_PREFIXES = ['Arcane', 'Mystic', 'Primal', 'Elemental', 'Chaos', 'Void', 'Storm', 'Infernal', 'Divine', 'Spectral']
-const AOE_PREFIXES = ['Sweeping', 'Whirling', 'Spinning', 'Circular', 'Wide', 'Explosive', 'Radiating', 'Bursting', 'Spreading', 'Encompassing']
-const COMBO_PREFIXES = ['Flurry', 'Barrage', 'Chain', 'Rapid', 'Sequential', 'Cascading', 'Relentless', 'Unending', 'Continuous', 'Perpetual']
-const COUNTER_PREFIXES = ['Reactive', 'Retaliating', 'Countering', 'Riposting', 'Deflecting', 'Parrying', 'Reflecting', 'Answering', 'Vengeful', 'Punishing']
-const MOBILITY_PREFIXES = ['Dashing', 'Leaping', 'Blinking', 'Warping', 'Phasing', 'Shifting', 'Gliding', 'Vaulting', 'Teleporting', 'Flickering']
-const SUSTAIN_PREFIXES = ['Draining', 'Leeching', 'Siphoning', 'Vampiric', 'Life-stealing', 'Absorbing', 'Consuming', 'Devouring', 'Feeding', 'Harvesting']
-
 const VARIANT_PREFIXES: Record<VariantType, string[]> = {
-  upgrade: UPGRADE_PREFIXES,
-  original_variant: ORIGINAL_PREFIXES,
-  buff_variant: BUFF_PREFIXES,
-  debuff_variant: DEBUFF_PREFIXES,
-  unique: UNIQUE_PREFIXES,
-  aoe_variant: AOE_PREFIXES,
-  combo_variant: COMBO_PREFIXES,
-  counter_variant: COUNTER_PREFIXES,
-  mobility_variant: MOBILITY_PREFIXES,
-  sustain_variant: SUSTAIN_PREFIXES,
-}
-
-// ============================================
-// EFFECT TEMPLATES BY VARIANT
-// ============================================
-
-const UPGRADE_EFFECTS = [
-  'Enhanced version with {amp}% amp',
-  'Stronger strike with {amp}% amp and improved accuracy',
-  'Perfected technique with {amp}% amp',
-]
-
-const ORIGINAL_EFFECTS = [
-  'Strikes with a different angle at {amp}% amp',
-  'A modified execution with {amp}% amp',
-  'Alternate technique dealing {amp}% amp',
-]
-
-const BUFF_EFFECTS = [
-  'Deals {amp}% amp and grants {buff}',
-  'Strike with {amp}% amp; empowers self with {buff}',
-  'Attack at {amp}% amp while gaining {buff}',
-]
-
-const DEBUFF_EFFECTS = [
-  'Deals {amp}% amp and applies {debuff}',
-  'Strike with {amp}% amp; afflicts target with {debuff}',
-  'Attack at {amp}% amp while inflicting {debuff}',
-]
-
-const UNIQUE_EFFECTS = [
-  'Unleashes a completely different technique at {amp}% amp',
-  'An unexpected maneuver with {amp}% amp',
-  'Unconventional strike at {amp}% amp with unique properties',
-]
-
-const AOE_EFFECTS = [
-  'Sweeps in a wide arc hitting nearby enemies at {amp}% amp',
-  'Explosive attack at {amp}% amp to all enemies in range',
-  'Radiating strike at {amp}% amp in an area',
-]
-
-const COMBO_EFFECTS = [
-  'Hits {hits} times rapidly at {amp}% amp per hit',
-  'Chain of {hits} attacks at {amp}% amp each',
-  'Flurry of {hits} strikes at {amp}% amp per strike',
-]
-
-const COUNTER_EFFECTS = [
-  'Reactive strike triggered on enemy attack at {amp}% amp',
-  'Counter-attack at {amp}% amp after successful block',
-  'Retaliating blow at {amp}% amp when hit',
-]
-
-const MOBILITY_EFFECTS = [
-  'Dash forward and strike at {amp}% amp',
-  'Leap to target at {amp}% amp on landing',
-  'Blink behind enemy and attack at {amp}% amp',
-]
-
-const SUSTAIN_EFFECTS = [
-  'Deals {amp}% amp and heals for 10% of damage dealt',
-  'Life-draining strike at {amp}% amp; restores HP',
-  'Vampiric attack at {amp}% amp with 10% lifesteal',
-]
-
-const VARIANT_EFFECTS: Record<VariantType, string[]> = {
-  upgrade: UPGRADE_EFFECTS,
-  original_variant: ORIGINAL_EFFECTS,
-  buff_variant: BUFF_EFFECTS,
-  debuff_variant: DEBUFF_EFFECTS,
-  unique: UNIQUE_EFFECTS,
-  aoe_variant: AOE_EFFECTS,
-  combo_variant: COMBO_EFFECTS,
-  counter_variant: COUNTER_EFFECTS,
-  mobility_variant: MOBILITY_EFFECTS,
-  sustain_variant: SUSTAIN_EFFECTS,
+  power:      ['Great', 'Heavy', 'Massive', 'Destructive', 'Ultimate', 'Titan', 'Crushing', 'Fatal', 'Mighty', 'Giga'],
+  multihit:   ['Double', 'Triple', 'Flurry', 'Chain', 'Infinite', 'Echoing', 'Rapid', 'Twin', 'Multi', 'Omni'],
+  aoe:        ['Sweeping', 'Erupting', 'Wide', 'Blast', 'Storm', 'Nova', 'Zone', 'Wave', 'Radial', 'Universal'],
+  rapid:      ['Quick', 'Swift', 'Flash', 'Instant', 'Sonic', 'Light', 'Rush', 'Blink', 'Turbo', 'Mach'],
+  efficiency: ['Efficient', 'Flowing', 'Endless', 'Masterful', 'Light', 'Graceful', 'Focused', 'Balanced', 'Fluid', 'Zen'],
+  dot:        ['Venomous', 'Burning', 'Corrosive', 'Bleeding', 'Cursed', 'Toxic', 'Searing', 'Rotting', 'Caustic', 'Vile'],
+  control:    ['Stunning', 'Slowing', 'Binding', 'Harying', 'Impact', 'Concussive', 'Freezing', 'Arresting', 'Lockdown', 'Static'],
+  sustain:    ['Vampiric', 'Draining', 'Siphoning', 'Parasitic', 'Blood', 'Hungry', 'Thirsty', 'Reaping', 'Leeching', 'Vital'],
+  defense:    ['Guarding', 'Shielded', 'Iron', 'Deflecting', 'Counter', 'Warded', 'Armored', 'Bastion', 'Fortified', 'Wall'],
+  execute:    ['Fatal', 'Lethal', 'Executing', 'Final', 'Killing', 'Mortal', 'Decapitating', 'Ending', 'Terminating', 'Last']
 }
 
 // ============================================
@@ -193,109 +176,97 @@ function getRandomElement<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)]
 }
 
-function shuffleArray<T>(arr: T[]): T[] {
-  const shuffled = [...arr]
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-  }
-  return shuffled
-}
-
 function calculateAmpPercent(parentAmp: number, stage: number, variantType: VariantType, damageType: string): number {
   // Logic: Parent Amp + Stage Bonus + Variant Modifier
-  // Physical/None: +5% per stage (reached ~125% at Stage 5)
-  // Magic: +20% per stage (starts at 100%, reaches 200% at Stage 5 to compensate for no crit)
+  // Physical/None: +5% per stage
+  // Magic: +20% per stage
   
   const isMagic = damageType === 'magic'
   const stageBonus = isMagic ? 20 : 5
   const modifier = VARIANT_CONFIGS[variantType].ampModifier
   
-  return parentAmp + stageBonus + modifier
+  // Ensure minimum 10% amp
+  return Math.max(10, parentAmp + stageBonus + modifier)
 }
 
 function calculateApCost(parentAp: number, stage: number, variantType: VariantType): number {
-  // Logic: Parent AP + Stage AP Increase + Variant Modifier
-  // Stage 2, 3, 4, 5 add +1 AP (cumulative). 
-  // But here we are just going from Parent -> Child (1 stage difference).
-  // So we just add the increment for the *new* stage if applicable.
-  
-  // Stage AP increases at stages 2, 4, 5?
-  // Docs say:
-  // Stage 0: +0
-  // Stage 1: +0
-  // Stage 2: +1
-  // Stage 3: +1
-  // Stage 4: +2
-  // Stage 5: +2
-  // This seems to be "total increase from base".
-  // Let's stick to a simpler incremental logic:
-  // AP increases by 1 at Stage 2 and Stage 4.
-  
+  // Logic: Parent AP + Stage Increment (at 2 & 4) + Modifier
   let stageIncrease = 0
   if (stage === 2 || stage === 4) stageIncrease = 1
   
   const modifier = VARIANT_CONFIGS[variantType].apModifier
-  return parentAp + stageIncrease + modifier
+  
+  // Ensure minimum 1 AP
+  return Math.max(1, parentAp + stageIncrease + modifier)
 }
 
 function calculateCooldown(parentCd: number, stage: number, variantType: VariantType): number {
-  // Logic: Parent CD + Stage CD Increase + Variant Modifier
-  // CD increases by 1 at Stage 3 and Stage 5
-  
+  // Logic: Parent CD + Stage Increment (at 3 & 5) + Modifier
   let stageIncrease = 0
   if (stage === 3 || stage === 5) stageIncrease = 1
   
   const modifier = VARIANT_CONFIGS[variantType].cdModifier
+  
+  // Ensure minimum 1 Turn (unless we add 0 CD skills later, but turn based usually needs 1)
   return Math.max(1, parentCd + stageIncrease + modifier)
-}
-
-function calculateBuffDuration(stage: number): number {
-  // 3 + (2 × stage) turns
-  return 3 + (2 * stage)
-}
-
-function calculateDebuffDuration(stage: number): number {
-  // 2 + stage turns
-  return 2 + stage
 }
 
 function generateName(parentName: string, variantType: VariantType): string {
   const prefix = getRandomElement(VARIANT_PREFIXES[variantType])
   
-  // Extract the core action from parent name (last word usually)
-  const words = parentName.split(' ')
-  const coreAction = words[words.length - 1]
+  // Simple heuristic: If parent name is "Fireball", child is "Great Fireball".
+  // If parent is "Great Fireball", we replace "Great" with "Massive" or append?
+  // Ideally, we keep the core name.
   
-  return `${prefix} ${coreAction}`
+  // Simplest approach: Always prefix. 
+  // "Slash" -> "Double Slash" -> "Infinite Double Slash" (gets long)
+  // Better: Try to identify core name.
+  
+  // For now, let's just append prefix to the START of the parent name, 
+  // but if the parent name already has 3+ words, maybe we replace the first word?
+  // Let's stick to prefixing for now, admin can edit.
+  
+  return `${prefix} ${parentName}`
 }
 
 function generateEffect(
   variantType: VariantType, 
   ampPercent: number, 
-  buffType?: string, 
-  debuffType?: string,
-  buffDuration?: number,
-  debuffDuration?: number,
-  hitCount?: number
+  damageType: string,
+  stage: number,
+  hitCount: number = 1
 ): string {
-  let template = getRandomElement(VARIANT_EFFECTS[variantType])
+  let template = VARIANT_CONFIGS[variantType].descriptionTemplate
   
-  // Replace placeholders
+  // Replace Amp
   template = template.replace('{amp}', String(ampPercent))
   
-  if (buffType && buffDuration) {
-    const buffDesc = BUFF_DESCRIPTIONS[buffType].replace('{turns}', String(buffDuration))
-    template = template.replace('{buff}', buffDesc)
+  // Replace Hits
+  template = template.replace('{hits}', String(hitCount))
+  
+  // Replace Status (DoT)
+  if (variantType === 'dot') {
+    const status = damageType === 'magic' ? 'Burn' : damageType === 'physical' ? 'Bleed' : 'Weakness'
+    const duration = 2 + Math.floor(stage / 2)
+    template = template.replace('{status}', status).replace('{duration}', String(duration))
   }
   
-  if (debuffType && debuffDuration) {
-    const debuffDesc = DEBUFF_DESCRIPTIONS[debuffType].replace('{turns}', String(debuffDuration))
-    template = template.replace('{debuff}', debuffDesc)
+  // Replace Control
+  if (variantType === 'control') {
+    const control = getRandomElement(CONTROL_EFFECTS)
+    template = template.replace('{control}', control)
   }
   
-  if (hitCount) {
-    template = template.replace('{hits}', String(hitCount))
+  // Replace Sustain
+  if (variantType === 'sustain') {
+    template = template.replace('{heal}', '20')
+  }
+  
+  // Replace Defense
+  if (variantType === 'defense') {
+    const buff = getRandomElement(DEFENSIVE_BUFFS)
+    const duration = 2
+    template = template.replace('{buff}', buff).replace('{duration}', String(duration))
   }
   
   return template
@@ -307,13 +278,13 @@ function generateEffect(
 
 export async function POST(request: Request) {
   try {
-    const { parentId, parentName, parentStage, starterSkillName } = await request.json()
+    const { parentId, parentName, parentStage, starterSkillName, selectedVariants } = await request.json()
     
     if (!parentId || parentStage === undefined) {
       return NextResponse.json({ error: 'parentId and parentStage are required' }, { status: 400 })
     }
     
-    // Get parent skill to inherit weapon requirement and utility mode
+    // Get parent skill
     const parentSkill = await prisma.skill.findUnique({
       where: { id: parentId }
     })
@@ -328,7 +299,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Maximum stage (5) reached' }, { status: 400 })
     }
     
-    // Check if children already exist
+    // Check existing
     const existingChildren = await prisma.skill.findMany({
       where: { parentId }
     })
@@ -341,117 +312,106 @@ export async function POST(request: Request) {
       })
     }
     
-    // Select variants: 1 upgrade (always) + 4 random from 9
-    const shuffledVariants = shuffleArray(RANDOM_VARIANTS)
-    const selectedVariants: VariantType[] = ['upgrade', ...shuffledVariants.slice(0, 4)]
+    // Determine variants to generate
+    // If selectedVariants provided (array of strings), use those.
+    // Otherwise, generate based on Tier Logic.
     
-    // Generate 5 children
-    const children = []
-    const usedNames = new Set<string>()
+    let variantsToUse: VariantType[] = []
     
-    for (const variantType of selectedVariants) {
-      // Generate unique name
-      let name = generateName(parentName, variantType)
-      let attempts = 0
-      while (usedNames.has(name) && attempts < 10) {
-        name = generateName(parentName, variantType)
-        attempts++
-      }
-      usedNames.add(name)
+    if (selectedVariants && Array.isArray(selectedVariants) && selectedVariants.length > 0) {
+      variantsToUse = selectedVariants as VariantType[]
+    } else {
+      // TIERED EVOLUTION LOGIC
+      // Stage is the PARENT stage. Child will be parentStage + 1.
+      // Child Stage 1 & 2: Tier 1 (Refinement)
+      // Child Stage 3 & 4: Tier 2 (Mutation)
+      // Child Stage 5: Tier 3 (Ascension)
       
-      // Calculate stats
+      let tierPool: VariantType[] = []
+      
+      if (newStage <= 2) {
+        // Tier 1: Refinement
+        tierPool = ['power', 'rapid', 'efficiency', 'defense']
+      } else if (newStage <= 4) {
+        // Tier 2: Mutation
+        tierPool = ['multihit', 'aoe', 'dot', 'sustain']
+      } else {
+        // Tier 3: Ascension (Stage 5)
+        tierPool = ['execute', 'control', 'power']
+      }
+      
+      // Select random variants from the tier pool
+      // For Stage 5, we might just return all of them since pool is small (3)
+      // For others, pick 4 randoms or all if length <= 4
+      
+      if (tierPool.length <= 4) {
+        variantsToUse = tierPool
+      } else {
+        const shuffled = tierPool.sort(() => 0.5 - Math.random())
+        variantsToUse = shuffled.slice(0, 4)
+      }
+      
+      // Always ensure 'power' is included for Stage 1/2 if not picked? 
+      // Tier 1 pool includes power, so it might be picked.
+      // If we want to guarantee at least one "Upgrade" (Power), we can force it.
+      // But for Tier 2, Power isn't in the pool (it's mutation time).
+      // Let's stick to the pool logic for strict tiering.
+    }
+    
+    const children = []
+    
+    for (const variantType of variantsToUse) {
+      // Generate Stats
       const ampPercent = calculateAmpPercent(parentSkill.ampPercent, newStage, variantType, parentSkill.damageType)
       const apCost = calculateApCost(parentSkill.apCost, newStage, variantType)
       const cooldown = calculateCooldown(parentSkill.cooldown, newStage, variantType)
-      const config = VARIANT_CONFIGS[variantType]
       
-      // Variant-specific fields
-      let buffType: string | null = null
-      let buffDuration: number | null = null
-      let debuffType: string | null = null
-      let debuffDuration: number | null = null
-      let lifestealPercent: number | null = null
-      let hitCount: number = 1
+      // Special logic for specific variants
+      let hitCount = 1
+      let targetType = 'single'
       let isCounter = false
-      let triggerCondition: string | null = null
       
-      if (variantType === 'buff_variant') {
-        buffType = getRandomElement(BUFF_TYPES)
-        buffDuration = calculateBuffDuration(newStage)
+      if (variantType === 'multihit') {
+        // Stage 1-2: 2 hits, Stage 3-4: 3 hits, Stage 5: 4 hits
+        hitCount = 2 + Math.floor(newStage / 2)
       }
       
-      if (variantType === 'debuff_variant') {
-        debuffType = getRandomElement(DEBUFF_TYPES)
-        debuffDuration = calculateDebuffDuration(newStage)
+      if (variantType === 'aoe') {
+        targetType = 'aoe_circle' // or cone, simplify to circle for now
       }
       
-      if (variantType === 'sustain_variant') {
-        lifestealPercent = 10
+      if (variantType === 'defense') {
+        isCounter = true // flag as counter for potential mechanics
       }
       
-      if (variantType === 'combo_variant') {
-        hitCount = 2 + Math.floor(newStage / 2) // 2-4 hits based on stage
-        if (hitCount > 4) hitCount = 4
-      }
+      // Name & Description
+      const name = generateName(parentName, variantType)
+      const description = generateEffect(variantType, ampPercent, parentSkill.damageType, newStage, hitCount)
       
-      if (variantType === 'counter_variant') {
-        isCounter = true
-        triggerCondition = getRandomElement(['after_dodge', 'after_parry', 'on_hit_taken'])
-      }
-      
-      // Generate effect description
-      const description = generateEffect(
-        variantType, 
-        ampPercent, 
-        buffType || undefined, 
-        debuffType || undefined,
-        buffDuration || undefined,
-        debuffDuration || undefined,
-        hitCount > 1 ? hitCount : undefined
-      )
-      
-      // Determine weapon requirement for child
-      // Most variants inherit parent's requirement
-      // Mobility variant can become 'any' (movement skills work with any weapon)
-      let childWeaponRequirement = parentSkill.weaponRequirement
-      if (variantType === 'mobility_variant') {
-        childWeaponRequirement = 'any'
-      }
-      
-      // Inherit utility mode from parent (magic skills keep their enchant ability)
-      const childHasUtilityMode = parentSkill.hasUtilityMode
-      const childUtilityEffect = parentSkill.utilityEffect
-      const childUtilityDuration = parentSkill.utilityDuration
-      
-      // Inherit damage type from parent
-      const childDamageType = parentSkill.damageType
+      // Inheritance
+      // Mobility variant might allow 'any' weapon if parent was strict
+      let weaponRequirement = parentSkill.weaponRequirement
+      // if (variantType === 'rapid' && weaponRequirement !== 'any') weaponRequirement = 'any' // Optional idea
       
       const child = await prisma.skill.create({
         data: {
           name,
           description,
-          skillType: config.skillType,
-          damageType: childDamageType,
-          weaponRequirement: childWeaponRequirement,
-          hasUtilityMode: childHasUtilityMode,
-          utilityEffect: childUtilityEffect,
-          utilityDuration: childUtilityDuration,
+          skillType: parentSkill.skillType, // Keep parent's category (Attack, etc.)
+          damageType: parentSkill.damageType,
+          weaponRequirement,
+          hasUtilityMode: parentSkill.hasUtilityMode,
+          utilityEffect: parentSkill.utilityEffect,
+          utilityDuration: parentSkill.utilityDuration,
           stage: newStage,
           variantType,
           ampPercent,
           apCost,
           cooldown,
-          targetType: config.targetType,
-          range: parentSkill.range,
+          targetType,
+          range: parentSkill.range, // Inherit range (AoE might modify this later)
           hitCount,
-          buffType,
-          buffDuration,
-          debuffType,
-          debuffDuration,
-          lifestealPercent,
           isCounter,
-          triggerCondition,
-          passive: null,
           starterSkillName,
           parentId,
           isSaved: false,
@@ -464,8 +424,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       success: true, 
       children,
-      message: `Generated ${children.length} child skills (1 upgrade + 4 random variants)`
+      message: `Generated ${children.length} child skills`
     })
+
   } catch (error) {
     console.error('Error generating children:', error)
     return NextResponse.json({ error: 'Failed to generate children', details: String(error) }, { status: 500 })

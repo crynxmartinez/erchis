@@ -50,19 +50,33 @@ interface Skill {
   children?: Skill[]
 }
 
+// All available variants
+const ALL_VARIANTS = [
+  'power',
+  'multihit',
+  'aoe',
+  'rapid',
+  'efficiency',
+  'dot',
+  'control',
+  'sustain',
+  'defense',
+  'execute',
+]
+
 // Variant type configuration
 const VARIANT_CONFIG: Record<string, { icon: string; color: string; label: string }> = {
-  root:             { icon: '🌱', color: 'bg-green-900/50 border-green-500 text-green-300', label: 'Root' },
-  upgrade:          { icon: '⬆️', color: 'bg-green-900/50 border-green-500 text-green-300', label: 'Upgrade' },
-  original_variant: { icon: '🔄', color: 'bg-blue-900/50 border-blue-500 text-blue-300', label: 'Original Variant' },
-  buff_variant:     { icon: '💪', color: 'bg-yellow-900/50 border-yellow-500 text-yellow-300', label: 'Buff Variant' },
-  debuff_variant:   { icon: '💀', color: 'bg-purple-900/50 border-purple-500 text-purple-300', label: 'Debuff Variant' },
-  unique:           { icon: '✨', color: 'bg-orange-900/50 border-orange-500 text-orange-300', label: 'Unique' },
-  aoe_variant:      { icon: '💥', color: 'bg-red-900/50 border-red-500 text-red-300', label: 'AoE Variant' },
-  combo_variant:    { icon: '⛓️', color: 'bg-cyan-900/50 border-cyan-500 text-cyan-300', label: 'Combo Variant' },
-  counter_variant:  { icon: '🛡️', color: 'bg-gray-700/50 border-gray-400 text-gray-300', label: 'Counter Variant' },
-  mobility_variant: { icon: '💨', color: 'bg-pink-900/50 border-pink-500 text-pink-300', label: 'Mobility Variant' },
-  sustain_variant:  { icon: '❤️‍🩹', color: 'bg-slate-700/50 border-slate-400 text-slate-300', label: 'Sustain Variant' },
+  root:       { icon: '🌱', color: 'bg-green-900/50 border-green-500 text-green-300', label: 'Root' },
+  power:      { icon: '💥', color: 'bg-red-900/50 border-red-500 text-red-300', label: 'Power' },
+  multihit:   { icon: '⚔️', color: 'bg-cyan-900/50 border-cyan-500 text-cyan-300', label: 'Multi-Hit' },
+  aoe:        { icon: '🌊', color: 'bg-blue-900/50 border-blue-500 text-blue-300', label: 'AoE' },
+  rapid:      { icon: '⚡', color: 'bg-yellow-900/50 border-yellow-500 text-yellow-300', label: 'Rapid' },
+  efficiency: { icon: '💧', color: 'bg-emerald-900/50 border-emerald-500 text-emerald-300', label: 'Efficiency' },
+  dot:        { icon: '☠️', color: 'bg-purple-900/50 border-purple-500 text-purple-300', label: 'Affliction' },
+  control:    { icon: '🛑', color: 'bg-orange-900/50 border-orange-500 text-orange-300', label: 'Control' },
+  sustain:    { icon: '🩸', color: 'bg-rose-900/50 border-rose-500 text-rose-300', label: 'Sustain' },
+  defense:    { icon: '🛡️', color: 'bg-slate-700/50 border-slate-400 text-slate-300', label: 'Defense' },
+  execute:    { icon: '💀', color: 'bg-gray-700/50 border-gray-400 text-gray-300', label: 'Execute' },
 }
 
 type ViewState = 
@@ -90,8 +104,20 @@ export default function SkillDatabaseBuilder() {
   const [editMode, setEditMode] = useState(false)
   const [editedSkill, setEditedSkill] = useState<Skill | null>(null)
   
+  // Generation Options
+  const [selectedVariants, setSelectedVariants] = useState<string[]>([])
+  
   // Progress tracking
   const [progress, setProgress] = useState({ total: 0, byStage: {} as Record<number, number> })
+
+  // Toggle variant selection
+  const toggleVariant = (variant: string) => {
+    setSelectedVariants(prev => 
+      prev.includes(variant) 
+        ? prev.filter(v => v !== variant)
+        : [...prev, variant]
+    )
+  }
 
   // ============================================
   // HANDLERS
@@ -271,6 +297,7 @@ export default function SkillDatabaseBuilder() {
           parentName: currentSkill.name,
           parentStage: currentSkill.stage,
           starterSkillName: currentSkill.starterSkillName,
+          selectedVariants: selectedVariants.length > 0 ? selectedVariants : undefined,
         })
       })
       
@@ -836,6 +863,33 @@ export default function SkillDatabaseBuilder() {
                       {currentSkill.passive}
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Variant Selection (Optional) */}
+              {currentSkill.stage < 5 && childSkills.length === 0 && (
+                <div className="mb-4 bg-black/20 rounded p-3 border border-white/10">
+                  <div className="text-xs text-gray-400 mb-2">Force Specific Variants (Optional - Leave empty for Tier logic)</div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+                    {ALL_VARIANTS.map(variant => {
+                      const config = VARIANT_CONFIG[variant]
+                      const isSelected = selectedVariants.includes(variant)
+                      return (
+                        <button
+                          key={variant}
+                          onClick={() => toggleVariant(variant)}
+                          className={`text-xs p-2 rounded border transition-colors flex items-center gap-1 ${
+                            isSelected 
+                              ? config.color
+                              : 'border-gray-700 bg-gray-900/50 text-gray-500 hover:border-gray-500'
+                          }`}
+                        >
+                          <span>{config.icon}</span>
+                          <span>{config.label}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
                 </div>
               )}
 
