@@ -1,233 +1,30 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { SKILL_TYPE_CATEGORIES, SkillTypeCategory, StarterSkill } from '@/data/universal-skills-data'
-
-// ============================================
-// TYPES
-// ============================================
-
-interface Skill {
-  id: string
-  name: string
-  description: string
-  executionDescription?: string | null
-  parentId: string | null
-  parent?: { id: string; name: string } | null
-  stage: number
-  skillType: string
-  damageType: string
-  variantType: string
-  // Weapon requirement
-  weaponRequirement: string
-  hasUtilityMode: boolean
-  utilityEffect?: string | null
-  utilityDuration?: number | null
-  // Combat stats
-  ampPercent: number
-  apCost: number
-  cooldown: number
-  // Targeting
-  targetType: string
-  range: number
-  hitCount: number
-  // Effects
-  buffType?: string | null
-  buffDuration?: number | null
-  debuffType?: string | null
-  debuffDuration?: number | null
-  debuffChance?: number | null
-  lifestealPercent?: number | null
-  armorPierce?: number | null
-  bonusVsGuard?: number | null
-  bonusVsDebuffed?: number | null
-  // Counter
-  isCounter: boolean
-  triggerCondition?: string | null
-  // Other
-  passive: string | null
-  starterSkillName: string
-  isSaved: boolean
-  children?: Skill[]
-}
-
-// All available variants
-const ALL_VARIANTS = [
-  'power',
-  'multihit',
-  'aoe',
-  'rapid',
-  'efficiency',
-  'dot',
-  'control',
-  'sustain',
-  'defense',
-  'execute',
-]
-
-// ============================================
-// CONSTANTS
-// ============================================
-
-const DAMAGE_TYPES = ['physical', 'magic', 'none']
-const WEAPON_REQS = ['melee_only', 'ranged_only', 'magic_only', 'any']
-const TARGET_TYPES = ['single', 'self', 'aoe_circle', 'aoe_cone', 'aoe_line', 'all_enemies']
-
-// Variant type configuration
-const VARIANT_CONFIG: Record<string, { icon: string; color: string; label: string }> = {
-  root:       { icon: '🌱', color: 'bg-green-900/50 border-green-500 text-green-300', label: 'Root' },
-  power:      { icon: '💥', color: 'bg-red-900/50 border-red-500 text-red-300', label: 'Power' },
-  multihit:   { icon: '⚔️', color: 'bg-cyan-900/50 border-cyan-500 text-cyan-300', label: 'Multi-Hit' },
-  aoe:        { icon: '🌊', color: 'bg-blue-900/50 border-blue-500 text-blue-300', label: 'AoE' },
-  rapid:      { icon: '⚡', color: 'bg-yellow-900/50 border-yellow-500 text-yellow-300', label: 'Rapid' },
-  efficiency: { icon: '💧', color: 'bg-emerald-900/50 border-emerald-500 text-emerald-300', label: 'Efficiency' },
-  dot:        { icon: '☠️', color: 'bg-purple-900/50 border-purple-500 text-purple-300', label: 'Affliction' },
-  control:    { icon: '🛑', color: 'bg-orange-900/50 border-orange-500 text-orange-300', label: 'Control' },
-  sustain:    { icon: '🩸', color: 'bg-rose-900/50 border-rose-500 text-rose-300', label: 'Sustain' },
-  defense:    { icon: '🛡️', color: 'bg-slate-700/50 border-slate-400 text-slate-300', label: 'Defense' },
-  execute:    { icon: '💀', color: 'bg-gray-700/50 border-gray-400 text-gray-300', label: 'Execute' },
-}
-
-type ViewState = 
-  | { type: 'categories' }
-  | { type: 'starters'; category: SkillTypeCategory }
-  | { type: 'skill'; skill: Skill; breadcrumb: Skill[] }
-
-// ============================================
-// UI SECTIONS COMPONENT (Internal)
-// ============================================
-
-const SectionHeader = ({ title, icon }: { title: string, icon: string }) => (
-  <div className="flex items-center gap-2 mb-4 pb-2 border-b border-white/10">
-    <span className="text-xl">{icon}</span>
-    <h3 className="text-lg font-bold text-gray-200">{title}</h3>
-  </div>
-)
-
-const InputField = ({ 
-  label, 
-  value, 
-  onChange, 
-  type = "text", 
-  placeholder = "", 
-  min,
-  color = "text-white",
-  width = "w-full"
-}: { 
-  label: string, 
-  value: string | number, 
-  onChange: (val: string) => void, 
-  type?: string, 
-  placeholder?: string,
-  min?: number,
-  color?: string,
-  width?: string
-}) => (
-  <div className="bg-black/20 rounded p-3 border border-white/5">
-    <div className="text-xs text-gray-400 mb-1 font-medium">{label}</div>
-    <input
-      type={type}
-      min={min}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className={`${width} bg-transparent border-b border-white/30 font-bold ${color} focus:outline-none focus:border-[#6eb5ff] transition-colors`}
-    />
-  </div>
-)
-
-const SelectField = ({ 
-  label, 
-  value, 
-  options, 
-  onChange, 
-  color = "text-white" 
-}: { 
-  label: string, 
-  value: string, 
-  options: string[], 
-  onChange: (val: string) => void, 
-  color?: string 
-}) => (
-  <div className="bg-black/20 rounded p-3 border border-white/5">
-    <div className="text-xs text-gray-400 mb-1 font-medium">{label}</div>
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className={`w-full bg-black/40 rounded px-2 py-1 border border-white/20 font-bold ${color} focus:outline-none focus:border-[#6eb5ff]`}
-    >
-      {options.map(opt => (
-        <option key={opt} value={opt} className="bg-[#242424]">{opt.replace(/_/g, ' ')}</option>
-      ))}
-    </select>
-  </div>
-)
-
-const BooleanToggle = ({
-  label,
-  value,
-  onChange,
-  color = "text-cyan-400"
-}: {
-  label: string,
-  value: boolean,
-  onChange: (val: boolean) => void,
-  color?: string
-}) => (
-  <div className="bg-black/20 rounded p-3 border border-white/5 flex items-center justify-between cursor-pointer hover:bg-black/30 transition-colors" onClick={() => onChange(!value)}>
-    <div className="text-xs text-gray-400 font-medium">{label}</div>
-    <div className={`font-bold ${value ? color : 'text-gray-600'}`}>
-      {value ? 'YES' : 'NO'}
-    </div>
-  </div>
-)
-
-// ============================================
-// MAIN COMPONENT
-// ============================================
+import { useState } from 'react'
+import { SkillTypeCategory, StarterSkill } from '@/data/universal-skills-data'
+import { SkillSidebar } from './components/SkillSidebar'
+import { SkillDashboard } from './components/SkillDashboard'
+import { SkillEditor } from './components/SkillEditor'
+import { Skill } from './types'
 
 export default function SkillDatabaseBuilder() {
-  // Navigation state
-  const [view, setView] = useState<ViewState>({ type: 'categories' })
+  // Navigation
+  const [view, setView] = useState<'dashboard' | 'skill'>('dashboard')
   
-  // Data state
+  // Data
   const [currentSkill, setCurrentSkill] = useState<Skill | null>(null)
   const [childSkills, setChildSkills] = useState<Skill[]>([])
   const [breadcrumb, setBreadcrumb] = useState<Skill[]>([])
   
-  // UI state
+  // UI
   const [loading, setLoading] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [message, setMessage] = useState('')
-  const [editMode, setEditMode] = useState(false)
-  const [editedSkill, setEditedSkill] = useState<Skill | null>(null)
-  
-  // Generation Options
-  const [selectedVariants, setSelectedVariants] = useState<string[]>([])
-  
-  // Progress tracking
-  const [progress, setProgress] = useState({ total: 0, byStage: {} as Record<number, number> })
-
-  // Toggle variant selection
-  const toggleVariant = (variant: string) => {
-    setSelectedVariants(prev => 
-      prev.includes(variant) 
-        ? prev.filter(v => v !== variant)
-        : [...prev, variant]
-    )
-  }
 
   // ============================================
   // HANDLERS
   // ============================================
 
-  // Select a skill type category
-  const handleSelectCategory = (category: SkillTypeCategory) => {
-    setView({ type: 'starters', category })
-    setMessage('')
-  }
-
-  // Select a starter skill
   const handleSelectStarterSkill = async (category: SkillTypeCategory, starter: StarterSkill) => {
     setLoading(true)
     setMessage('')
@@ -241,6 +38,7 @@ export default function SkillDatabaseBuilder() {
       
       if (data.skill) {
         // Skill exists in database - update it with correct values from StarterSkill
+        // This ensures the database is in sync with the code definition
         const updateResponse = await fetch('/api/skills/update', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -261,8 +59,9 @@ export default function SkillDatabaseBuilder() {
         if (updateData.success && updateData.skill) {
           skill = updateData.skill
         } else {
-          // If update fails, still use existing skill
+          // If update fails, still use existing skill but warn
           skill = data.skill
+          console.warn('Failed to sync starter skill with code definition')
         }
       } else {
         // Create new starter skill in database
@@ -304,8 +103,7 @@ export default function SkillDatabaseBuilder() {
       setCurrentSkill(skill)
       setBreadcrumb([skill])
       await loadChildSkills(skill.id)
-      await loadProgress(starter.name)
-      setView({ type: 'skill', skill, breadcrumb: [skill] })
+      setView('skill')
     } catch (error) {
       setMessage(`❌ Error: ${error}`)
     }
@@ -313,7 +111,6 @@ export default function SkillDatabaseBuilder() {
     setLoading(false)
   }
 
-  // Load child skills for a skill
   const loadChildSkills = async (parentId: string) => {
     try {
       const response = await fetch(`/api/skills/children?parentId=${parentId}`)
@@ -325,18 +122,6 @@ export default function SkillDatabaseBuilder() {
     }
   }
 
-  // Load progress for a starter skill tree
-  const loadProgress = async (starterSkillName: string) => {
-    try {
-      const response = await fetch(`/api/skills/progress?starter=${encodeURIComponent(starterSkillName)}`)
-      const data = await response.json()
-      setProgress(data)
-    } catch (error) {
-      console.error('Failed to load progress:', error)
-    }
-  }
-
-  // Navigate to a child skill
   const handleNavigateToSkill = async (skill: Skill) => {
     setLoading(true)
     
@@ -350,17 +135,15 @@ export default function SkillDatabaseBuilder() {
       setCurrentSkill(fullSkill)
       setBreadcrumb(newBreadcrumb)
       await loadChildSkills(fullSkill.id)
-      setView({ type: 'skill', skill: fullSkill, breadcrumb: newBreadcrumb })
+      setView('skill')
     }
     
     setLoading(false)
   }
 
-  // Navigate back via breadcrumb
   const handleBreadcrumbClick = async (index: number) => {
     if (index === -1) {
-      // Go back to categories
-      setView({ type: 'categories' })
+      setView('dashboard')
       setCurrentSkill(null)
       setBreadcrumb([])
       setChildSkills([])
@@ -372,11 +155,10 @@ export default function SkillDatabaseBuilder() {
     setCurrentSkill(skill)
     setBreadcrumb(newBreadcrumb)
     await loadChildSkills(skill.id)
-    setView({ type: 'skill', skill, breadcrumb: newBreadcrumb })
+    setView('skill')
   }
 
-  // Generate children for current skill
-  const handleGenerateChildren = async () => {
+  const handleGenerateChildren = async (variants?: string[]) => {
     if (!currentSkill) return
     if (currentSkill.stage >= 5) {
       setMessage('⚠️ Maximum stage reached (Stage 5)')
@@ -395,7 +177,7 @@ export default function SkillDatabaseBuilder() {
           parentName: currentSkill.name,
           parentStage: currentSkill.stage,
           starterSkillName: currentSkill.starterSkillName,
-          selectedVariants: selectedVariants.length > 0 ? selectedVariants : undefined,
+          selectedVariants: variants,
         })
       })
       
@@ -404,7 +186,6 @@ export default function SkillDatabaseBuilder() {
       if (data.success) {
         setMessage(`✅ Generated ${data.children.length} child skills!`)
         setChildSkills(data.children)
-        await loadProgress(currentSkill.starterSkillName)
       } else {
         setMessage(`❌ Error: ${data.error}`)
       }
@@ -415,23 +196,19 @@ export default function SkillDatabaseBuilder() {
     setGenerating(false)
   }
 
-  // Save edited skill
-  const handleSaveSkill = async () => {
-    if (!editedSkill) return
-    
+  const handleSaveSkill = async (skillToSave: Skill) => {
     try {
       const response = await fetch('/api/skills/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editedSkill)
+        body: JSON.stringify(skillToSave)
       })
       
       const data = await response.json()
       
       if (data.success) {
-        setCurrentSkill(editedSkill)
+        setCurrentSkill(skillToSave)
         setMessage('✅ Skill saved!')
-        setEditMode(false)
       } else {
         setMessage(`❌ Error: ${data.error}`)
       }
@@ -440,7 +217,6 @@ export default function SkillDatabaseBuilder() {
     }
   }
 
-  // Save all generated children to database
   const handleSaveAllChildren = async () => {
     if (childSkills.length === 0) return
     
@@ -469,7 +245,6 @@ export default function SkillDatabaseBuilder() {
     }
   }
 
-  // Regenerate children (delete existing unsaved and generate new)
   const handleRegenerateChildren = async () => {
     if (!currentSkill) return
     
@@ -488,7 +263,7 @@ export default function SkillDatabaseBuilder() {
         throw new Error('Failed to delete existing children')
       }
       
-      // Generate new children
+      // Generate new children (without specific variants, random logic applies)
       const response = await fetch('/api/skills/generate-children', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -515,7 +290,6 @@ export default function SkillDatabaseBuilder() {
     setGenerating(false)
   }
 
-  // Reset entire skill tree (delete all children of starter skill)
   const handleResetTree = async () => {
     if (!currentSkill) return
     
@@ -540,7 +314,6 @@ export default function SkillDatabaseBuilder() {
       if (data.success) {
         setMessage(`✅ Deleted ${data.count} skills. All trees reset to starter skills only.`)
         setChildSkills([])
-        await loadProgress(starterName)
       } else {
         setMessage(`❌ Error: ${data.error}`)
       }
@@ -549,880 +322,55 @@ export default function SkillDatabaseBuilder() {
     }
   }
 
-  // ============================================
-  // HELPER FUNCTIONS
-  // ============================================
-
-  const getVariantColor = (variantType: string) => {
-    const config = VARIANT_CONFIG[variantType]
-    return config?.color || 'bg-gray-900/50 border-gray-500 text-gray-300'
-  }
-
-  const getVariantIcon = (variantType: string) => {
-    const config = VARIANT_CONFIG[variantType]
-    return config?.icon || '❓'
-  }
-
-  const getStageColor = (stage: number) => {
-    const colors = [
-      'border-gray-500 text-gray-400',
-      'border-green-500 text-green-400',
-      'border-blue-500 text-blue-400',
-      'border-purple-500 text-purple-400',
-      'border-orange-500 text-orange-400',
-      'border-red-500 text-red-400',
-    ]
-    return colors[stage] || colors[0]
-  }
-
-  // ============================================
-  // RENDER
-  // ============================================
-
   return (
-    <div className="min-h-screen bg-[#1a1a1a] text-white">
-      {/* Header */}
-      <header className="bg-[#242424] border-b border-[#333] p-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-[#6eb5ff]">⚔️ Skill Database Builder</h1>
-            <p className="text-sm text-gray-400">Build skill trees one skill at a time (Admin Tool)</p>
+    <div className="flex h-screen bg-[#111] text-white overflow-hidden font-sans">
+      <SkillSidebar 
+        onSelectStarter={handleSelectStarterSkill} 
+        selectedStarterName={currentSkill?.starterSkillName || (breadcrumb.length > 0 ? breadcrumb[0].name : undefined)}
+      />
+      
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        {/* Message Toast */}
+        {message && (
+          <div className="absolute top-4 right-4 z-50 animate-in slide-in-from-top-2 fade-in">
+            <div className={`px-4 py-3 rounded-lg shadow-lg border backdrop-blur-md flex items-center gap-3 ${
+              message.includes('✅') ? 'bg-green-900/80 border-green-500/50 text-green-100' : 
+              message.includes('⚠️') ? 'bg-yellow-900/80 border-yellow-500/50 text-yellow-100' :
+              'bg-red-900/80 border-red-500/50 text-red-100'
+            }`}>
+              <span>{message}</span>
+              <button onClick={() => setMessage('')} className="opacity-70 hover:opacity-100 font-bold ml-2">✕</button>
+            </div>
           </div>
-          <a
-            href="/floor/1/town"
-            className="flex items-center gap-2 px-4 py-2 bg-[#333] hover:bg-[#444] rounded-lg text-gray-300 hover:text-white transition-colors"
-          >
-            <span>🏠</span>
-            <span className="text-sm font-medium">Home</span>
-          </a>
-        </div>
-      </header>
+        )}
 
-      {/* Breadcrumb */}
-      <div className="max-w-6xl mx-auto px-4 py-3 border-b border-[#333]">
-        <div className="flex items-center gap-2 text-sm">
-          <button 
-            onClick={() => handleBreadcrumbClick(-1)}
-            className="text-[#6eb5ff] hover:underline"
-          >
-            🏠 Skill Types
-          </button>
-          
-          {view.type === 'starters' && (
-            <>
-              <span className="text-gray-500">›</span>
-              <span className="text-white">{view.category.icon} {view.category.name} Skills</span>
-            </>
-          )}
-          
-          {view.type === 'skill' && breadcrumb.map((skill, index) => (
-            <span key={skill.id} className="flex items-center gap-2">
-              <span className="text-gray-500">›</span>
-              {index < breadcrumb.length - 1 ? (
-                <button 
-                  onClick={() => handleBreadcrumbClick(index)}
-                  className="text-[#6eb5ff] hover:underline"
-                >
-                  {skill.name}
-                </button>
-              ) : (
-                <span className="text-white font-medium">{skill.name}</span>
-              )}
-            </span>
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center bg-[#111]">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-12 h-12 border-4 border-[#6eb5ff] border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-gray-400 animate-pulse">Loading skill data...</p>
+            </div>
+          </div>
+        ) : (
+          view === 'skill' && currentSkill ? (
+            <SkillEditor 
+              skill={currentSkill}
+              childSkills={childSkills}
+              breadcrumb={breadcrumb}
+              onNavigate={handleNavigateToSkill}
+              onBreadcrumbClick={handleBreadcrumbClick}
+              onSave={handleSaveSkill}
+              onGenerateChildren={handleGenerateChildren}
+              onRegenerateChildren={handleRegenerateChildren}
+              onSaveAllChildren={handleSaveAllChildren}
+              onResetTree={handleResetTree}
+              generating={generating}
+            />
+          ) : (
+            <SkillDashboard />
+          )
+        )}
       </div>
-
-      {/* Message Banner */}
-      {message && (
-        <div className="max-w-6xl mx-auto px-4 pt-4">
-          <div className={`p-3 rounded border ${message.includes('✅') ? 'bg-green-900/30 border-green-500 text-green-300' : message.includes('⚠️') ? 'bg-yellow-900/30 border-yellow-500 text-yellow-300' : 'bg-red-900/30 border-red-500 text-red-300'}`}>
-            {message}
-            <button onClick={() => setMessage('')} className="ml-4 text-xs opacity-70 hover:opacity-100">✕</button>
-          </div>
-        </div>
-      )}
-
-      {/* Progress Bar (only in skill view) */}
-      {view.type === 'skill' && progress.total > 0 && (
-        <div className="max-w-6xl mx-auto px-4 pt-4">
-          <div className="bg-[#242424] rounded-lg border border-[#333] p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-[#6eb5ff]">📊 Tree Progress: {currentSkill?.starterSkillName}</span>
-              <span className="text-sm text-gray-400">{progress.total} skills generated</span>
-            </div>
-            <div className="flex gap-2">
-              {[0, 1, 2, 3, 4, 5].map(stage => (
-                <div key={stage} className={`flex-1 text-center p-2 rounded border ${getStageColor(stage)}`}>
-                  <div className="text-xs opacity-70">S{stage}</div>
-                  <div className="font-bold">{progress.byStage[stage] || 0}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto p-4">
-        
-        {/* Loading State */}
-        {loading && (
-          <div className="text-center py-12">
-            <div className="text-4xl mb-4 animate-pulse">⏳</div>
-            <p className="text-gray-400">Loading...</p>
-          </div>
-        )}
-
-        {/* VIEW: Skill Type Categories */}
-        {!loading && view.type === 'categories' && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Choose Skill Type</h2>
-              <span className="text-sm text-gray-400">100 Starter Skills Total</span>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
-              {SKILL_TYPE_CATEGORIES.map(category => (
-                <button
-                  key={category.id}
-                  onClick={() => handleSelectCategory(category)}
-                  className={`border-2 rounded-lg p-4 text-left hover:scale-[1.02] transition-all ${category.color}`}
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-3xl">{category.icon}</span>
-                    <div>
-                      <div className="font-semibold text-lg">{category.name}</div>
-                      <div className="text-xs opacity-70">{category.skills.length} skills</div>
-                    </div>
-                  </div>
-                  <div className="text-xs opacity-80 mb-3">{category.description}</div>
-                  <div className={`text-xs px-2 py-1 rounded inline-block ${
-                    category.weaponRequirement === 'melee_only' ? 'bg-red-900/50 text-red-300' :
-                    category.weaponRequirement === 'ranged_only' ? 'bg-green-900/50 text-green-300' :
-                    category.weaponRequirement === 'magic_only' ? 'bg-purple-900/50 text-purple-300' :
-                    'bg-gray-900/50 text-gray-300'
-                  }`}>
-                    {category.weaponRequirement === 'melee_only' ? '⚔️ Melee Only' :
-                     category.weaponRequirement === 'ranged_only' ? '🏹 Ranged Only' :
-                     category.weaponRequirement === 'magic_only' ? '✨ Magic Only' :
-                     '🔄 Any Weapon'}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* VIEW: Starter Skills */}
-        {!loading && view.type === 'starters' && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">
-                {view.category.icon} {view.category.name} Skills
-              </h2>
-              <div className={`text-xs px-2 py-1 rounded ${
-                view.category.weaponRequirement === 'melee_only' ? 'bg-red-900/50 text-red-300' :
-                view.category.weaponRequirement === 'ranged_only' ? 'bg-green-900/50 text-green-300' :
-                view.category.weaponRequirement === 'magic_only' ? 'bg-purple-900/50 text-purple-300' :
-                'bg-gray-900/50 text-gray-300'
-              }`}>
-                {view.category.weaponRequirement === 'melee_only' ? '⚔️ Melee Only' :
-                 view.category.weaponRequirement === 'ranged_only' ? '🏹 Ranged Only' :
-                 view.category.weaponRequirement === 'magic_only' ? '✨ Magic Only' :
-                 '🔄 Any Weapon'}
-              </div>
-            </div>
-            <p className="text-sm text-gray-400 mb-4">{view.category.description}</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {view.category.skills.map((starter: StarterSkill) => (
-                <button
-                  key={starter.name}
-                  onClick={() => handleSelectStarterSkill(view.category, starter)}
-                  className="bg-[#242424] border border-[#444] rounded-lg p-4 text-left hover:border-[#6eb5ff] hover:bg-[#2a2a2a] transition-all"
-                >
-                  <div className="font-semibold mb-1">{starter.name}</div>
-                  <div className="text-xs text-gray-400 mb-2">{starter.subtype}</div>
-                  <div className="text-xs text-gray-500 line-clamp-2 mb-2">{starter.description}</div>
-                  {starter.hasUtilityMode && (
-                    <div className="text-xs text-cyan-400 mb-2">🔮 Can enchant weapons</div>
-                  )}
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    <span className="text-xs px-2 py-0.5 rounded bg-green-900/30 text-green-400">Stage 0</span>
-                    <span className={`text-xs px-2 py-0.5 rounded ${
-                      starter.damageType === 'magic' ? 'bg-purple-900/30 text-purple-400' : 
-                      starter.damageType === 'physical' ? 'bg-red-900/30 text-red-400' : 
-                      'bg-gray-900/30 text-gray-400'
-                    }`}>
-                      {starter.damageType}
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* VIEW: Skill Detail */}
-        {!loading && view.type === 'skill' && currentSkill && (
-          <div className="space-y-6">
-            
-            {/* =====================================================================================
-                EDIT MODE: COMPREHENSIVE BUILDER
-                ===================================================================================== */}
-            {editMode && editedSkill ? (
-              <div className="space-y-6">
-                
-                {/* 1. IDENTITY & CORE */}
-                <div className={`bg-[#242424] border-2 rounded-xl p-6 ${getVariantColor(editedSkill.variantType)}`}>
-                  <SectionHeader title="Core Identity" icon="🆔" />
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <InputField 
-                      label="Skill Name" 
-                      value={editedSkill.name} 
-                      onChange={(v) => setEditedSkill({...editedSkill, name: v})} 
-                      color="text-2xl"
-                    />
-                    <SelectField
-                      label="Variant Type"
-                      value={editedSkill.variantType}
-                      options={['root', ...ALL_VARIANTS]}
-                      onChange={(v) => setEditedSkill({...editedSkill, variantType: v})}
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-4 gap-4">
-                    <InputField 
-                      label="Stage" 
-                      value={editedSkill.stage} 
-                      onChange={(v) => setEditedSkill({...editedSkill, stage: parseInt(v) || 0})} 
-                      type="number"
-                      min={0}
-                    />
-                    <InputField 
-                      label="Skill Type" 
-                      value={editedSkill.skillType} 
-                      onChange={(v) => setEditedSkill({...editedSkill, skillType: v})} 
-                    />
-                    <SelectField
-                      label="Weapon Req"
-                      value={editedSkill.weaponRequirement}
-                      options={WEAPON_REQS}
-                      onChange={(v) => setEditedSkill({...editedSkill, weaponRequirement: v})}
-                      color={
-                        editedSkill.weaponRequirement === 'melee_only' ? 'text-red-400' :
-                        editedSkill.weaponRequirement === 'ranged_only' ? 'text-green-400' :
-                        editedSkill.weaponRequirement === 'magic_only' ? 'text-purple-400' : 'text-gray-400'
-                      }
-                    />
-                    <SelectField
-                      label="Damage Type"
-                      value={editedSkill.damageType}
-                      options={DAMAGE_TYPES}
-                      onChange={(v) => setEditedSkill({...editedSkill, damageType: v})}
-                      color={
-                        editedSkill.damageType === 'physical' ? 'text-red-400' :
-                        editedSkill.damageType === 'magic' ? 'text-purple-400' : 'text-gray-400'
-                      }
-                    />
-                  </div>
-                </div>
-
-                {/* 2. COMBAT STATS */}
-                <div className="bg-[#2a2a2a] border border-gray-700 rounded-xl p-6">
-                  <SectionHeader title="Combat Mechanics" icon="⚔️" />
-                  
-                  <div className="grid grid-cols-4 gap-4 mb-6">
-                    <InputField 
-                      label="Amp % (Damage)" 
-                      value={editedSkill.ampPercent} 
-                      onChange={(v) => setEditedSkill({...editedSkill, ampPercent: parseInt(v) || 0})} 
-                      type="number"
-                      color="text-red-400"
-                    />
-                    <InputField 
-                      label="AP Cost" 
-                      value={editedSkill.apCost} 
-                      onChange={(v) => setEditedSkill({...editedSkill, apCost: parseInt(v) || 0})} 
-                      type="number"
-                      color="text-blue-400"
-                    />
-                    <InputField 
-                      label="Cooldown (Turns)" 
-                      value={editedSkill.cooldown} 
-                      onChange={(v) => setEditedSkill({...editedSkill, cooldown: parseInt(v) || 0})} 
-                      type="number"
-                      color="text-yellow-400"
-                    />
-                    <InputField 
-                      label="Range (Tiles)" 
-                      value={editedSkill.range} 
-                      onChange={(v) => setEditedSkill({...editedSkill, range: parseInt(v) || 0})} 
-                      type="number"
-                      color="text-orange-400"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-4 gap-4">
-                    <SelectField
-                      label="Target Type"
-                      value={editedSkill.targetType}
-                      options={TARGET_TYPES}
-                      onChange={(v) => setEditedSkill({...editedSkill, targetType: v})}
-                      color="text-purple-400"
-                    />
-                    <InputField 
-                      label="Hit Count" 
-                      value={editedSkill.hitCount} 
-                      onChange={(v) => setEditedSkill({...editedSkill, hitCount: Math.max(1, parseInt(v) || 1)})} 
-                      type="number"
-                      min={1}
-                      color="text-cyan-400"
-                    />
-                    <BooleanToggle
-                      label="Is Counter?"
-                      value={editedSkill.isCounter}
-                      onChange={(v) => setEditedSkill({...editedSkill, isCounter: v})}
-                      color="text-green-400"
-                    />
-                    {editedSkill.isCounter && (
-                      <InputField 
-                        label="Trigger Condition" 
-                        value={editedSkill.triggerCondition || ''} 
-                        onChange={(v) => setEditedSkill({...editedSkill, triggerCondition: v})} 
-                        placeholder="e.g. on_dodge"
-                      />
-                    )}
-                  </div>
-                </div>
-
-                {/* 3. ADVANCED STATS */}
-                <div className="bg-[#2a2a2a] border border-gray-700 rounded-xl p-6">
-                  <SectionHeader title="Advanced Stats" icon="📊" />
-                  
-                  <div className="grid grid-cols-4 gap-4">
-                    <InputField 
-                      label="Armor Pierce %" 
-                      value={editedSkill.armorPierce || 0} 
-                      onChange={(v) => setEditedSkill({...editedSkill, armorPierce: parseInt(v) || 0})} 
-                      type="number"
-                      color="text-gray-300"
-                    />
-                    <InputField 
-                      label="Lifesteal %" 
-                      value={editedSkill.lifestealPercent || 0} 
-                      onChange={(v) => setEditedSkill({...editedSkill, lifestealPercent: parseInt(v) || 0})} 
-                      type="number"
-                      color="text-pink-400"
-                    />
-                    <InputField 
-                      label="Bonus vs Guard %" 
-                      value={editedSkill.bonusVsGuard || 0} 
-                      onChange={(v) => setEditedSkill({...editedSkill, bonusVsGuard: parseInt(v) || 0})} 
-                      type="number"
-                      color="text-blue-300"
-                    />
-                    <InputField 
-                      label="Bonus vs Debuffed %" 
-                      value={editedSkill.bonusVsDebuffed || 0} 
-                      onChange={(v) => setEditedSkill({...editedSkill, bonusVsDebuffed: parseInt(v) || 0})} 
-                      type="number"
-                      color="text-purple-300"
-                    />
-                  </div>
-                </div>
-
-                {/* 4. UTILITY & MAGIC */}
-                <div className="bg-[#1e293b] border border-cyan-900 rounded-xl p-6">
-                  <SectionHeader title="Utility & Magic Infusion" icon="🔮" />
-                  
-                  <div className="grid grid-cols-4 gap-4 mb-4">
-                    <BooleanToggle
-                      label="Has Utility Mode?"
-                      value={editedSkill.hasUtilityMode}
-                      onChange={(v) => setEditedSkill({...editedSkill, hasUtilityMode: v})}
-                      color="text-cyan-400"
-                    />
-                  </div>
-
-                  {editedSkill.hasUtilityMode && (
-                    <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
-                      <InputField 
-                        label="Utility Effect (Code)" 
-                        value={editedSkill.utilityEffect || ''} 
-                        onChange={(v) => setEditedSkill({...editedSkill, utilityEffect: v})} 
-                        placeholder="e.g. fire_enchant"
-                        color="text-cyan-300"
-                      />
-                      <InputField 
-                        label="Utility Duration (Turns)" 
-                        value={editedSkill.utilityDuration || 0} 
-                        onChange={(v) => setEditedSkill({...editedSkill, utilityDuration: parseInt(v) || 0})} 
-                        type="number"
-                        color="text-cyan-300"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* 5. STATUS EFFECTS */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* BUFFS */}
-                  <div className="bg-[#3f2c2c] border border-yellow-900 rounded-xl p-6">
-                    <SectionHeader title="Buffs (On Self)" icon="💪" />
-                    <div className="space-y-4">
-                      <InputField 
-                        label="Buff Type" 
-                        value={editedSkill.buffType || ''} 
-                        onChange={(v) => setEditedSkill({...editedSkill, buffType: v || null})} 
-                        placeholder="e.g. haste"
-                        color="text-yellow-400"
-                      />
-                      <InputField 
-                        label="Buff Duration" 
-                        value={editedSkill.buffDuration || 0} 
-                        onChange={(v) => setEditedSkill({...editedSkill, buffDuration: parseInt(v) || null})} 
-                        type="number"
-                        color="text-yellow-400"
-                      />
-                    </div>
-                  </div>
-
-                  {/* DEBUFFS */}
-                  <div className="bg-[#2c2035] border border-purple-900 rounded-xl p-6">
-                    <SectionHeader title="Debuffs (On Enemy)" icon="💀" />
-                    <div className="space-y-4">
-                      <InputField 
-                        label="Debuff Type" 
-                        value={editedSkill.debuffType || ''} 
-                        onChange={(v) => setEditedSkill({...editedSkill, debuffType: v || null})} 
-                        placeholder="e.g. bleed"
-                        color="text-purple-400"
-                      />
-                      <div className="grid grid-cols-2 gap-4">
-                        <InputField 
-                          label="Duration" 
-                          value={editedSkill.debuffDuration || 0} 
-                          onChange={(v) => setEditedSkill({...editedSkill, debuffDuration: parseInt(v) || null})} 
-                          type="number"
-                          color="text-purple-400"
-                        />
-                        <InputField 
-                          label="Chance %" 
-                          value={editedSkill.debuffChance || 100} 
-                          onChange={(v) => setEditedSkill({...editedSkill, debuffChance: parseInt(v) || null})} 
-                          type="number"
-                          color="text-purple-400"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 6. FLAVOR & DESCRIPTION */}
-                <div className="bg-[#242424] border border-gray-700 rounded-xl p-6">
-                  <SectionHeader title="Flavor & Descriptions" icon="📝" />
-                  
-                  <div className="space-y-6">
-                    <div>
-                      <div className="text-sm text-gray-400 mb-2 font-bold">Skill Description (Tooltip)</div>
-                      <textarea
-                        value={editedSkill.description}
-                        onChange={(e) => setEditedSkill({...editedSkill, description: e.target.value})}
-                        className="w-full bg-black/20 rounded p-4 border border-white/10 focus:outline-none focus:border-[#6eb5ff] min-h-[80px]"
-                        placeholder="What does the skill do?"
-                      />
-                    </div>
-                    
-                    <div>
-                      <div className="text-sm text-gray-400 mb-2 font-bold">Execution Description (Narrative)</div>
-                      <textarea
-                        value={editedSkill.executionDescription || ''}
-                        onChange={(e) => setEditedSkill({...editedSkill, executionDescription: e.target.value})}
-                        className="w-full bg-black/20 rounded p-4 border border-white/10 focus:outline-none focus:border-[#6eb5ff] min-h-[100px] italic font-serif text-lg text-gray-300"
-                        placeholder="Describe the action vividly..."
-                      />
-                    </div>
-
-                    <div>
-                      <div className="text-sm text-gray-400 mb-2 font-bold">Passive Effect (Optional)</div>
-                      <textarea
-                        value={editedSkill.passive || ''}
-                        onChange={(e) => setEditedSkill({...editedSkill, passive: e.target.value})}
-                        className="w-full bg-purple-900/10 rounded p-4 border border-purple-500/20 focus:outline-none focus:border-purple-500 min-h-[60px]"
-                        placeholder="Passive bonus description..."
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* ACTION BAR */}
-                <div className="sticky bottom-6 bg-[#1a1a1a]/95 backdrop-blur border border-[#333] p-4 rounded-xl flex gap-4 shadow-2xl z-10">
-                  <button
-                    onClick={handleSaveSkill}
-                    className="flex-1 py-4 bg-green-600 text-white rounded-lg font-bold text-lg hover:bg-green-700 transition-colors shadow-lg hover:shadow-green-900/50"
-                  >
-                    💾 SAVE CHANGES
-                  </button>
-                  <button
-                    onClick={() => {
-                      setEditMode(false)
-                      setEditedSkill(null)
-                    }}
-                    className="flex-1 py-4 bg-gray-700 text-white rounded-lg font-bold text-lg hover:bg-gray-600 transition-colors"
-                  >
-                    ❌ CANCEL
-                  </button>
-                </div>
-
-              </div>
-            ) : (
-            /* =====================================================================================
-               VIEW MODE: READ ONLY DISPLAY
-               ===================================================================================== */
-            <div className={`bg-[#242424] border-2 rounded-xl p-6 ${getVariantColor(currentSkill.variantType)}`}>
-                <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-3xl">{getVariantIcon(currentSkill.variantType)}</span>
-                    <h2 className="text-2xl font-bold">{currentSkill.name}</h2>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <span className={`px-2 py-1 rounded border ${getStageColor(currentSkill.stage)}`}>
-                      Stage {currentSkill.stage}
-                    </span>
-                    <span className="text-gray-400">{currentSkill.skillType}</span>
-                    <span className="capitalize text-gray-400">• {currentSkill.variantType.replace('_', ' ')}</span>
-                  </div>
-                </div>
-                
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      setEditMode(true)
-                      setEditedSkill(currentSkill)
-                    }}
-                    className="px-4 py-2 bg-[#6eb5ff] text-black rounded font-medium hover:bg-[#5a9ee6] transition-colors"
-                  >
-                    ✏️ Edit
-                  </button>
-                  {currentSkill.stage === 0 && (
-                    <button
-                      onClick={handleResetTree}
-                      className="px-4 py-2 bg-red-600 text-white rounded font-medium hover:bg-red-700 transition-colors"
-                    >
-                      🗑️ Reset Tree
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Stats Grid - Row 1 */}
-              <div className="grid grid-cols-4 gap-4 mb-4">
-                <div className="bg-black/20 rounded p-3">
-                  <div className="text-xs text-gray-400 mb-1">Amp %</div>
-                  <div className="font-bold text-red-400">{currentSkill.ampPercent}%</div>
-                </div>
-                <div className="bg-black/20 rounded p-3">
-                  <div className="text-xs text-gray-400 mb-1">AP Cost</div>
-                  <div className="font-bold text-blue-400">{currentSkill.apCost}</div>
-                </div>
-                <div className="bg-black/20 rounded p-3">
-                  <div className="text-xs text-gray-400 mb-1">Cooldown</div>
-                  <div className="font-bold text-yellow-400">
-                    {currentSkill.cooldown} turn{currentSkill.cooldown !== 1 ? 's' : ''}
-                  </div>
-                </div>
-                <div className="bg-black/20 rounded p-3">
-                  <div className="text-xs text-gray-400 mb-1">Target</div>
-                  <div className="font-bold text-purple-400">{currentSkill.targetType}</div>
-                </div>
-              </div>
-
-              {/* Stats Grid - Row 2: Weapon & Utility */}
-              <div className="grid grid-cols-4 gap-4 mb-4">
-                <div className="bg-black/20 rounded p-3">
-                  <div className="text-xs text-gray-400 mb-1">Weapon Req</div>
-                  <div className={`font-bold text-sm ${
-                    currentSkill.weaponRequirement === 'melee_only' ? 'text-red-400' :
-                    currentSkill.weaponRequirement === 'ranged_only' ? 'text-green-400' :
-                    currentSkill.weaponRequirement === 'magic_only' ? 'text-purple-400' :
-                    'text-gray-400'
-                  }`}>
-                    {currentSkill.weaponRequirement === 'melee_only' ? '⚔️ Melee' :
-                     currentSkill.weaponRequirement === 'ranged_only' ? '🏹 Ranged' :
-                     currentSkill.weaponRequirement === 'magic_only' ? '✨ Magic' :
-                     '🔄 Any'}
-                  </div>
-                </div>
-                <div className="bg-black/20 rounded p-3">
-                  <div className="text-xs text-gray-400 mb-1">Damage Type</div>
-                  <div className={`font-bold ${
-                    currentSkill.damageType === 'magic' ? 'text-purple-400' :
-                    currentSkill.damageType === 'physical' ? 'text-red-400' :
-                    'text-gray-400'
-                  }`}>
-                    {currentSkill.damageType}
-                  </div>
-                </div>
-                <div className="bg-black/20 rounded p-3">
-                  <div className="text-xs text-gray-400 mb-1">Utility Mode</div>
-                  <div className={`font-bold ${currentSkill.hasUtilityMode ? 'text-cyan-400' : 'text-gray-500'}`}>
-                    {currentSkill.hasUtilityMode ? '🔮 Yes' : 'No'}
-                  </div>
-                </div>
-                <div className="bg-black/20 rounded p-3">
-                  <div className="text-xs text-gray-400 mb-1">Range</div>
-                  <div className="font-bold text-orange-400">{currentSkill.range} tile{currentSkill.range !== 1 ? 's' : ''}</div>
-                </div>
-              </div>
-
-              {/* Stats Grid - Row 3: Advanced Stats */}
-              <div className="grid grid-cols-4 gap-4 mb-4">
-                <div className="bg-black/20 rounded p-3">
-                  <div className="text-xs text-gray-400 mb-1">Hit Count</div>
-                  <div className="font-bold text-cyan-400">{currentSkill.hitCount}x</div>
-                </div>
-                
-                <div className="bg-black/20 rounded p-3">
-                  <div className="text-xs text-gray-400 mb-1">Lifesteal %</div>
-                  <div className="font-bold text-pink-400">{currentSkill.lifestealPercent || 0}%</div>
-                </div>
-
-                <div className="bg-black/20 rounded p-3">
-                    <div className="text-xs text-gray-400 mb-1">Is Counter</div>
-                    <div className={`font-bold ${currentSkill.isCounter ? 'text-green-400' : 'text-gray-500'}`}>
-                        {currentSkill.isCounter ? '🛡️ YES' : 'No'}
-                    </div>
-                </div>
-
-                {currentSkill.isCounter && (
-                    <div className="bg-black/20 rounded p-3">
-                        <div className="text-xs text-gray-400 mb-1">Trigger</div>
-                        <div className="font-bold text-green-300 text-xs">{currentSkill.triggerCondition || 'Any'}</div>
-                    </div>
-                )}
-              </div>
-
-              {/* Stats Grid - Row 4: Bonuses */}
-              <div className="grid grid-cols-3 gap-4 mb-4">
-                <div className="bg-black/20 rounded p-3">
-                  <div className="text-xs text-gray-400 mb-1">Armor Pierce %</div>
-                  <div className="font-bold text-gray-300">{currentSkill.armorPierce || 0}%</div>
-                </div>
-                <div className="bg-black/20 rounded p-3">
-                  <div className="text-xs text-gray-400 mb-1">Vs Guard %</div>
-                  <div className="font-bold text-blue-300">{currentSkill.bonusVsGuard || 0}%</div>
-                </div>
-                <div className="bg-black/20 rounded p-3">
-                  <div className="text-xs text-gray-400 mb-1">Vs Debuffed %</div>
-                  <div className="font-bold text-purple-300">{currentSkill.bonusVsDebuffed || 0}%</div>
-                </div>
-              </div>
-
-              {/* Utility Effect (if has utility mode) */}
-              {currentSkill.hasUtilityMode && currentSkill.utilityEffect && (
-                <div className="bg-cyan-900/20 border border-cyan-500/30 rounded p-3 mb-4">
-                  <div className="text-xs text-cyan-400 mb-1">🔮 Utility Effect (when used with non-magic weapons)</div>
-                  <div className="text-cyan-300">
-                    {currentSkill.utilityEffect.replace('_', ' ')} for {currentSkill.utilityDuration || 3} turns
-                  </div>
-                </div>
-              )}
-
-              {/* Effect */}
-              <div className="mb-4">
-                <div className="text-xs text-gray-400 mb-1">Effect</div>
-                <div className="bg-black/20 rounded p-3">{currentSkill.description}</div>
-              </div>
-
-              {/* Execution Description */}
-              <div className="mb-4">
-                <div className="text-xs text-gray-400 mb-1">Execution (Flavor Text)</div>
-                <div className="bg-black/20 rounded p-3 italic text-gray-300 font-serif text-lg">
-                  {currentSkill.executionDescription || 'No execution description available.'}
-                </div>
-              </div>
-
-              {/* Buffs & Debuffs Display (View Mode) */}
-              {(currentSkill.buffType || currentSkill.debuffType) && (
-                <div className="mb-4 grid grid-cols-2 gap-4">
-                  {currentSkill.buffType && (
-                    <div className="bg-yellow-900/20 border border-yellow-500/30 rounded p-3">
-                      <div className="text-xs text-yellow-400 mb-1">🔼 Buff Effect</div>
-                      <div className="text-yellow-200 font-bold capitalize">
-                        {currentSkill.buffType.replace(/_/g, ' ')}
-                      </div>
-                      <div className="text-xs text-yellow-500/70 mt-1">
-                        Duration: {currentSkill.buffDuration} turns
-                      </div>
-                    </div>
-                  )}
-                  
-                  {currentSkill.debuffType && (
-                    <div className="bg-purple-900/20 border border-purple-500/30 rounded p-3">
-                      <div className="text-xs text-purple-400 mb-1">🔽 Debuff Effect</div>
-                      <div className="text-purple-200 font-bold capitalize">
-                        {currentSkill.debuffType.replace(/_/g, ' ')}
-                      </div>
-                      <div className="text-xs text-purple-500/70 mt-1 flex gap-3">
-                        <span>Duration: {currentSkill.debuffDuration} turns</span>
-                        {currentSkill.debuffChance && <span>Chance: {currentSkill.debuffChance}%</span>}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Passive */}
-              {currentSkill.passive && (
-                <div className="mb-4">
-                  <div className="text-xs text-gray-400 mb-1">Passive (Stage {currentSkill.stage})</div>
-                  <div className="bg-purple-900/20 rounded p-3 border border-purple-500/30 text-purple-300">
-                    {currentSkill.passive}
-                  </div>
-                </div>
-              )}
-
-              {/* Variant Selection (Optional) */}
-              {currentSkill.stage < 5 && childSkills.length === 0 && (
-                <div className="mb-4 bg-black/20 rounded p-3 border border-white/10">
-                  <div className="text-xs text-gray-400 mb-2">Force Specific Variants (Optional - Leave empty for Tier logic)</div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-                    {ALL_VARIANTS.map(variant => {
-                      const config = VARIANT_CONFIG[variant]
-                      const isSelected = selectedVariants.includes(variant)
-                      return (
-                        <button
-                          key={variant}
-                          onClick={() => toggleVariant(variant)}
-                          className={`text-xs p-2 rounded border transition-colors flex items-center gap-1 ${
-                            isSelected 
-                              ? config.color
-                              : 'border-gray-700 bg-gray-900/50 text-gray-500 hover:border-gray-500'
-                          }`}
-                        >
-                          <span>{config.icon}</span>
-                          <span>{config.label}</span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Generate Button */}
-              {currentSkill.stage < 5 && childSkills.length === 0 && (
-                <button
-                  onClick={handleGenerateChildren}
-                  disabled={generating}
-                  className="w-full py-4 bg-gradient-to-r from-[#6eb5ff] to-[#a855f7] text-white rounded-lg font-bold text-lg hover:opacity-90 transition-opacity disabled:opacity-50"
-                >
-                  {generating ? '⏳ Generating...' : `🎲 Generate Stage ${currentSkill.stage + 1} Children (1 Upgrade + 4 Random Variants)`}
-                </button>
-              )}
-
-              {currentSkill.stage >= 5 && (
-                <div className="text-center py-4 text-gray-400 border border-dashed border-gray-600 rounded-lg">
-                  🏆 Maximum Stage Reached (Stage 5)
-                </div>
-              )}
-            </div>
-            )}
-
-            {/* Child Skills */}
-            {childSkills.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold mb-4">
-                  Generated Children ({childSkills.length})
-                  <span className="text-sm font-normal text-gray-400 ml-2">Click to navigate • Not saved yet</span>
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                  {childSkills.map(child => {
-                    const variantConfig = VARIANT_CONFIG[child.variantType || 'root'] || VARIANT_CONFIG.root
-                    return (
-                      <button
-                        key={child.id}
-                        onClick={() => handleNavigateToSkill(child)}
-                        className={`border-2 rounded-lg p-4 text-left hover:scale-105 transition-transform ${variantConfig.color}`}
-                      >
-                        {/* Variant Badge */}
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl">{variantConfig.icon}</span>
-                            {child.isSaved && (
-                              <span className="text-[10px] bg-green-900/80 text-green-300 px-1.5 py-0.5 rounded border border-green-700/50" title="Saved to database (Live in game)">
-                                ✅ Saved
-                              </span>
-                            )}
-                          </div>
-                          <span className={`text-xs px-2 py-0.5 rounded border ${getStageColor(child.stage)}`}>
-                            S{child.stage}
-                          </span>
-                        </div>
-                        
-                        {/* Variant Type Label */}
-                        <div className="text-xs font-medium opacity-80 mb-1">{variantConfig.label}</div>
-                        
-                        {/* Skill Name */}
-                        <div className="font-semibold mb-2 line-clamp-1">{child.name}</div>
-                        
-                        {/* Stats Row */}
-                        <div className="flex gap-2 text-xs mb-2">
-                          <span className="text-red-400">{child.ampPercent}%</span>
-                          <span className="text-blue-400">{child.apCost} AP</span>
-                          <span className="text-yellow-400">{child.cooldown}T</span>
-                        </div>
-                        
-                        {/* Effect Preview */}
-                        <div className="text-xs text-gray-400 line-clamp-2">{child.description}</div>
-                        
-                        {/* Extra Info for special variants */}
-                        {child.buffType && (
-                          <div className="mt-2 text-xs text-yellow-400">💪 {child.buffType} ({child.buffDuration} turns)</div>
-                        )}
-                        {child.debuffType && (
-                          <div className="mt-2 text-xs text-purple-400">💀 {child.debuffType} ({child.debuffDuration} turns)</div>
-                        )}
-                        {child.hitCount && (
-                          <div className="mt-2 text-xs text-cyan-400">⛓️ {child.hitCount} hits</div>
-                        )}
-                        {child.lifestealPercent && (
-                          <div className="mt-2 text-xs text-slate-400">❤️‍🩹 {child.lifestealPercent}% lifesteal</div>
-                        )}
-                        
-                        <div className="mt-3 text-xs text-center opacity-70">
-                          Click to view →
-                        </div>
-                      </button>
-                    )
-                  })}
-                </div>
-
-                {/* Save/Regenerate Buttons */}
-                <div className="flex gap-4 mt-6">
-                  <button
-                    onClick={handleSaveAllChildren}
-                    disabled={childSkills.every(c => c.isSaved)}
-                    className="flex-1 py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:bg-gray-600"
-                  >
-                    {childSkills.every(c => c.isSaved) ? '✅ All Saved' : '💾 Save All to Database'}
-                  </button>
-                  <button
-                    onClick={handleRegenerateChildren}
-                    disabled={generating}
-                    className="flex-1 py-3 bg-orange-600 text-white rounded-lg font-bold hover:bg-orange-700 transition-colors disabled:opacity-50"
-                  >
-                    {generating ? '⏳ Regenerating...' : '🔄 Regenerate All'}
-                  </button>
-                </div>
-              </div>
-            )}
-
-          </div>
-        )}
-
-      </main>
     </div>
   )
 }
