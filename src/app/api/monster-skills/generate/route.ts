@@ -146,202 +146,378 @@ const DEBUFFS = ['bleed', 'poison', 'burn', 'freeze', 'stun', 'slow', 'blind', '
 const BUFFS = ['enrage', 'shield', 'regen', 'haste', 'focus', 'fortify', 'sharpen', 'berserk']
 
 // ============================================
-// NARRATIVE TEMPLATES
+// SKILL-SPECIFIC NARRATIVE GENERATOR
 // ============================================
 
-const MELEE_NARRATIVES = {
-  use: [
-    'The monster lunges forward with a vicious attack!',
-    'The creature strikes with brutal force!',
-    'A savage blow comes crashing down!',
-    'The beast attacks with primal fury!',
-    'Claws and fangs flash in a deadly assault!',
-  ],
-  hit: [
-    'The attack connects with devastating impact!',
-    'A solid hit tears through defenses!',
-    'The blow lands with bone-crushing force!',
-    'The strike finds its mark!',
-    'A direct hit sends shockwaves of pain!',
-  ],
-  miss: [
-    'The attack swings wide, missing its target!',
-    'A narrow dodge avoids the deadly blow!',
-    'The strike whistles past harmlessly!',
-    'Quick reflexes evade the attack!',
-    'The blow fails to connect!',
-  ],
-  crit: [
-    'A devastating critical strike!',
-    'The attack hits a vital point!',
-    'A perfectly placed blow deals massive damage!',
-    'Critical hit! The attack is devastating!',
-    'A brutal strike finds a weak spot!',
-  ],
+// Damage type flavor words
+const DAMAGE_FLAVOR: Record<string, { verb: string; adjective: string; noun: string; effect: string }> = {
+  physical: { verb: 'crushes', adjective: 'brutal', noun: 'force', effect: 'bones crack and flesh tears' },
+  fire: { verb: 'scorches', adjective: 'blazing', noun: 'flames', effect: 'skin blisters and armor glows red-hot' },
+  ice: { verb: 'freezes', adjective: 'frigid', noun: 'frost', effect: 'ice crystals spread across the wound' },
+  lightning: { verb: 'electrifies', adjective: 'crackling', noun: 'thunder', effect: 'electricity arcs through the body' },
+  poison: { verb: 'corrodes', adjective: 'venomous', noun: 'toxin', effect: 'the wound festers with corruption' },
+  magic: { verb: 'warps', adjective: 'arcane', noun: 'energy', effect: 'reality itself seems to bend' },
+  dark: { verb: 'consumes', adjective: 'shadowy', noun: 'darkness', effect: 'the soul itself feels drained' },
+  true: { verb: 'annihilates', adjective: 'absolute', noun: 'destruction', effect: 'nothing can withstand the impact' },
+  none: { verb: 'empowers', adjective: 'surging', noun: 'power', effect: 'strength flows through every fiber' },
 }
 
-const RANGED_NARRATIVES = {
-  use: [
-    'The monster launches a projectile attack!',
-    'A ranged assault streaks through the air!',
-    'The creature fires from a distance!',
-    'An attack comes flying toward its target!',
-    'The beast unleashes a ranged strike!',
-  ],
-  hit: [
-    'The projectile strikes true!',
-    'A direct hit from the ranged attack!',
-    'The shot connects with precision!',
-    'The attack finds its mark from afar!',
-    'A solid impact from the ranged strike!',
-  ],
-  miss: [
-    'The projectile sails past its target!',
-    'A quick sidestep avoids the attack!',
-    'The shot goes wide!',
-    'The ranged attack misses!',
-    'The projectile fails to connect!',
-  ],
-  crit: [
-    'A perfectly aimed critical shot!',
-    'The projectile hits a vital area!',
-    'Critical hit from range!',
-    'A devastating ranged strike!',
-    'The attack pierces through for massive damage!',
-  ],
+// Skill name to action mapping for more specific narratives
+const SKILL_ACTIONS: Record<string, { use: string; hit: string; miss: string; crit: string }> = {
+  // Melee
+  'Bite': {
+    use: 'The creature opens its maw wide, rows of jagged teeth gleaming with saliva as it lunges for your throat!',
+    hit: 'Fangs sink deep into flesh, tearing through muscle as blood sprays!',
+    miss: 'You twist away at the last second, feeling hot breath on your neck as jaws snap shut on empty air!',
+    crit: 'The bite finds the jugular! Blood fountains as teeth rip through vital arteries!',
+  },
+  'Claw': {
+    use: 'Razor-sharp talons flash through the air in a deadly arc, each claw capable of gutting a man!',
+    hit: 'Claws rake across your body, leaving deep parallel gashes that weep crimson!',
+    miss: 'You duck under the swipe, feeling the wind of those deadly claws pass inches above your head!',
+    crit: 'The claws find purchase and RIP downward, tearing flesh from bone in a spray of gore!',
+  },
+  'Slash': {
+    use: 'The beast swings with murderous intent, its natural weapons carving through the air!',
+    hit: 'A vicious slash opens a deep wound, blood flowing freely!',
+    miss: 'The slash cuts only air as you desperately throw yourself backward!',
+    crit: 'The slash nearly bisects you, cutting so deep you can see bone!',
+  },
+  'Rend': {
+    use: 'With both claws hooked, the creature prepares to tear you apart like wet paper!',
+    hit: 'Claws dig in and PULL, rending flesh in opposite directions!',
+    miss: 'You break free before those terrible claws can find purchase!',
+    crit: 'The rending attack tears away a chunk of flesh, leaving a horrific wound!',
+  },
+  'Maul': {
+    use: 'The beast rears up, preparing to bring its full weight down in a devastating maul!',
+    hit: 'You\'re driven to the ground under the crushing assault, bones groaning under the pressure!',
+    miss: 'You roll aside as the creature crashes down where you stood, cracking the earth!',
+    crit: 'The maul pins you down and the beast savages you mercilessly!',
+  },
+  'Crush': {
+    use: 'Massive limbs rise high, ready to pulverize everything beneath them!',
+    hit: 'The crushing blow drives you into the ground, armor denting under the impact!',
+    miss: 'You scramble clear as the ground explodes where you stood!',
+    crit: 'Bones shatter audibly as the crushing force finds its mark!',
+  },
+  'Slam': {
+    use: 'The creature hurls its bulk forward in a devastating body slam!',
+    hit: 'The impact sends you flying, the world spinning as you crash to the ground!',
+    miss: 'You sidestep the charging mass, feeling the rush of displaced air!',
+    crit: 'The slam catches you dead center, driving every ounce of breath from your lungs!',
+  },
+  'Tackle': {
+    use: 'With a thunderous roar, the beast charges forward to flatten you!',
+    hit: 'You\'re bowled over by the charging mass, tumbling across the ground!',
+    miss: 'You pivot at the last instant, the charging beast barreling past!',
+    crit: 'The tackle drives you into the ground with bone-jarring force!',
+  },
+  'Charge': {
+    use: 'The ground trembles as the creature lowers its head and CHARGES!',
+    hit: 'The charging impact lifts you off your feet, sending you crashing backward!',
+    miss: 'You throw yourself aside as the charging beast thunders past!',
+    crit: 'The charge catches you full-on, the impact like being hit by a battering ram!',
+  },
+  // Ranged
+  'Fire Breath': {
+    use: 'The creature\'s chest swells, heat radiating from its maw as flames build within!',
+    hit: 'A torrent of fire engulfs you, searing flesh and igniting everything it touches!',
+    miss: 'You dive behind cover as the stream of fire roars past, scorching the air!',
+    crit: 'The flames consume you completely, burning with supernatural intensity!',
+  },
+  'Ice Beam': {
+    use: 'Frost crackles around the creature\'s maw as it draws in a deep, freezing breath!',
+    hit: 'The beam of absolute cold strikes you, ice spreading across your body instantly!',
+    miss: 'You dodge aside as the freezing beam passes, leaving a trail of frost in its wake!',
+    crit: 'The ice beam flash-freezes flesh, the cold so intense it burns!',
+  },
+  'Lightning Bolt': {
+    use: 'Electricity crackles and arcs around the creature as it gathers power!',
+    hit: 'The bolt of lightning strikes you dead-on, electricity coursing through your body!',
+    miss: 'The lightning bolt strikes the ground beside you, leaving a smoking crater!',
+    crit: 'The lightning finds your heart, every nerve screaming as electricity overloads your system!',
+  },
+  'Poison Spray': {
+    use: 'Venom drips from the creature\'s fangs as it prepares to unleash a toxic deluge!',
+    hit: 'The spray of poison coats you, burning wherever it touches exposed skin!',
+    miss: 'You hold your breath and dodge, the toxic cloud passing harmlessly!',
+    crit: 'The concentrated venom seeps into every wound, spreading corruption through your veins!',
+  },
+  'Acid Spit': {
+    use: 'The creature\'s throat bulges as it prepares to launch a glob of corrosive acid!',
+    hit: 'The acid splashes across you, immediately beginning to dissolve armor and flesh!',
+    miss: 'You duck as the acid sails overhead, sizzling as it eats into the ground behind you!',
+    crit: 'The acid finds gaps in your armor, eating through to the flesh beneath!',
+  },
+  // AoE
+  'Inferno': {
+    use: 'The air itself ignites as the creature summons a raging inferno that spreads in all directions!',
+    hit: 'Flames wash over you in a tidal wave of fire, consuming everything in their path!',
+    miss: 'You find a pocket of safety as the inferno rages around you!',
+    crit: 'The inferno reaches white-hot intensity, melting stone and incinerating all in its path!',
+  },
+  'Blizzard': {
+    use: 'Temperature plummets as the creature calls forth a howling blizzard of ice and wind!',
+    hit: 'The blizzard engulfs you, ice shards cutting like knives as the cold seeps into your bones!',
+    miss: 'You find shelter from the worst of the blizzard, though frost still bites at exposed skin!',
+    crit: 'The blizzard freezes you to the core, ice forming in your very blood!',
+  },
+  'Thunderstorm': {
+    use: 'Dark clouds materialize overhead as the creature calls down the fury of the storm!',
+    hit: 'Lightning strikes from every direction, thunder deafening as electricity courses through you!',
+    miss: 'You weave between the lightning strikes, each bolt missing by inches!',
+    crit: 'Multiple bolts converge on you simultaneously, the combined voltage overwhelming!',
+  },
+  'Earthquake': {
+    use: 'The creature slams the ground with tremendous force, sending shockwaves rippling outward!',
+    hit: 'The ground bucks and heaves beneath you, throwing you off balance as fissures open!',
+    miss: 'You leap clear as the ground splits and churns where you stood!',
+    crit: 'The earth swallows you momentarily before spitting you out, battered and broken!',
+  },
+  'Chain Lightning': {
+    use: 'Electricity arcs between the creature\'s claws as it prepares to unleash chained destruction!',
+    hit: 'Lightning leaps from target to target, each arc carrying deadly voltage!',
+    miss: 'The lightning chain breaks before reaching you, grounding harmlessly!',
+    crit: 'The chain lightning amplifies with each jump, the final arc devastating!',
+  },
+  // Self
+  'Enrage': {
+    use: 'The creature\'s eyes turn blood-red as primal fury overtakes its mind!',
+    hit: 'Muscles bulge and veins pulse as rage-fueled strength floods through the beast!',
+    miss: 'The rage flickers and fades, failing to take hold!',
+    crit: 'The creature enters a berserk frenzy, its power multiplying exponentially!',
+  },
+  'Regenerate': {
+    use: 'Wounds begin to knit closed as the creature\'s flesh writhes with unnatural healing!',
+    hit: 'Torn flesh mends, broken bones reset, the creature\'s injuries fading before your eyes!',
+    miss: 'The regeneration sputters and fails, wounds remaining open!',
+    crit: 'The creature\'s body regenerates completely, emerging stronger than before!',
+  },
+  'Harden': {
+    use: 'The creature\'s hide shifts and thickens, taking on an almost metallic sheen!',
+    hit: 'Scales lock together, skin becomes stone-like, the creature\'s defense skyrockets!',
+    miss: 'The hardening process fails, leaving the creature vulnerable!',
+    crit: 'The creature\'s body becomes nearly impenetrable, like living armor!',
+  },
+  // Reactive
+  'Counter': {
+    use: 'The creature reads your attack and moves to intercept with deadly precision!',
+    hit: 'Your own momentum is used against you as the counter-strike lands!',
+    miss: 'You pull back just in time, avoiding the counter!',
+    crit: 'The perfect counter turns your attack into your own undoing!',
+  },
+  'Retaliate': {
+    use: 'Pain only makes the creature angrier as it lashes out in immediate retaliation!',
+    hit: 'The retaliatory strike catches you before you can recover from your own attack!',
+    miss: 'You manage to block the retaliatory strike!',
+    crit: 'The retaliation is savage and immediate, punishing you for daring to attack!',
+  },
+  'Thorns': {
+    use: 'Razor-sharp spines erupt from the creature\'s body, punishing any who dare strike it!',
+    hit: 'Your attack lands, but the thorns tear into you in return!',
+    miss: 'You strike carefully, avoiding the worst of the thorns!',
+    crit: 'The thorns impale you deeply, the creature\'s defense becoming your doom!',
+  },
+  // Signature
+  'Apocalypse': {
+    use: 'Reality itself seems to crack as the creature channels power beyond mortal comprehension!',
+    hit: 'The apocalyptic force tears through you, body and soul alike screaming in agony!',
+    miss: 'By some miracle, you survive the apocalyptic onslaught!',
+    crit: 'The full force of the apocalypse is unleashed, devastation beyond measure!',
+  },
+  'Hellfire': {
+    use: 'Flames from the deepest pits of hell erupt around the creature, burning with unholy intensity!',
+    hit: 'Hellfire consumes you, burning not just flesh but the very essence of your being!',
+    miss: 'You escape the hellfire, though its heat still sears your skin!',
+    crit: 'The hellfire burns eternal, leaving wounds that may never truly heal!',
+  },
+  'Judgment': {
+    use: 'The creature rises up, becoming an avatar of divine wrath as it prepares to pass judgment!',
+    hit: 'You are found wanting, and the judgment is swift and merciless!',
+    miss: 'Somehow, you are spared from the creature\'s terrible judgment!',
+    crit: 'The judgment is absolute, your very existence weighed and found unworthy!',
+  },
 }
 
-const AOE_NARRATIVES = {
-  use: [
-    'The monster unleashes a devastating area attack!',
-    'A massive spell engulfs the battlefield!',
-    'The creature summons a catastrophic force!',
-    'An overwhelming attack covers the area!',
-    'The beast channels destructive energy!',
-  ],
-  hit: [
-    'The area attack engulfs its targets!',
-    'The devastating spell connects!',
-    'The massive attack hits everything in range!',
-    'The area effect deals widespread damage!',
-    'The catastrophic force finds its marks!',
-  ],
-  miss: [
-    'The area attack dissipates harmlessly!',
-    'Quick movement avoids the worst of it!',
-    'The spell fails to fully connect!',
-    'The attack loses power before impact!',
-    'The area effect misses its primary target!',
-  ],
-  crit: [
-    'A catastrophic critical area attack!',
-    'The spell reaches maximum devastation!',
-    'Critical hit! The area attack is amplified!',
-    'A perfectly executed area devastation!',
-    'The attack reaches apocalyptic proportions!',
-  ],
-}
+// Generate narrative based on skill name and damage type
+function generateNarratives(skillName: string, damageType: string, category: CategoryType): { use: string; hit: string; miss: string; crit: string } {
+  // Check if we have specific narratives for this skill
+  if (SKILL_ACTIONS[skillName]) {
+    return SKILL_ACTIONS[skillName]
+  }
 
-const SELF_NARRATIVES = {
-  use: [
-    'The monster focuses its energy inward!',
-    'The creature begins to power up!',
-    'A surge of energy flows through the beast!',
-    'The monster prepares itself for battle!',
-    'The creature enters a heightened state!',
-  ],
-  hit: [
-    'The effect takes hold successfully!',
-    'The power-up activates!',
-    'The enhancement is complete!',
-    'The buff is applied!',
-    'The effect strengthens the monster!',
-  ],
-  miss: [
-    'The effect fizzles out!',
-    'The power-up fails to activate!',
-    'The enhancement is disrupted!',
-    'The buff fails to take hold!',
-    'The effect dissipates before completion!',
-  ],
-  crit: [
-    'A powerful enhancement takes effect!',
-    'The power-up is exceptionally strong!',
-    'Critical success! Maximum enhancement!',
-    'The buff is amplified!',
-    'An overwhelming surge of power!',
-  ],
-}
+  // Generate dynamic narratives based on skill name and damage type
+  const flavor = DAMAGE_FLAVOR[damageType] || DAMAGE_FLAVOR.physical
+  const skillLower = skillName.toLowerCase()
 
-const REACTIVE_NARRATIVES = {
-  use: [
-    'The monster reacts with lightning speed!',
-    'A counter-attack is triggered!',
-    'The creature responds to the threat!',
-    'An automatic defense activates!',
-    'The beast retaliates instantly!',
-  ],
-  hit: [
-    'The counter-attack connects!',
-    'The reactive strike lands!',
-    'The retaliation hits its mark!',
-    'The defensive response succeeds!',
-    'The triggered attack finds its target!',
-  ],
-  miss: [
-    'The counter-attack misses!',
-    'The reactive strike fails to connect!',
-    'The retaliation goes wide!',
-    'The defensive response is evaded!',
-    'The triggered attack misses!',
-  ],
-  crit: [
-    'A devastating counter-attack!',
-    'Critical reactive strike!',
-    'The retaliation is devastating!',
-    'A perfectly timed counter!',
-    'The triggered attack deals massive damage!',
-  ],
-}
+  // Category-specific narrative templates
+  const templates: Record<CategoryType, { use: string[]; hit: string[]; miss: string[]; crit: string[] }> = {
+    melee: {
+      use: [
+        `The creature coils its muscles and unleashes ${skillName} with ${flavor.adjective} fury!`,
+        `With a guttural snarl, the beast executes ${skillName}, ${flavor.noun} radiating from the strike!`,
+        `The monster's ${skillName} comes without warning, a blur of ${flavor.adjective} violence!`,
+        `Primal instinct drives the creature's ${skillName}, each movement promising death!`,
+      ],
+      hit: [
+        `${skillName} connects! The ${flavor.adjective} impact ${flavor.verb} through your defenses as ${flavor.effect}!`,
+        `The ${skillName} lands true, and ${flavor.effect}!`,
+        `You feel the full force of ${skillName} as ${flavor.noun} tears through you!`,
+        `The devastating ${skillName} finds its mark, ${flavor.effect}!`,
+      ],
+      miss: [
+        `You twist away from ${skillName}, the ${flavor.adjective} attack grazing past!`,
+        `The ${skillName} whistles through empty air as you desperately evade!`,
+        `Instinct saves you as ${skillName} misses by a hair's breadth!`,
+        `You dodge ${skillName}, feeling the displaced air of the near-miss!`,
+      ],
+      crit: [
+        `${skillName} strikes with perfect precision! ${flavor.effect.charAt(0).toUpperCase() + flavor.effect.slice(1)} as the critical blow lands!`,
+        `A devastating ${skillName}! The ${flavor.adjective} strike finds a vital point!`,
+        `Critical ${skillName}! The attack ${flavor.verb} through you with terrible efficiency!`,
+        `The ${skillName} hits exactly where it hurts most, ${flavor.effect}!`,
+      ],
+    },
+    ranged: {
+      use: [
+        `The creature takes aim and launches ${skillName}, ${flavor.adjective} energy streaking toward you!`,
+        `${skillName} erupts from the beast, a projectile of pure ${flavor.noun}!`,
+        `With deadly accuracy, the monster unleashes ${skillName}!`,
+        `The air crackles as ${skillName} is fired, trailing ${flavor.adjective} energy!`,
+      ],
+      hit: [
+        `${skillName} strikes home! The ${flavor.adjective} projectile ${flavor.verb} on impact as ${flavor.effect}!`,
+        `The ${skillName} hits dead center, ${flavor.effect}!`,
+        `You're struck by ${skillName}, the ${flavor.noun} searing through you!`,
+        `${skillName} finds its mark from across the battlefield!`,
+      ],
+      miss: [
+        `${skillName} screams past you, the ${flavor.adjective} projectile missing by inches!`,
+        `You dive aside as ${skillName} impacts where you stood!`,
+        `The ${skillName} goes wide, its ${flavor.noun} dissipating harmlessly!`,
+        `Quick reflexes save you from ${skillName}!`,
+      ],
+      crit: [
+        `${skillName} pierces straight through! The ${flavor.adjective} shot ${flavor.verb} everything in its path!`,
+        `Critical hit! ${skillName} strikes a vital point, ${flavor.effect}!`,
+        `The ${skillName} hits with devastating precision, ${flavor.effect}!`,
+        `A perfect shot! ${skillName} deals catastrophic damage!`,
+      ],
+    },
+    aoe: {
+      use: [
+        `The creature raises its power and ${skillName} erupts across the battlefield, ${flavor.adjective} ${flavor.noun} spreading in all directions!`,
+        `Reality warps as ${skillName} manifests, a cataclysm of ${flavor.adjective} destruction!`,
+        `The air itself screams as ${skillName} is unleashed, ${flavor.noun} consuming everything!`,
+        `${skillName} explodes outward from the creature, an unstoppable wave of ${flavor.adjective} devastation!`,
+      ],
+      hit: [
+        `${skillName} engulfs you! The ${flavor.adjective} ${flavor.noun} ${flavor.verb} through everything as ${flavor.effect}!`,
+        `There's no escape from ${skillName}! ${flavor.effect.charAt(0).toUpperCase() + flavor.effect.slice(1)}!`,
+        `The ${skillName} washes over you, ${flavor.effect}!`,
+        `You're caught in the heart of ${skillName}, ${flavor.noun} tearing at you from all sides!`,
+      ],
+      miss: [
+        `You find a gap in ${skillName}, the ${flavor.adjective} destruction passing around you!`,
+        `By some miracle, ${skillName} fails to catch you in its radius!`,
+        `You escape the worst of ${skillName}, though ${flavor.noun} still singes you!`,
+        `The ${skillName} dissipates before reaching full power!`,
+      ],
+      crit: [
+        `${skillName} reaches apocalyptic intensity! The ${flavor.adjective} ${flavor.noun} ${flavor.verb} everything, ${flavor.effect}!`,
+        `Critical ${skillName}! The devastation is absolute, ${flavor.effect}!`,
+        `The ${skillName} amplifies beyond control, ${flavor.effect} as destruction reigns!`,
+        `Maximum power ${skillName}! Nothing survives the ${flavor.adjective} cataclysm!`,
+      ],
+    },
+    self: {
+      use: [
+        `The creature focuses inward, ${skillName} causing its body to surge with ${flavor.adjective} ${flavor.noun}!`,
+        `${skillName} activates! The beast's form shimmers with newfound power!`,
+        `The monster channels ${skillName}, ${flavor.noun} flowing through its being!`,
+        `With a primal roar, the creature triggers ${skillName}!`,
+      ],
+      hit: [
+        `${skillName} takes hold! The creature's power swells as ${flavor.effect}!`,
+        `The ${skillName} succeeds, ${flavor.adjective} energy coursing through the beast!`,
+        `${skillName} empowers the creature, its presence becoming more terrifying!`,
+        `The monster grows stronger as ${skillName} completes!`,
+      ],
+      miss: [
+        `${skillName} fizzles, the ${flavor.noun} failing to take hold!`,
+        `The ${skillName} sputters and dies, leaving the creature unchanged!`,
+        `Something disrupts ${skillName}, the power dissipating uselessly!`,
+        `${skillName} fails to activate properly!`,
+      ],
+      crit: [
+        `${skillName} achieves maximum effect! The creature becomes a avatar of ${flavor.adjective} power!`,
+        `Critical ${skillName}! The beast's strength multiplies exponentially!`,
+        `The ${skillName} exceeds all limits, ${flavor.effect}!`,
+        `Perfect ${skillName}! The creature transcends its former power!`,
+      ],
+    },
+    reactive: {
+      use: [
+        `The creature's ${skillName} triggers instantly, responding to your aggression with ${flavor.adjective} precision!`,
+        `${skillName} activates! The beast retaliates with supernatural speed!`,
+        `Your attack triggers ${skillName}, the creature's response immediate and deadly!`,
+        `The monster's ${skillName} catches you off-guard, punishment for your assault!`,
+      ],
+      hit: [
+        `${skillName} connects! The ${flavor.adjective} retaliation ${flavor.verb} through you as ${flavor.effect}!`,
+        `The ${skillName} lands before you can react, ${flavor.effect}!`,
+        `Your own momentum works against you as ${skillName} strikes!`,
+        `${skillName} punishes your aggression, ${flavor.effect}!`,
+      ],
+      miss: [
+        `You manage to block ${skillName}, the ${flavor.adjective} counter failing to land!`,
+        `The ${skillName} misses as you recover faster than expected!`,
+        `You evade ${skillName}, denying the creature its retaliation!`,
+        `${skillName} fails to connect, the counter-attack going wide!`,
+      ],
+      crit: [
+        `${skillName} devastates you! The perfect counter ${flavor.verb} through your defenses, ${flavor.effect}!`,
+        `Critical ${skillName}! The retaliation is absolute, ${flavor.effect}!`,
+        `The ${skillName} finds a fatal opening, ${flavor.effect}!`,
+        `Your attack becomes your undoing as ${skillName} critically strikes!`,
+      ],
+    },
+    signature: {
+      use: [
+        `The creature's eyes blaze as it channels its ultimate technique: ${skillName}! The very air trembles with ${flavor.adjective} power!`,
+        `${skillName} is unleashed! This is the creature's true power, ${flavor.noun} incarnate!`,
+        `Reality bends as ${skillName} manifests, a technique of legendary devastation!`,
+        `The beast reveals its trump card: ${skillName}! ${flavor.adjective.charAt(0).toUpperCase() + flavor.adjective.slice(1)} ${flavor.noun} erupts in all directions!`,
+      ],
+      hit: [
+        `${skillName} strikes with the force of a god! ${flavor.effect.charAt(0).toUpperCase() + flavor.effect.slice(1)} as the ultimate attack ${flavor.verb} through everything!`,
+        `The full might of ${skillName} crashes into you! ${flavor.effect.charAt(0).toUpperCase() + flavor.effect.slice(1)}!`,
+        `There is no defense against ${skillName}! The ${flavor.adjective} devastation is absolute, ${flavor.effect}!`,
+        `${skillName} finds its mark! The legendary technique ${flavor.verb} through you, ${flavor.effect}!`,
+      ],
+      miss: [
+        `Against all odds, you survive ${skillName}! The ${flavor.adjective} attack barely misses!`,
+        `${skillName} fails to connect! The creature roars in frustration!`,
+        `You somehow evade ${skillName}, though the near-miss leaves you shaken!`,
+        `The ultimate ${skillName} misses! Fortune smiles upon you this day!`,
+      ],
+      crit: [
+        `${skillName} achieves PERFECT execution! The ${flavor.adjective} ${flavor.noun} ${flavor.verb} through reality itself, ${flavor.effect}!`,
+        `CRITICAL ${skillName}! This is power beyond mortal comprehension, ${flavor.effect}!`,
+        `The ultimate ${skillName} strikes with maximum force! ${flavor.effect.charAt(0).toUpperCase() + flavor.effect.slice(1)}, the devastation absolute!`,
+        `${skillName} transcends its limits! The ${flavor.adjective} apocalypse ${flavor.verb} everything, ${flavor.effect}!`,
+      ],
+    },
+  }
 
-const SIGNATURE_NARRATIVES = {
-  use: [
-    'The monster unleashes its ultimate attack!',
-    'A signature move is activated!',
-    'The creature reveals its true power!',
-    'An overwhelming assault begins!',
-    'The beast uses its most devastating technique!',
-  ],
-  hit: [
-    'The signature attack devastates its target!',
-    'The ultimate move connects with full force!',
-    'The true power is unleashed!',
-    'The overwhelming attack succeeds!',
-    'The devastating technique finds its mark!',
-  ],
-  miss: [
-    'The signature attack is evaded!',
-    'The ultimate move misses!',
-    'The true power fails to connect!',
-    'The overwhelming attack is dodged!',
-    'The devastating technique misses!',
-  ],
-  crit: [
-    'A catastrophic signature strike!',
-    'The ultimate move reaches maximum power!',
-    'Critical hit! True devastation unleashed!',
-    'The overwhelming attack is amplified!',
-    'A perfect execution of the signature technique!',
-  ],
-}
-
-const NARRATIVE_POOLS: Record<CategoryType, { use: string[]; hit: string[]; miss: string[]; crit: string[] }> = {
-  melee: MELEE_NARRATIVES,
-  ranged: RANGED_NARRATIVES,
-  aoe: AOE_NARRATIVES,
-  self: SELF_NARRATIVES,
-  reactive: REACTIVE_NARRATIVES,
-  signature: SIGNATURE_NARRATIVES,
+  const categoryTemplates = templates[category]
+  return {
+    use: categoryTemplates.use[Math.floor(Math.random() * categoryTemplates.use.length)],
+    hit: categoryTemplates.hit[Math.floor(Math.random() * categoryTemplates.hit.length)],
+    miss: categoryTemplates.miss[Math.floor(Math.random() * categoryTemplates.miss.length)],
+    crit: categoryTemplates.crit[Math.floor(Math.random() * categoryTemplates.crit.length)],
+  }
 }
 
 // ============================================
@@ -359,7 +535,6 @@ function getRandomInRange(min: number, max: number): number {
 function generateSkill(category: CategoryType, existingNames: Set<string>) {
   const config = CATEGORY_CONFIGS[category]
   const namePool = NAME_POOLS[category]
-  const narratives = NARRATIVE_POOLS[category]
   const isSelfCategory = category === 'self'
 
   // Find a unique name
@@ -386,6 +561,9 @@ function generateSkill(category: CategoryType, existingNames: Set<string>) {
   const hasBuff = isSelfCategory || (!isSelfCategory && Math.random() < 0.2)
   const hasSelfHeal = isSelfCategory && Math.random() < 0.4
 
+  // Generate skill-specific narratives based on name and damage type
+  const narratives = generateNarratives(name, isSelfCategory ? 'none' : damageType, category)
+
   return {
     name,
     description: `A ${category} skill that deals ${damageType} damage.`,
@@ -406,10 +584,10 @@ function generateSkill(category: CategoryType, existingNames: Set<string>) {
     buffValue: hasBuff ? getRandomInRange(10, 30) : 0,
     selfHeal: hasSelfHeal ? getRandomInRange(20, 50) : 0,
     selfDamage: 0,
-    narrativeUse: getRandomElement(narratives.use),
-    narrativeHit: getRandomElement(narratives.hit),
-    narrativeMiss: getRandomElement(narratives.miss),
-    narrativeCrit: getRandomElement(narratives.crit),
+    narrativeUse: narratives.use,
+    narrativeHit: narratives.hit,
+    narrativeMiss: narratives.miss,
+    narrativeCrit: narratives.crit,
   }
 }
 
