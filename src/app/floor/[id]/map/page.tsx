@@ -2,8 +2,8 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
 import GameLayout from '@/components/game/GameLayout'
-import FloorMap from '@/components/game/FloorMap'
-import { FLOOR_1_REGIONS } from '@/data/floor1-regions'
+import FloorMapPins from '@/components/game/FloorMapPins'
+import { FLOOR_1_LOCATIONS } from '@/data/floor1-locations'
 import { calculateMaxHp, calculateHpRegen, calculateApRegen } from '@/lib/player'
 
 interface SessionData {
@@ -69,17 +69,17 @@ export default async function MapPage({ params }: MapPageProps) {
     characterImage: player.characterImage,
   }
 
-  // Get regions based on floor
-  const getRegions = (floor: number) => {
+  // Get locations based on floor
+  const getLocations = (floor: number) => {
     switch (floor) {
       case 1:
-        return FLOOR_1_REGIONS
+        return FLOOR_1_LOCATIONS
       default:
         return []
     }
   }
 
-  const regions = getRegions(floorNumber)
+  const locations = getLocations(floorNumber)
 
   // Floor names
   const floorNames: Record<number, string> = {
@@ -101,8 +101,8 @@ export default async function MapPage({ params }: MapPageProps) {
           </div>
         </div>
 
-        {regions.length > 0 ? (
-          <FloorMap floorId={floorNumber} regions={regions} />
+        {locations.length > 0 ? (
+          <FloorMapPins floorId={floorNumber} locations={locations} />
         ) : (
           <div className="text-center py-12 text-gray-400">
             <span className="text-4xl block mb-4">🗺️</span>
@@ -112,9 +112,9 @@ export default async function MapPage({ params }: MapPageProps) {
 
         <div className="mt-6 p-3 bg-[#1a1a1a] rounded border border-[#333]">
           <div className="text-xs text-gray-500">
-            <p className="mb-1">• Hover over regions to see details</p>
-            <p className="mb-1">• Click on a region to travel there</p>
-            <p>• Undiscovered areas are hidden by fog of war</p>
+            <p className="mb-1">• Hover over map pins to see location details</p>
+            <p className="mb-1">• Click on a pin to travel to that location</p>
+            <p>• Explore the world to discover new areas</p>
           </div>
         </div>
       </div>
