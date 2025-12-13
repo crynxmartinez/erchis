@@ -38,18 +38,12 @@ export function SkillEditor({
   const [selectedVariants, setSelectedVariants] = useState<string[]>([])
 
   useEffect(() => {
-    // Reset internal state when skill changes
+    // Reset internal state ONLY when the parent skill changes (navigation)
     setEditMode(false)
     setEditedSkill(null)
     setActiveTab('overview')
     setSelectedVariants([])
-    
-    // Debug logging for lock functionality
-    console.log('SkillEditor: onToggleLock prop present?', !!onToggleLock)
-    if (childSkills.length > 0) {
-      console.log('SkillEditor: First child lock status:', childSkills[0].name, childSkills[0].isLocked)
-    }
-  }, [skill.id, childSkills])
+  }, [skill.id])
 
   const handleStartEdit = () => {
     setEditedSkill(JSON.parse(JSON.stringify(skill))) // Deep copy
