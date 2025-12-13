@@ -197,7 +197,7 @@ model Skill {
   // Skill Tree Structure
   starterSkillName String   // Root skill name for tree tracking
   parentId         String?  // Parent skill ID in the tree
-  parent           Skill?   @relation("SkillTree", fields: [parentId], references: [id])
+  parent           Skill?   @relation("SkillTree", fields: [pabeforentId], references: [id])
   children         Skill[]  @relation("SkillTree")
   stage            Int      @default(0)  // 0-5
   
