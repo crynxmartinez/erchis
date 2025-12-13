@@ -837,7 +837,7 @@ export function SkillEditor({
                               onToggleLock(child)
                             }}
                             disabled={lockingSkillId === child.id}
-                            className={`relative z-20 w-8 h-8 flex items-center justify-center rounded-lg transition-all border ${
+                            className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all border ${
                               child.isLocked 
                                 ? 'bg-blue-600 border-blue-400 text-white hover:bg-blue-500' 
                                 : 'bg-white/10 border-white/20 text-gray-400 hover:bg-white/20 hover:text-white'
@@ -862,15 +862,6 @@ export function SkillEditor({
                         </div>
                         <p className="text-xs text-gray-400 line-clamp-2">{child.description}</p>
                       </div>
-
-                      {/* Locked Overlay - covers body only, not header with button */}
-                      {child.isLocked && (
-                        <div className="absolute inset-x-0 bottom-0 top-[72px] flex items-center justify-center bg-black/40 backdrop-blur-[1px] pointer-events-none">
-                          <div className="px-4 py-2 rounded-lg bg-blue-600/80 text-white text-xs font-bold border border-blue-400/50">
-                            🔒 LOCKED
-                          </div>
-                        </div>
-                      )}
                     </div>
                   )
                 })}
