@@ -584,41 +584,8 @@ export async function POST(request: Request) {
     if (selectedVariants && Array.isArray(selectedVariants) && selectedVariants.length > 0) {
       variantsToUse = selectedVariants as VariantType[]
     } else {
-      // TIERED EVOLUTION LOGIC
-      // Stage is the PARENT stage. Child will be parentStage + 1.
-      // Child Stage 1 & 2: Tier 1 (Refinement)
-      // Child Stage 3 & 4: Tier 2 (Mutation)
-      // Child Stage 5: Tier 3 (Ascension)
-      
-      let tierPool: VariantType[] = []
-      
-      if (newStage <= 2) {
-        // Tier 1: Refinement
-        tierPool = ['power', 'rapid', 'efficiency', 'defense']
-      } else if (newStage <= 4) {
-        // Tier 2: Mutation
-        tierPool = ['multihit', 'aoe', 'dot', 'sustain']
-      } else {
-        // Tier 3: Ascension (Stage 5)
-        tierPool = ['execute', 'control', 'power']
-      }
-      
-      // Select random variants from the tier pool
-      // For Stage 5, we might just return all of them since pool is small (3)
-      // For others, pick 4 randoms or all if length <= 4
-      
-      if (tierPool.length <= 4) {
-        variantsToUse = tierPool
-      } else {
-        const shuffled = tierPool.sort(() => 0.5 - Math.random())
-        variantsToUse = shuffled.slice(0, 4)
-      }
-      
-      // Always ensure 'power' is included for Stage 1/2 if not picked? 
-      // Tier 1 pool includes power, so it might be picked.
-      // If we want to guarantee at least one "Upgrade" (Power), we can force it.
-      // But for Tier 2, Power isn't in the pool (it's mutation time).
-      // Let's stick to the pool logic for strict tiering.
+      // Use ALL variants by default as requested
+      variantsToUse = ALL_VARIANTS
     }
     
     const children = []
