@@ -70,7 +70,7 @@ export default async function TownPage({ params }: TownPageProps) {
   // Town data based on floor
   const townData: Record<number, { name: string; buildings: { icon: string; name: string; npc: string; desc: string; href: string }[] }> = {
     1: {
-      name: 'Town of Beginnings',
+      name: "Haven's Rest",
       buildings: [
         { icon: '🏪', name: "Romolo's Provisions", npc: 'Romolo', desc: 'Buy & sell items', href: `/floor/1/town/shop` },
         { icon: '⚔️', name: 'Steel & Edge Armory', npc: 'Diavel', desc: 'Get basic weapons', href: `/floor/1/town/armory` },
@@ -119,18 +119,18 @@ export default async function TownPage({ params }: TownPageProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-6">
+        {/* Menu-style rectangular buttons */}
+        <div className="flex flex-wrap gap-2 mt-6">
           {currentTown.buildings.map((building) => (
             <a
               key={building.name}
               href={building.href}
-              className="bg-[#1e1e1e] border border-[#333] rounded-lg p-4 hover:border-[#6eb5ff] transition-colors cursor-pointer block"
+              className="flex items-center gap-3 bg-[#1e1e1e] border border-[#333] rounded-lg px-4 py-3 hover:border-[#6eb5ff] hover:bg-[#252525] transition-colors cursor-pointer"
             >
-              <div className="text-center">
-                <span className="text-2xl block mb-2">{building.icon}</span>
-                <span className="text-sm text-gray-300 font-medium block">{building.name}</span>
-                <p className="text-xs text-[#6eb5ff] mt-1">NPC: {building.npc}</p>
-                <p className="text-xs text-gray-500 mt-1">{building.desc}</p>
+              <span className="text-xl">{building.icon}</span>
+              <div>
+                <span className="text-sm text-gray-200 font-medium block">{building.name}</span>
+                <span className="text-xs text-gray-500">{building.desc}</span>
               </div>
             </a>
           ))}

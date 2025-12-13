@@ -11,7 +11,7 @@ export interface MapRegion {
 export const FLOOR_1_REGIONS: MapRegion[] = [
   {
     id: 'town-of-beginnings',
-    name: 'Town of Beginnings',
+    name: "Haven's Rest",
     type: 'town',
     level: 'Safe',
     polygon: '50,420 120,380 180,400 180,480 140,520 60,500',

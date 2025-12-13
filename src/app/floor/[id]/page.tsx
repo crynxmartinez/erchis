@@ -75,7 +75,7 @@ export default async function FloorPage({ params }: FloorPageProps) {
         <div className="text-gray-300">
           <p className="mb-2">You are on <span className="text-[#6eb5ff]">Floor {floorNumber}</span></p>
           {floorNumber === 1 && (
-            <p className="text-sm text-gray-400">Town of Beginnings - The starting floor where all adventurers begin their journey.</p>
+            <p className="text-sm text-gray-400">Haven's Rest - The starting floor where all adventurers begin their journey.</p>
           )}
         </div>
 

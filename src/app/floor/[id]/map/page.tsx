@@ -83,7 +83,7 @@ export default async function MapPage({ params }: MapPageProps) {
 
   // Floor names
   const floorNames: Record<number, string> = {
-    1: 'Town of Beginnings',
+    1: "Haven's Rest",
     2: 'Urbus',
     3: 'Zumfut',
     4: 'Rovia',
