@@ -359,7 +359,8 @@ export default function SkillDatabaseBuilder() {
       
       if (data.success) {
         setMessage(`✅ Deleted ${data.count} skills. Tree reset (Saved/Locked preserved).`)
-        setChildSkills([])
+        // Reload children to show any locked/saved skills that weren't deleted
+        await loadChildSkills(currentSkill.id)
       } else {
         setMessage(`❌ Error: ${data.error}`)
       }
