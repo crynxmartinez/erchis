@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 interface SidebarProps {
   maxUnlockedFloor?: number
@@ -10,8 +10,12 @@ interface SidebarProps {
 
 export default function Sidebar({ maxUnlockedFloor = 1 }: SidebarProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const [selectedFloor, setSelectedFloor] = useState(1)
   const [isFloorDropdownOpen, setIsFloorDropdownOpen] = useState(false)
+
+  // Check if a path is active
+  const isActive = (path: string) => pathname === path || pathname?.startsWith(path + '/')
 
   // Generate array of unlocked floors
   const unlockedFloors = Array.from({ length: maxUnlockedFloor }, (_, i) => i + 1)
@@ -76,7 +80,11 @@ export default function Sidebar({ maxUnlockedFloor = 1 }: SidebarProps) {
           {/* World Map Link */}
           <Link
             href={`/floor/${selectedFloor}/map`}
-            className="flex items-center mt-2 px-3 py-2 text-sm text-gray-300 hover:bg-[#2a2a2a] hover:text-white rounded transition-colors"
+            className={`flex items-center mt-2 px-3 py-2 text-sm rounded transition-colors ${
+              isActive(`/floor/${selectedFloor}/map`)
+                ? 'bg-[#6eb5ff]/20 text-[#6eb5ff] border-l-2 border-[#6eb5ff]'
+                : 'text-gray-300 hover:bg-[#2a2a2a] hover:text-white'
+            }`}
           >
             <span className="mr-2">🗺️</span>
             World Map
@@ -85,7 +93,11 @@ export default function Sidebar({ maxUnlockedFloor = 1 }: SidebarProps) {
           {/* Main Town Link */}
           <Link
             href={`/floor/${selectedFloor}/town`}
-            className="flex items-center mt-1 px-3 py-2 text-sm text-gray-300 hover:bg-[#2a2a2a] hover:text-white rounded transition-colors"
+            className={`flex items-center mt-1 px-3 py-2 text-sm rounded transition-colors ${
+              isActive(`/floor/${selectedFloor}/town`)
+                ? 'bg-[#6eb5ff]/20 text-[#6eb5ff] border-l-2 border-[#6eb5ff]'
+                : 'text-gray-300 hover:bg-[#2a2a2a] hover:text-white'
+            }`}
           >
             <span className="mr-2">🏘️</span>
             Haven&apos;s Rest
@@ -102,7 +114,11 @@ export default function Sidebar({ maxUnlockedFloor = 1 }: SidebarProps) {
           {/* Skill Database Link */}
           <Link
             href="/admin/skills"
-            className="flex items-center mt-1 px-3 py-2 text-sm text-gray-300 hover:bg-[#2a2a2a] hover:text-white rounded transition-colors"
+            className={`flex items-center mt-1 px-3 py-2 text-sm rounded transition-colors ${
+              isActive('/admin/skills')
+                ? 'bg-[#6eb5ff]/20 text-[#6eb5ff] border-l-2 border-[#6eb5ff]'
+                : 'text-gray-300 hover:bg-[#2a2a2a] hover:text-white'
+            }`}
           >
             <span className="mr-2">⚔️</span>
             Skill Database
