@@ -34,6 +34,7 @@ export async function POST(request: Request) {
         category: body.category || 'attack',
         damageType: body.damageType || 'physical',
         baseDamage: body.baseDamage || 0,
+        hitCount: body.hitCount || 1,
         accuracy: body.accuracy || 100,
         speed: body.speed || 50,
         scalesWithAttack: body.scalesWithAttack ?? true,

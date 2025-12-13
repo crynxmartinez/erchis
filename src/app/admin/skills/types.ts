@@ -36,6 +36,9 @@ export interface Skill {
   isCounter: boolean
   triggerCondition?: string | null
   passive: string | null
+  narrativeSuccess?: string | null
+  narrativeMiss?: string | null
+  narrativeCrit?: string | null
   starterSkillName: string
   isSaved: boolean
   isLocked: boolean

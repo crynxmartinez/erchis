@@ -348,6 +348,7 @@ model MonsterSkill {
   // Combat Stats
   damageType String @default("physical") // physical, magic, true
   baseDamage Int    @default(0)
+  hitCount   Int    @default(1) // Number of hits
   accuracy   Int    @default(100) // Hit chance %
   speed      Int    @default(50) // Action priority (0-100)
 

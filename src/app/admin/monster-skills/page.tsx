@@ -16,6 +16,7 @@ interface MonsterSkill {
   category: string
   damageType: string
   baseDamage: number
+  hitCount: number
   accuracy: number
   speed: number
   scalesWithAttack: boolean
@@ -275,9 +276,9 @@ function SkillDetailPanel({ skill, onClose }: { skill: MonsterSkill; onClose: ()
             {/* Quick Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <StatCard label="Base Damage" value={skill.baseDamage} color="text-red-400" icon="💥" />
+              <StatCard label="Hit Count" value={skill.hitCount || 1} color="text-cyan-300" icon="⚔️" />
               <StatCard label="Accuracy" value={skill.accuracy} unit="%" color="text-blue-400" icon="🎯" />
               <StatCard label="Speed" value={skill.speed} color="text-yellow-400" icon="⚡" />
-              <StatCard label="Scaling" value={skill.scalesWithAttack ? skill.scalingPercent : 0} unit="%" color="text-purple-400" icon="📈" />
             </div>
 
             {/* Info Panels */}

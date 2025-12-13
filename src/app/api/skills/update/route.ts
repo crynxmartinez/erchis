@@ -39,6 +39,9 @@ export async function POST(request: Request) {
     if (data.triggerCondition !== undefined) updateData.triggerCondition = data.triggerCondition
     if (data.isLocked !== undefined) updateData.isLocked = data.isLocked
     if (data.isSaved !== undefined) updateData.isSaved = data.isSaved
+    if (data.narrativeSuccess !== undefined) updateData.narrativeSuccess = data.narrativeSuccess
+    if (data.narrativeMiss !== undefined) updateData.narrativeMiss = data.narrativeMiss
+    if (data.narrativeCrit !== undefined) updateData.narrativeCrit = data.narrativeCrit
     
     const skill = await prisma.skill.update({
       where: { id: data.id },

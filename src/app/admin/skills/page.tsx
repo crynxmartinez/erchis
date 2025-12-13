@@ -404,9 +404,71 @@ function SkillDetailPanel({
 
         {activeTab === 'flavor' && (
            <div className="space-y-6">
-             <SectionPanel title="Execution Narrative" icon="📜">
-               <p className="text-gray-400 italic leading-relaxed">"{currentData.executionDescription || 'No narrative description.'}"</p>
-             </SectionPanel>
+             {editMode ? (
+               <>
+                 <SectionPanel title="Execution Narrative" icon="📜">
+                   <textarea 
+                     value={currentData.executionDescription || ''} 
+                     onChange={e => setEditedSkill({...editedSkill!, executionDescription: e.target.value})}
+                     className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-sm text-gray-300 italic focus:border-[#6eb5ff] focus:outline-none resize-none h-24"
+                     placeholder="Describe how the skill looks when executed..."
+                   />
+                 </SectionPanel>
+                 
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                   <SectionPanel title="On Hit" icon="✅" color="border-green-500/30">
+                     <textarea 
+                       value={currentData.narrativeSuccess || ''} 
+                       onChange={e => setEditedSkill({...editedSkill!, narrativeSuccess: e.target.value})}
+                       className="w-full bg-green-900/10 border border-green-500/20 rounded-lg p-3 text-sm text-green-200 italic focus:border-green-500 focus:outline-none resize-none h-24"
+                       placeholder="Text when attack hits..."
+                     />
+                   </SectionPanel>
+                   <SectionPanel title="On Miss" icon="❌" color="border-red-500/30">
+                     <textarea 
+                       value={currentData.narrativeMiss || ''} 
+                       onChange={e => setEditedSkill({...editedSkill!, narrativeMiss: e.target.value})}
+                       className="w-full bg-red-900/10 border border-red-500/20 rounded-lg p-3 text-sm text-red-200 italic focus:border-red-500 focus:outline-none resize-none h-24"
+                       placeholder="Text when attack misses..."
+                     />
+                   </SectionPanel>
+                   <SectionPanel title="On Critical Hit" icon="💥" color="border-yellow-500/30">
+                     <textarea 
+                       value={currentData.narrativeCrit || ''} 
+                       onChange={e => setEditedSkill({...editedSkill!, narrativeCrit: e.target.value})}
+                       className="w-full bg-yellow-900/10 border border-yellow-500/20 rounded-lg p-3 text-sm text-yellow-200 italic focus:border-yellow-500 focus:outline-none resize-none h-24"
+                       placeholder="Text when attack crits..."
+                     />
+                   </SectionPanel>
+                 </div>
+               </>
+             ) : (
+               <>
+                 <SectionPanel title="Execution Narrative" icon="📜">
+                   <p className="text-gray-400 italic leading-relaxed">"{currentData.executionDescription || 'No narrative description.'}"</p>
+                 </SectionPanel>
+
+                 {(currentData.narrativeSuccess || currentData.narrativeMiss || currentData.narrativeCrit) && (
+                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                     {currentData.narrativeSuccess && (
+                       <SectionPanel title="On Hit" icon="✅" color="border-green-500/30">
+                         <p className="text-green-300 italic leading-relaxed">"{currentData.narrativeSuccess}"</p>
+                       </SectionPanel>
+                     )}
+                     {currentData.narrativeMiss && (
+                       <SectionPanel title="On Miss" icon="❌" color="border-red-500/30">
+                         <p className="text-red-300 italic leading-relaxed">"{currentData.narrativeMiss}"</p>
+                       </SectionPanel>
+                     )}
+                     {currentData.narrativeCrit && (
+                       <SectionPanel title="On Critical Hit" icon="💥" color="border-yellow-500/30">
+                         <p className="text-yellow-300 italic leading-relaxed">"{currentData.narrativeCrit}"</p>
+                       </SectionPanel>
+                     )}
+                   </div>
+                 )}
+               </>
+             )}
            </div>
         )}
 
