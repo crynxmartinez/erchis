@@ -309,16 +309,11 @@ model PlayerInventory {
 
 model Monster {
   id          String  @id @default(cuid())
-  name        String
+  name        String  @unique
   description String?
   imageUrl    String?
 
-  // Location
-  floorId Int    @default(1)
-  areaId  String // Which hunting area spawns this monster
-
-  // Stats
-  level        Int
+  // Stats (no location/level - those are assigned when attaching to areas)
   maxHp        Int
   attack       Int // Base physical damage
   magicAttack  Int @default(0) // Base magic damage
@@ -326,68 +321,97 @@ model Monster {
   magicDefense Int @default(0)
   accuracy     Int @default(70) // Hit chance modifier
   evasion      Int @default(10) // Dodge chance modifier
-  speed        Int @default(50) // Turn order priority
 
   // Rewards
   xpReward    Int
-  xpVariance  Int @default(0) // Random +/- variance
   colReward   Int
-  colVariance Int @default(0)
-
-  // Behavior - AI attack patterns
-  attackPatterns Json @default("[]") // Array of skill sequence arrays
 
   // Relations
-  skills         MonsterSkill[]
-  lootDrops      LootDrop[]
+  skills         MonsterSkillAssignment[]
+  lootDrops      MonsterLootDrop[]
   combatSessions CombatSession[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@index([floorId])
-  @@index([areaId])
 }
 
+// Standalone Monster Skill Database (reusable across monsters)
 model MonsterSkill {
-  id        String  @id @default(cuid())
-  monsterId String
-  monster   Monster @relation(fields: [monsterId], references: [id], onDelete: Cascade)
-
-  name        String
+  id          String  @id @default(cuid())
+  name        String  @unique
   description String?
+  icon        String  @default("👊") // Emoji icon
+
+  // Skill Category
+  category String @default("attack") // attack, buff, debuff, heal, special
 
   // Combat Stats
-  damageType String @default("physical") // physical, magic
-  baseDamage Int
+  damageType String @default("physical") // physical, magic, true
+  baseDamage Int    @default(0)
   accuracy   Int    @default(100) // Hit chance %
-  speed      Int    @default(50) // Action priority
+  speed      Int    @default(50) // Action priority (0-100)
+
+  // Scaling (optional)
+  scalesWithAttack Boolean @default(true)
+  scalingPercent   Int     @default(100) // % of monster's attack stat
 
   // Effects
-  appliesDebuff  String? // bleed, poison, stun, etc.
-  debuffChance   Int?    @default(100)
-  debuffDuration Int?
-  debuffValue    Int?
+  appliesDebuff  String? // bleed, poison, stun, burn, freeze, etc.
+  debuffChance   Int     @default(100)
+  debuffDuration Int     @default(2)
+  debuffValue    Int     @default(0)
+
+  appliesBuff   String? // enrage, shield, regen, etc.
+  buffDuration  Int     @default(2)
+  buffValue     Int     @default(0)
+
+  // Self effects
+  selfHeal    Int @default(0) // HP restored to monster
+  selfDamage  Int @default(0) // HP cost to use
 
   // Narrative Templates
-  narrativeUse  String // "The Goblin lunges with snapping jaws..."
-  narrativeHit  String // "Its fangs sink into your flesh!"
-  narrativeMiss String // "You sidestep the clumsy attack."
-  narrativeCrit String? // "A vicious strike! Critical damage!"
+  narrativeUse  String @default("The monster attacks!") // Action description
+  narrativeHit  String @default("The attack connects!") // On hit
+  narrativeMiss String @default("The attack misses!") // On miss
+  narrativeCrit String @default("Critical hit!") // On crit
+
+  // Relations
+  assignments MonsterSkillAssignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Junction table: Attach skills to monsters
+model MonsterSkillAssignment {
+  id             String       @id @default(cuid())
+  monsterId      String
+  monster        Monster      @relation(fields: [monsterId], references: [id], onDelete: Cascade)
+  monsterSkillId String
+  monsterSkill   MonsterSkill @relation(fields: [monsterSkillId], references: [id], onDelete: Cascade)
+
+  // Override base skill values for this specific monster (optional)
+  damageOverride   Int?
+  accuracyOverride Int?
+  speedOverride    Int?
+
+  // Priority in attack patterns (lower = used more often)
+  priority Int @default(1)
 
   createdAt DateTime @default(now())
 
+  @@unique([monsterId, monsterSkillId])
   @@index([monsterId])
+  @@index([monsterSkillId])
 }
 
-model LootDrop {
+// Junction table: Attach items to monsters as loot
+model MonsterLootDrop {
   id        String  @id @default(cuid())
   monsterId String
   monster   Monster @relation(fields: [monsterId], references: [id], onDelete: Cascade)
-
-  itemType String // weapon, consumable, material
-  itemId   String? // Reference to specific item if applicable
-  itemName String // Display name
+  itemId    String
+  item      Item    @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
   dropChance  Float // 0.0 - 1.0 (0.1 = 10%)
   minQuantity Int   @default(1)
@@ -395,7 +419,48 @@ model LootDrop {
 
   createdAt DateTime @default(now())
 
+  @@unique([monsterId, itemId])
   @@index([monsterId])
+  @@index([itemId])
+}
+
+// ============================================
+// ITEMS DATABASE
+// ============================================
+
+model Item {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+  icon        String  @default("📦") // Emoji icon
+
+  // Item Type
+  itemType String // consumable, material, equipment, key_item
+
+  // For consumables
+  useEffect   String? // heal, restore_ap, buff, cure
+  effectValue Int     @default(0)
+
+  // For equipment (future)
+  equipSlot    String? // weapon, armor, accessory
+  statBonuses  Json    @default("{}") // {"str": 5, "vit": 3}
+
+  // Economy
+  buyPrice  Int @default(0) // Price to buy from shop (0 = not buyable)
+  sellPrice Int @default(0) // Price when selling
+
+  // Stacking
+  maxStack Int     @default(99)
+  isUnique Boolean @default(false) // Only 1 can exist in inventory
+
+  // Rarity
+  rarity String @default("common") // common, uncommon, rare, epic, legendary
+
+  // Relations
+  lootDrops MonsterLootDrop[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model CombatSession {

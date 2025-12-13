@@ -36,56 +36,57 @@ A turn-based combat system with **unified narrative storytelling** where player 
 
 ## Implementation Checklist
 
-### Phase 1: Schema Updates
-- [ ] **1.1** Add `speed` field to Skill schema (0-100, higher = faster)
-- [ ] **1.2** Add `isReaction` field to Skill schema (for Dodge/Guard/Counter)
-- [ ] **1.3** Add narrative template fields to Skill schema
-- [ ] **1.4** Create Monster schema
-- [ ] **1.5** Create MonsterSkill schema
-- [ ] **1.6** Create CombatSession schema
-- [ ] **1.7** Create CombatLog schema
-- [ ] **1.8** Add XP fields to Player schema (currentXp, totalXpEarned)
-- [ ] **1.9** Run Prisma migration
+### Phase 1: Schema Updates ✅
+- [x] **1.1** Add `speed` field to Skill schema (0-100, higher = faster)
+- [x] **1.2** Add `isReaction` field to Skill schema (for Dodge/Guard/Counter)
+- [x] **1.3** Add narrative template fields to Skill schema
+- [x] **1.4** Create Monster schema
+- [x] **1.5** Create MonsterSkill schema
+- [x] **1.6** Create CombatSession schema
+- [x] **1.7** Create CombatLog schema
+- [x] **1.8** Add XP fields to Player schema (currentXp, totalXpEarned)
+- [x] **1.9** Run Prisma migration
 
-### Phase 2: Combat Engine (Backend)
-- [ ] **2.1** Create `src/lib/combat/engine.ts` - Core combat logic
-- [ ] **2.2** Create `src/lib/combat/dice.ts` - Dice roll functions
-- [ ] **2.3** Create `src/lib/combat/damage.ts` - Damage calculation
-- [ ] **2.4** Create `src/lib/combat/sequence.ts` - Action sequence interleaving
-- [ ] **2.5** Create `src/lib/combat/narrator.ts` - Narrative text generator
-- [ ] **2.6** Create `src/lib/combat/cooldowns.ts` - Cooldown management
-- [ ] **2.7** Create `src/lib/combat/combos.ts` - Combo detection & bonuses
+### Phase 2: Combat Engine (Backend) ✅
+- [x] **2.1** Create `src/lib/combat/engine.ts` - Core combat logic
+- [x] **2.2** Create `src/lib/combat/dice.ts` - Dice roll functions
+- [x] **2.3** Create `src/lib/combat/damage.ts` - Damage calculation
+- [x] **2.4** Create `src/lib/combat/sequence.ts` - Action sequence interleaving
+- [x] **2.5** Create `src/lib/combat/narrator.ts` - Narrative text generator
+- [x] **2.6** Create `src/lib/combat/cooldowns.ts` - Cooldown management (in engine.ts)
+- [x] **2.7** Create `src/lib/combat/combos.ts` - Combo detection & bonuses
 
-### Phase 3: API Routes
-- [ ] **3.1** `POST /api/combat/start` - Start combat session
-- [ ] **3.2** `POST /api/combat/queue` - Submit player action queue
-- [ ] **3.3** `POST /api/combat/execute` - Execute turn and get narrative
-- [ ] **3.4** `POST /api/combat/flee` - Attempt to flee combat
-- [ ] **3.5** `GET /api/combat/session` - Get current combat state
+### Phase 3: API Routes ✅
+- [x] **3.1** `POST /api/combat/start` - Start combat session
+- [x] **3.2** `POST /api/combat/queue` - Submit player action queue (merged into execute)
+- [x] **3.3** `POST /api/combat/execute` - Execute turn and get narrative
+- [x] **3.4** `POST /api/combat/flee` - Attempt to flee combat
+- [x] **3.5** `GET /api/combat/session` - Get current combat state
 - [ ] **3.6** `GET /api/combat/log` - Get combat log history
 
-### Phase 4: Combat UI
-- [ ] **4.1** Create `CombatScreen.tsx` - Main combat view
-- [ ] **4.2** Create `SkillQueue.tsx` - 5-slot drag-drop queue
-- [ ] **4.3** Create `CombatNarrative.tsx` - Story display panel
-- [ ] **4.4** Create `EnemyDisplay.tsx` - Enemy HP, image, intent
-- [ ] **4.5** Create `PlayerCombatStatus.tsx` - Player HP/AP in combat
-- [ ] **4.6** Update `SkillBar.tsx` - Make skills draggable
-- [ ] **4.7** Implement drag-and-drop functionality
+### Phase 4: Combat UI ✅
+- [x] **4.1** Create `CombatScreen.tsx` - Main combat view
+- [x] **4.2** Create `SkillQueue.tsx` - 5-slot queue (integrated into SkillBar)
+- [x] **4.3** Create `CombatNarrative.tsx` - Story display panel
+- [x] **4.4** Create `EnemyDisplay.tsx` - Enemy HP, image, intent
+- [x] **4.5** Create `PlayerCombatStatus.tsx` - Player HP/AP in combat
+- [x] **4.6** Update `SkillBar.tsx` - Click to add to queue
+- [ ] **4.7** Implement drag-and-drop functionality (optional enhancement)
 
-### Phase 5: Monster Data
+### Phase 5: Monster Data 🔄 IN PROGRESS
 - [ ] **5.1** Create Floor 1 monsters (5-10 monsters)
 - [ ] **5.2** Create monster skills for each monster
 - [ ] **5.3** Create monster attack patterns (AI sequences)
 - [ ] **5.4** Create loot tables for monsters
+- [ ] **5.5** Create Monster Database admin page
 
 ### Phase 6: Integration
 - [ ] **6.1** Connect hunting areas to combat encounters
-- [ ] **6.2** Implement XP rewards on victory
-- [ ] **6.3** Implement Col rewards on victory
-- [ ] **6.4** Implement skill useCount increment
+- [x] **6.2** Implement XP rewards on victory (in execute route)
+- [x] **6.3** Implement Col rewards on victory (in execute route)
+- [x] **6.4** Implement skill useCount increment (in execute route)
 - [ ] **6.5** Implement player death handling
-- [ ] **6.6** Implement flee mechanics
+- [x] **6.6** Implement flee mechanics
 
 ### Phase 7: Polish
 - [ ] **7.1** Add combat animations/transitions

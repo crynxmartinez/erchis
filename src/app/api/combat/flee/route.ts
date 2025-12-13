@@ -42,9 +42,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Combat session not found' }, { status: 404 })
     }
 
-    // Calculate flee chance based on player AGI vs monster speed
-    const speedDiff = player.agi - session.monster.speed
-    const fleeChance = Math.max(10, Math.min(90, 50 + speedDiff))
+    // Calculate flee chance based on player AGI vs monster evasion
+    const agiDiff = player.agi - session.monster.evasion
+    const fleeChance = Math.max(10, Math.min(90, 50 + agiDiff))
     const roll = Math.random() * 100
     const success = roll < fleeChance
 

@@ -61,7 +61,6 @@ export async function GET(request: NextRequest) {
         monster: {
           id: session.monster.id,
           name: session.monster.name,
-          level: session.monster.level,
           hp: session.monsterHp,
           maxHp: session.monster.maxHp,
           imageUrl: session.monster.imageUrl,

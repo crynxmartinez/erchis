@@ -13,11 +13,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    const { monsterId, areaId } = await request.json()
+    const { monsterId } = await request.json()
 
-    if (!monsterId && !areaId) {
+    if (!monsterId) {
       return NextResponse.json(
-        { error: 'Either monsterId or areaId is required' },
+        { error: 'monsterId is required' },
         { status: 400 }
       )
     }
@@ -47,23 +47,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get monster - either by ID or random from area
-    let monster
-    if (monsterId) {
-      monster = await prisma.monster.findUnique({
-        where: { id: monsterId },
-        include: { skills: true },
-      })
-    } else {
-      // Get random monster from area
-      const monsters = await prisma.monster.findMany({
-        where: { areaId },
-        include: { skills: true },
-      })
-      if (monsters.length > 0) {
-        monster = monsters[Math.floor(Math.random() * monsters.length)]
-      }
-    }
+    // Get monster by ID with skills
+    const monster = await prisma.monster.findUnique({
+      where: { id: monsterId },
+      include: { 
+        skills: {
+          include: { monsterSkill: true }
+        } 
+      },
+    })
 
     if (!monster) {
       return NextResponse.json({ error: 'Monster not found' }, { status: 404 })
@@ -132,7 +124,7 @@ export async function POST(request: NextRequest) {
       currentAp: 100,
       maxAp: 100,
       str: monster.attack,
-      agi: monster.speed,
+      agi: monster.evasion,
       vit: monster.defense,
       int: monster.magicAttack,
       dex: 10,
@@ -144,33 +136,26 @@ export async function POST(request: NextRequest) {
       dodgeChance: monster.evasion,
       critChance: 5,
       critMultiplier: 1.5,
-      speed: monster.speed,
+      speed: 50, // Default speed, actual speed comes from skills
       buffs: [],
       debuffs: [],
       position: { x: 5, y: 0 },
-      equippedSkillIds: monster.skills.map((s: { id: string }) => s.id),
+      equippedSkillIds: monster.skills.map((sa: { monsterSkillId: string }) => sa.monsterSkillId),
       skillCooldowns: {},
     }
 
-    // Generate monster's first action queue based on AI patterns
-    const attackPatterns = monster.attackPatterns as string[][] || []
+    // Generate monster's first action queue
     let monsterQueue: { skillId: string; skillName: string }[] = []
     
-    if (attackPatterns.length > 0 && monster.skills.length > 0) {
-      const pattern = attackPatterns[0]
-      for (let i = 0; i < Math.min(2, pattern.length); i++) {
-        const skillId = pattern[i]
-        const skill = monster.skills.find((s: { id: string; name: string }) => s.id === skillId)
-        if (skill) {
-          monsterQueue.push({ skillId: skill.id, skillName: skill.name })
-        }
+    if (monster.skills.length > 0) {
+      // Use first assigned skill
+      const firstSkillAssignment = monster.skills[0]
+      if (firstSkillAssignment.monsterSkill) {
+        monsterQueue.push({
+          skillId: firstSkillAssignment.monsterSkillId,
+          skillName: firstSkillAssignment.monsterSkill.name,
+        })
       }
-    } else if (monster.skills.length > 0) {
-      // Fallback: use first skill
-      monsterQueue.push({
-        skillId: monster.skills[0].id,
-        skillName: monster.skills[0].name,
-      })
     }
 
     // Update session with monster queue
@@ -193,16 +178,15 @@ export async function POST(request: NextRequest) {
       monster: {
         id: monster.id,
         name: monster.name,
-        level: monster.level,
         hp: monster.maxHp,
         maxHp: monster.maxHp,
         imageUrl: monster.imageUrl,
         intent: monsterQueue.length > 0 ? monsterQueue[0].skillName : 'Attack',
       },
-      monsterSkills: monster.skills.map((s: { id: string; name: string; baseDamage: number }) => ({
-        id: s.id,
-        name: s.name,
-        damage: s.baseDamage,
+      monsterSkills: monster.skills.map((sa: { monsterSkillId: string; monsterSkill: { name: string; baseDamage: number } }) => ({
+        id: sa.monsterSkillId,
+        name: sa.monsterSkill.name,
+        damage: sa.monsterSkill.baseDamage,
       })),
     })
   } catch (error) {

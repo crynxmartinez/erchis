@@ -48,7 +48,13 @@ export async function POST(request: NextRequest) {
         status: 'active',
       },
       include: {
-        monster: { include: { skills: true } },
+        monster: { 
+          include: { 
+            skills: {
+              include: { monsterSkill: true }
+            }
+          } 
+        },
       },
     })
 
@@ -125,16 +131,24 @@ export async function POST(request: NextRequest) {
     const enemyQueue = session.enemyQueue as { skillId: string; skillName: string }[]
     if (monsterHp > 0 && enemyQueue.length > 0) {
       for (const enemyAction of enemyQueue) {
-        const monsterSkill = session.monster.skills.find(s => s.id === enemyAction.skillId)
-        if (!monsterSkill) continue
+        // Find the skill assignment and get the actual skill
+        const skillAssignment = session.monster.skills.find(
+          (sa: { monsterSkillId: string }) => sa.monsterSkillId === enemyAction.skillId
+        )
+        if (!skillAssignment || !skillAssignment.monsterSkill) continue
 
-        // Calculate monster damage
+        const monsterSkill = skillAssignment.monsterSkill
+
+        // Calculate monster damage (use override if set)
+        const accuracy = skillAssignment.accuracyOverride ?? monsterSkill.accuracy
+        const baseDamage = skillAssignment.damageOverride ?? monsterSkill.baseDamage
+
         const hitRoll = Math.random() * 100
-        const hitChance = monsterSkill.accuracy - (player.agi * 0.5)
+        const hitChance = accuracy - (player.agi * 0.5)
 
         if (hitRoll < hitChance) {
           // Hit
-          const damage = Math.max(1, monsterSkill.baseDamage - Math.floor(player.vit * 0.5))
+          const damage = Math.max(1, baseDamage - Math.floor(player.vit * 0.5))
           playerHp = Math.max(0, playerHp - damage)
 
           narrativeLines.push(monsterSkill.narrativeUse)
