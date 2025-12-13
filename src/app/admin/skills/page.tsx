@@ -252,7 +252,7 @@ export default function SkillDatabaseBuilder() {
     setMessage('🔄 Regenerating children...')
     
     try {
-      // Delete existing unsaved children
+      // Delete existing unsaved children (API now respects locks)
       const deleteResponse = await fetch('/api/skills/delete-unsaved', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -263,7 +263,7 @@ export default function SkillDatabaseBuilder() {
         throw new Error('Failed to delete existing children')
       }
       
-      // Generate new children (without specific variants, random logic applies)
+      // Generate new children
       const response = await fetch('/api/skills/generate-children', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -290,29 +290,62 @@ export default function SkillDatabaseBuilder() {
     setGenerating(false)
   }
 
+  const handleToggleLock = async (skill: Skill) => {
+    try {
+      // Toggle both Locked and Saved state together
+      // If it's locked, we unlock and unsave
+      // If it's unlocked, we lock and save
+      const newState = !skill.isLocked
+      
+      const response = await fetch('/api/skills/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: skill.id,
+          isLocked: newState,
+          isSaved: newState
+        })
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        // Update local state
+        setChildSkills(prev => prev.map(s => s.id === skill.id ? { ...s, isLocked: newState, isSaved: newState } : s))
+        setMessage(newState ? '🔒 Skill Locked & Saved' : '🔓 Skill Unlocked & Unsaved')
+      } else {
+        setMessage(`❌ Error: ${data.error}`)
+      }
+    } catch (error) {
+      setMessage(`❌ Failed to toggle lock: ${error}`)
+    }
+  }
+
   const handleResetTree = async () => {
     if (!currentSkill) return
     
     const starterName = currentSkill.starterSkillName || currentSkill.name
     
-    // Use deleteAll=true to delete ALL skills with stage > 0 (nuclear option for old data)
-    if (!confirm(`Are you sure you want to delete ALL generated skills? This will reset ALL skill trees. This cannot be undone.`)) {
+    if (!confirm(`Reset tree for "${starterName}"? \n\nThis will delete all generated skills for this weapon that are NOT Saved or Locked.\n\nSaved/Locked skills will be preserved.`)) {
       return
     }
     
-    setMessage('🗑️ Deleting all generated skills...')
+    setMessage(`🗑️ Resetting tree for ${starterName}...`)
     
     try {
       const response = await fetch('/api/skills/delete-all-children', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ deleteAll: true })
+        body: JSON.stringify({ 
+          starterSkillName: starterName,
+          deleteAll: false 
+        })
       })
       
       const data = await response.json()
       
       if (data.success) {
-        setMessage(`✅ Deleted ${data.count} skills. All trees reset to starter skills only.`)
+        setMessage(`✅ Deleted ${data.count} skills. Tree reset (Saved/Locked preserved).`)
         setChildSkills([])
       } else {
         setMessage(`❌ Error: ${data.error}`)
@@ -336,6 +369,8 @@ export default function SkillDatabaseBuilder() {
             <div className={`px-4 py-3 rounded-lg shadow-lg border backdrop-blur-md flex items-center gap-3 ${
               message.includes('✅') ? 'bg-green-900/80 border-green-500/50 text-green-100' : 
               message.includes('⚠️') ? 'bg-yellow-900/80 border-yellow-500/50 text-yellow-100' :
+              message.includes('🔒') ? 'bg-blue-900/80 border-blue-500/50 text-blue-100' :
+              message.includes('🔓') ? 'bg-gray-800/80 border-gray-500/50 text-gray-100' :
               'bg-red-900/80 border-red-500/50 text-red-100'
             }`}>
               <span>{message}</span>
@@ -364,6 +399,7 @@ export default function SkillDatabaseBuilder() {
               onRegenerateChildren={handleRegenerateChildren}
               onSaveAllChildren={handleSaveAllChildren}
               onResetTree={handleResetTree}
+              onToggleLock={handleToggleLock}
               generating={generating}
             />
           ) : (

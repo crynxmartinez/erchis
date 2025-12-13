@@ -14,6 +14,7 @@ interface SkillEditorProps {
   onRegenerateChildren: () => Promise<void>
   onSaveAllChildren: () => Promise<void>
   onResetTree: () => Promise<void>
+  onToggleLock: (skill: Skill) => void
   generating: boolean
 }
 
@@ -28,6 +29,7 @@ export function SkillEditor({
   onRegenerateChildren,
   onSaveAllChildren,
   onResetTree,
+  onToggleLock,
   generating
 }: SkillEditorProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'combat' | 'effects' | 'flavor' | 'tree'>('overview')
@@ -41,7 +43,13 @@ export function SkillEditor({
     setEditedSkill(null)
     setActiveTab('overview')
     setSelectedVariants([])
-  }, [skill.id])
+    
+    // Debug logging for lock functionality
+    console.log('SkillEditor: onToggleLock prop present?', !!onToggleLock)
+    if (childSkills.length > 0) {
+      console.log('SkillEditor: First child lock status:', childSkills[0].name, childSkills[0].isLocked)
+    }
+  }, [skill.id, childSkills])
 
   const handleStartEdit = () => {
     setEditedSkill(JSON.parse(JSON.stringify(skill))) // Deep copy
@@ -437,27 +445,51 @@ export function SkillEditor({
                   return (
                     <div 
                       key={child.id}
-                      onClick={() => onNavigate(child)}
-                      className={`cursor-pointer p-4 rounded-lg border-2 hover:scale-105 transition-all relative group ${variantConfig.color} bg-[#1a1a1a]`}
+                      className={`relative group p-4 rounded-lg border-2 transition-all ${
+                        child.isLocked 
+                          ? 'border-blue-500/50 bg-[#1a2230]' 
+                          : `${variantConfig.color} bg-[#1a1a1a] hover:scale-105 cursor-pointer`
+                      }`}
+                      onClick={() => !child.isLocked && onNavigate(child)}
                     >
-                      {child.isSaved && (
-                        <div className="absolute top-2 right-2 text-xs bg-green-900/80 text-green-300 px-1.5 py-0.5 rounded border border-green-500/30">
-                          Saved
+                      <div className="flex justify-between items-start mb-2">
+                        <div className={`flex items-center gap-2 ${child.isLocked ? 'opacity-75' : ''}`}>
+                          <span className="text-2xl">{variantConfig.icon}</span>
+                          <div>
+                            <div className="font-bold text-sm line-clamp-1">{child.name}</div>
+                            <div className="text-[10px] opacity-70 uppercase tracking-wider">{variantConfig.label}</div>
+                          </div>
                         </div>
-                      )}
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-2xl">{variantConfig.icon}</span>
-                        <div>
-                          <div className="font-bold text-sm line-clamp-1">{child.name}</div>
-                          <div className="text-[10px] opacity-70 uppercase tracking-wider">{variantConfig.label}</div>
-                        </div>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onToggleLock(child)
+                          }}
+                          className={`w-8 h-8 flex items-center justify-center rounded-md transition-all border-2 z-50 shadow-md ${
+                            child.isLocked 
+                              ? 'text-white bg-blue-600 border-blue-400 hover:bg-blue-500' 
+                              : 'text-black bg-white border-gray-300 hover:bg-gray-100'
+                          }`}
+                          title={child.isLocked ? "Unlock (Unsave & Allow Regeneration)" : "Lock & Save (Prevent Regeneration)"}
+                        >
+                          <span className="text-lg leading-none">{child.isLocked ? '🔒' : '🔓'}</span>
+                        </button>
                       </div>
-                      <div className="flex gap-2 text-xs opacity-80 mb-2">
+                      <div className={`flex gap-2 text-xs opacity-80 mb-2 ${child.isLocked ? 'opacity-60' : ''}`}>
                         <span className="text-red-400">{child.ampPercent}%</span>
                         <span className="text-blue-400">{child.apCost} AP</span>
                         <span className="text-yellow-400">{child.cooldown}T</span>
                       </div>
-                      <p className="text-xs text-gray-400 line-clamp-2">{child.description}</p>
+                      <p className={`text-xs text-gray-400 line-clamp-2 ${child.isLocked ? 'opacity-50' : ''}`}>{child.description}</p>
+                      
+                      {child.isLocked && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="bg-black/60 px-3 py-1 rounded text-blue-300 text-xs font-bold border border-blue-500/30 backdrop-blur-sm">
+                            LOCKED
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )
                 })}

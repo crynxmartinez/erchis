@@ -37,6 +37,8 @@ export async function POST(request: Request) {
     if (data.bonusVsDebuffed !== undefined) updateData.bonusVsDebuffed = data.bonusVsDebuffed
     if (data.isCounter !== undefined) updateData.isCounter = data.isCounter
     if (data.triggerCondition !== undefined) updateData.triggerCondition = data.triggerCondition
+    if (data.isLocked !== undefined) updateData.isLocked = data.isLocked
+    if (data.isSaved !== undefined) updateData.isSaved = data.isSaved
     
     const skill = await prisma.skill.update({
       where: { id: data.id },

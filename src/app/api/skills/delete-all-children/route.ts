@@ -6,17 +6,23 @@ export async function POST(request: Request) {
     const { starterSkillName, deleteAll } = await request.json()
     
     if (deleteAll) {
-      // Nuclear option: delete ALL skills with stage > 0
+      // Nuclear option: delete ALL skills with stage > 0 that are NOT locked or saved
+      // User requested "reset all generated skills", usually implying a clean slate, but we should probably still respect locks if we add them.
+      // However, the user specifically asked for "reset children on that current skill" in the prompt.
+      // The "Reset Tree" button on stage 0 usually implies "clear everything I generated for this starter".
+      
       const result = await prisma.skill.deleteMany({
         where: {
-          stage: { gt: 0 }
+          stage: { gt: 0 },
+          isSaved: false,
+          isLocked: false
         }
       })
       
       return NextResponse.json({ 
         success: true, 
         count: result.count,
-        message: `Deleted ${result.count} child skills (all trees)`
+        message: `Deleted ${result.count} generated skills (respected locks/saves)`
       })
     }
     
@@ -25,10 +31,13 @@ export async function POST(request: Request) {
     }
     
     // Delete all skills that belong to this starter skill tree EXCEPT the root (stage 0)
+    // AND respect isSaved / isLocked
     const result = await prisma.skill.deleteMany({
       where: {
         starterSkillName,
-        stage: { gt: 0 }
+        stage: { gt: 0 },
+        isSaved: false,
+        isLocked: false
       }
     })
     

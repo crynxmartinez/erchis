@@ -9,13 +9,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'skillIds array is required' }, { status: 400 })
     }
     
-    // Update all skills to mark them as saved
+    // Update all skills to mark them as saved and locked
     const result = await prisma.skill.updateMany({
       where: {
         id: { in: skillIds }
       },
       data: {
-        isSaved: true
+        isSaved: true,
+        isLocked: true
       }
     })
     

@@ -236,6 +236,7 @@ model Skill {
   
   // State for admin builder
   isSaved       Boolean  @default(false)
+  isLocked      Boolean  @default(false)
 
   // Relations
   playerSkills PlayerSkill[]

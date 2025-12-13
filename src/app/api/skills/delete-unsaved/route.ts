@@ -9,11 +9,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'parentId is required' }, { status: 400 })
     }
     
-    // Delete all unsaved children of this parent
+    // Delete all unsaved children of this parent that are NOT locked
     const result = await prisma.skill.deleteMany({
       where: {
         parentId,
-        isSaved: false
+        isSaved: false,
+        isLocked: false
       }
     })
     

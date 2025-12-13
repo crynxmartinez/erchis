@@ -35,6 +35,7 @@ export interface Skill {
   passive: string | null
   starterSkillName: string
   isSaved: boolean
+  isLocked: boolean
   children?: Skill[]
 }
 
