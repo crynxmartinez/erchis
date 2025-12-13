@@ -173,8 +173,82 @@ export default function SkillBar({
 
   return (
     <>
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-[#1a1a1a]/95 border border-[#333] rounded-lg py-2 px-4 z-[100] backdrop-blur-sm shadow-xl">
-        <div className="flex items-center justify-center gap-1">
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100]">
+        {/* Action Queue - Top Center */}
+        <div className="flex justify-center mb-2">
+          <div className="bg-[#1a1a1a]/95 border border-[#444] rounded-lg py-2 px-4 backdrop-blur-sm shadow-xl">
+            <div className="flex items-center gap-2">
+              {/* Action Queue Label */}
+              <div className="flex flex-col items-center mr-1">
+                <span className="text-[10px] text-[#6eb5ff] font-semibold">QUEUE</span>
+                <span className={`text-[10px] ${totalApCost > currentAp ? 'text-red-400' : 'text-gray-400'}`}>
+                  {totalApCost}/{currentAp} AP
+                </span>
+              </div>
+
+              {/* 5 Action Queue Slots */}
+              {actionQueue.map((action, index) => (
+                <div key={`queue-${index}`} className="relative">
+                  <button
+                    onClick={() => action && removeFromQueue(index)}
+                    disabled={isExecuting}
+                    className={`w-12 h-12 rounded border-2 flex items-center justify-center transition-all ${
+                      action
+                        ? 'bg-[#1a3a5c] border-[#6eb5ff] hover:bg-[#2a4a6c] cursor-pointer'
+                        : 'bg-[#1e1e1e] border-[#444] border-dashed'
+                    }`}
+                  >
+                    {action ? (
+                      <div className="flex flex-col items-center">
+                        <span className="text-lg">{action.skill.icon}</span>
+                        <span className="text-[8px] text-gray-300 truncate max-w-[40px]">
+                          {action.skill.name}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-gray-600 text-xs">{index + 1}</span>
+                    )}
+                  </button>
+                  {action && (
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500/80 rounded-full text-[10px] flex items-center justify-center text-white cursor-pointer hover:bg-red-600"
+                      onClick={(e) => { e.stopPropagation(); removeFromQueue(index); }}
+                    >
+                      ✕
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Execute Button */}
+              <button
+                onClick={handleExecute}
+                disabled={isExecuting || actionQueue.every(a => a === null) || totalApCost > currentAp}
+                className={`ml-1 px-4 h-12 rounded font-semibold text-sm transition-all ${
+                  !isExecuting && actionQueue.some(a => a !== null) && totalApCost <= currentAp
+                    ? 'bg-[#6eb5ff] text-black hover:bg-[#8ec5ff]'
+                    : 'bg-[#333] text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                {isExecuting ? '⏳' : '▶'}
+              </button>
+
+              {/* Clear Button */}
+              {actionQueue.some(a => a !== null) && (
+                <button
+                  onClick={clearQueue}
+                  disabled={isExecuting}
+                  className="px-2 h-12 rounded bg-[#333] text-gray-400 hover:bg-[#444] hover:text-red-400 text-xs transition-all"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Skill Bar + Item Bar - Bottom Row */}
+        <div className="bg-[#1a1a1a]/95 border border-[#333] rounded-lg py-2 px-4 backdrop-blur-sm shadow-xl">
+          <div className="flex items-center justify-center gap-1">
             {equippedSkills.map((skill, index) => {
               const position = index + 1
               return (
@@ -282,79 +356,9 @@ export default function SkillBar({
                 </div>
               )
             })}
-
-            {/* Action Queue (5 slots) - Always visible */}
-            <>
-              {/* Separator */}
-              <div className="w-px h-10 bg-[#6eb5ff] mx-2" />
-
-                {/* Action Queue Label */}
-                <div className="flex flex-col items-center mr-2">
-                  <span className="text-[10px] text-[#6eb5ff] font-semibold">QUEUE</span>
-                  <span className={`text-[10px] ${totalApCost > currentAp ? 'text-red-400' : 'text-gray-400'}`}>
-                    {totalApCost}/{currentAp} AP
-                  </span>
-                </div>
-
-                {/* 5 Action Queue Slots */}
-                {actionQueue.map((action, index) => (
-                  <div key={`queue-${index}`} className="relative">
-                    <button
-                      onClick={() => action && removeFromQueue(index)}
-                      disabled={isExecuting}
-                      className={`w-12 h-12 rounded border-2 flex items-center justify-center transition-all ${
-                        action
-                          ? 'bg-[#1a3a5c] border-[#6eb5ff] hover:bg-[#2a4a6c] cursor-pointer'
-                          : 'bg-[#1e1e1e] border-[#444] border-dashed'
-                      }`}
-                    >
-                      {action ? (
-                        <div className="flex flex-col items-center">
-                          <span className="text-lg">{action.skill.icon}</span>
-                          <span className="text-[8px] text-gray-300 truncate max-w-[40px]">
-                            {action.skill.name}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-gray-600 text-xs">{index + 1}</span>
-                      )}
-                    </button>
-                    {action && (
-                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500/80 rounded-full text-[10px] flex items-center justify-center text-white cursor-pointer hover:bg-red-600"
-                        onClick={(e) => { e.stopPropagation(); removeFromQueue(index); }}
-                      >
-                        ✕
-                      </div>
-                    )}
-                  </div>
-                ))}
-
-                {/* Execute Button */}
-                <button
-                  onClick={handleExecute}
-                  disabled={isExecuting || actionQueue.every(a => a === null) || totalApCost > currentAp}
-                  className={`ml-2 px-4 h-12 rounded font-semibold text-sm transition-all ${
-                    !isExecuting && actionQueue.some(a => a !== null) && totalApCost <= currentAp
-                      ? 'bg-[#6eb5ff] text-black hover:bg-[#8ec5ff]'
-                      : 'bg-[#333] text-gray-500 cursor-not-allowed'
-                  }`}
-                >
-                  {isExecuting ? '⏳' : '▶'}
-                </button>
-
-                {/* Clear Button */}
-                {actionQueue.some(a => a !== null) && (
-                  <button
-                    onClick={clearQueue}
-                    disabled={isExecuting}
-                    className="ml-1 px-2 h-12 rounded bg-[#333] text-gray-400 hover:bg-[#444] hover:text-red-400 text-xs transition-all"
-                  >
-                    Clear
-                  </button>
-                )}
-            </>
           </div>
         </div>
+      </div>
 
       {/* Skill Picker Modal */}
       {showSkillPicker && (
