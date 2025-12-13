@@ -37,17 +37,82 @@ interface MonsterSkill {
   isSaved?: boolean
 }
 
+interface CategoryConfig {
+  id: string
+  icon: string
+  label: string
+  description: string
+  color: string
+  borderColor: string
+  bgColor: string
+  tag: string
+}
+
 // ============================================
 // CONSTANTS
 // ============================================
 
-const CATEGORIES = [
-  { id: 'melee', icon: '👊', label: 'Melee', description: 'Close-range attacks' },
-  { id: 'ranged', icon: '🎯', label: 'Ranged', description: 'Distance attacks' },
-  { id: 'aoe', icon: '💥', label: 'AoE', description: 'Area spells' },
-  { id: 'self', icon: '🛡️', label: 'Self', description: 'Self-targeting buffs/heals' },
-  { id: 'reactive', icon: '⚡', label: 'Reactive', description: 'Triggered on conditions' },
-  { id: 'signature', icon: '⭐', label: 'Signature', description: 'Unique boss skills' },
+const CATEGORIES: CategoryConfig[] = [
+  { 
+    id: 'melee', 
+    icon: '⚔️', 
+    label: 'Melee Attacks', 
+    description: 'Physical close-range attacks requiring proximity.',
+    color: 'text-red-400',
+    borderColor: 'border-red-500/50',
+    bgColor: 'bg-red-900/10',
+    tag: 'melee'
+  },
+  { 
+    id: 'ranged', 
+    icon: '🏹', 
+    label: 'Ranged Attacks', 
+    description: 'Physical ranged attacks from a distance.',
+    color: 'text-green-400',
+    borderColor: 'border-green-500/50',
+    bgColor: 'bg-green-900/10',
+    tag: 'ranged'
+  },
+  { 
+    id: 'aoe', 
+    icon: '💥', 
+    label: 'Area Effects', 
+    description: 'Spells that damage multiple enemies or zones.',
+    color: 'text-orange-400',
+    borderColor: 'border-orange-500/50',
+    bgColor: 'bg-orange-900/10',
+    tag: 'magic'
+  },
+  { 
+    id: 'self', 
+    icon: '🛡️', 
+    label: 'Defensive / Self', 
+    description: 'Skills to mitigate damage or heal self.',
+    color: 'text-blue-400',
+    borderColor: 'border-blue-500/50',
+    bgColor: 'bg-blue-900/10',
+    tag: 'any'
+  },
+  { 
+    id: 'reactive', 
+    icon: '⚡', 
+    label: 'Reactive', 
+    description: 'Triggered on specific combat conditions.',
+    color: 'text-yellow-400',
+    borderColor: 'border-yellow-500/50',
+    bgColor: 'bg-yellow-900/10',
+    tag: 'passive'
+  },
+  { 
+    id: 'signature', 
+    icon: '⭐', 
+    label: 'Signature', 
+    description: 'Unique boss skills with special properties.',
+    color: 'text-purple-400',
+    borderColor: 'border-purple-500/50',
+    bgColor: 'bg-purple-900/10',
+    tag: 'boss'
+  },
 ]
 
 // ============================================
@@ -398,7 +463,148 @@ function SkillDetailPanel({ skill, onClose }: { skill: MonsterSkill; onClose: ()
 }
 
 // ============================================
-// MAIN COMPONENT
+// DASHBOARD COMPONENTS
+// ============================================
+
+function DashboardStats({ totalSkills, totalCategories }: { totalSkills: number, totalCategories: number }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="bg-[#1a1a1a] rounded-xl p-6 border border-[#333] relative overflow-hidden group">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="relative z-10">
+          <div className="text-4xl font-bold text-blue-400 mb-1">{totalSkills}</div>
+          <div className="text-gray-400 text-sm font-medium">Total Skills</div>
+        </div>
+        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-6xl opacity-5">📊</div>
+      </div>
+      
+      <div className="bg-[#1a1a1a] rounded-xl p-6 border border-[#333] relative overflow-hidden group">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="relative z-10">
+          <div className="text-4xl font-bold text-purple-400 mb-1">{totalCategories}</div>
+          <div className="text-gray-400 text-sm font-medium">Skill Categories</div>
+        </div>
+        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-6xl opacity-5">📂</div>
+      </div>
+
+      <div className="bg-[#1a1a1a] rounded-xl p-6 border border-[#333] relative overflow-hidden group">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="relative z-10">
+          <div className="text-4xl font-bold text-green-400 mb-1">Active</div>
+          <div className="text-gray-400 text-sm font-medium">System Status</div>
+        </div>
+        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-6xl opacity-5">✅</div>
+      </div>
+    </div>
+  )
+}
+
+function CategoryGrid({ onSelectCategory, skillCounts }: { 
+  onSelectCategory: (id: string) => void,
+  skillCounts: Record<string, number>
+}) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {CATEGORIES.map(cat => (
+        <button
+          key={cat.id}
+          onClick={() => onSelectCategory(cat.id)}
+          className={`relative overflow-hidden rounded-xl border ${cat.borderColor} bg-[#1a1a1a] p-6 text-left transition-all hover:scale-[1.02] hover:shadow-lg group`}
+        >
+          {/* Background tint */}
+          <div className={`absolute inset-0 ${cat.bgColor} opacity-0 group-hover:opacity-100 transition-opacity`} />
+          
+          <div className="relative z-10">
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{cat.icon}</span>
+                <span className={`text-lg font-bold ${cat.color}`}>{cat.label}</span>
+              </div>
+            </div>
+            
+            <p className="text-gray-400 text-xs mb-6 h-8 line-clamp-2">{cat.description}</p>
+            
+            <div className="flex justify-between items-end border-t border-white/5 pt-4">
+              <div className="text-2xl font-bold text-white">
+                {skillCounts[cat.id] || 0} <span className="text-xs font-normal text-gray-500">Skills</span>
+              </div>
+              <span className={`text-xs px-2 py-1 rounded bg-black/40 border border-white/10 ${cat.color}`}>
+                {cat.tag}
+              </span>
+            </div>
+          </div>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function Sidebar({ 
+  activeCategory, 
+  onSelectCategory, 
+  onBackToDashboard 
+}: { 
+  activeCategory: string | null, 
+  onSelectCategory: (id: string) => void,
+  onBackToDashboard: () => void 
+}) {
+  return (
+    <div className="w-64 bg-[#0a0a0a] border-r border-[#333] flex flex-col h-screen fixed left-0 top-0 z-20">
+      <div className="p-4 border-b border-[#333]">
+        <div className="flex items-center gap-2 text-white font-bold text-lg mb-6">
+          <span>🎮</span> SKILL DATABASE
+        </div>
+        <div className="relative">
+          <input 
+            type="text" 
+            placeholder="Search skills..." 
+            className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg py-2 pl-9 pr-4 text-sm text-gray-300 focus:outline-none focus:border-[#6eb5ff]"
+          />
+          <span className="absolute left-3 top-2.5 text-gray-500 text-xs">🔍</span>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto py-4">
+        <button
+          onClick={onBackToDashboard}
+          className={`w-full text-left px-6 py-3 text-sm font-medium transition-colors flex items-center justify-between group ${
+            activeCategory === null ? 'text-[#6eb5ff] bg-[#6eb5ff]/10 border-l-2 border-[#6eb5ff]' : 'text-gray-400 hover:text-white hover:bg-white/5'
+          }`}
+        >
+          <span>Dashboard</span>
+        </button>
+
+        <div className="my-4 px-6 text-xs font-bold text-gray-600 uppercase tracking-wider">Categories</div>
+
+        {CATEGORIES.map(cat => (
+          <button
+            key={cat.id}
+            onClick={() => onSelectCategory(cat.id)}
+            className={`w-full text-left px-6 py-3 text-sm font-medium transition-colors flex items-center justify-between group ${
+              activeCategory === cat.id 
+                ? `text-[${cat.color}] bg-white/5 border-l-2 border-current` 
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+            style={activeCategory === cat.id ? { color: cat.color.replace('text-', '') } : {}}
+          >
+            <div className="flex items-center gap-3">
+              <span className="opacity-70 group-hover:opacity-100 transition-opacity">{cat.icon}</span>
+              <span>{cat.label}</span>
+            </div>
+            {activeCategory === cat.id && <span className="text-[10px]">▶</span>}
+          </button>
+        ))}
+      </div>
+      
+      <div className="p-4 border-t border-[#333] text-xs text-gray-600">
+        v1.0.0 • Monster Skills
+      </div>
+    </div>
+  )
+}
+
+// ============================================
+// MAIN COMPONENT REFACTOR
 // ============================================
 
 export default function MonsterSkillDatabase() {
@@ -409,11 +615,14 @@ export default function MonsterSkillDatabase() {
   
   // UI State
   const [loading, setLoading] = useState(true)
+  const [view, setView] = useState<'dashboard' | 'category'>('dashboard')
+  const [selectedCategory, setSelectedCategory] = useState<string>('melee')
+  
+  // ... (keep existing state)
   const [generating, setGenerating] = useState(false)
   const [saving, setSaving] = useState(false)
   const [resetting, setResetting] = useState(false)
   const [message, setMessage] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<string>('melee')
   const [selectedSkill, setSelectedSkill] = useState<MonsterSkill | null>(null)
   const [showPreviewModal, setShowPreviewModal] = useState(false)
 
@@ -433,6 +642,24 @@ export default function MonsterSkillDatabase() {
       setLoading(false)
     }
   }
+
+  // Navigation Handlers
+  const handleSelectCategory = (id: string) => {
+    setSelectedCategory(id)
+    setView('category')
+  }
+
+  const handleBackToDashboard = () => {
+    setView('dashboard')
+    setSelectedSkill(null)
+  }
+
+  // Calculate counts for dashboard
+  const skillCounts = CATEGORIES.reduce((acc, cat) => {
+    acc[cat.id] = savedSkills.filter(s => s.category === cat.id).length
+    return acc
+  }, {} as Record<string, number>)
+
 
   // ============================================
   // GENERATE SKILLS
@@ -592,207 +819,198 @@ export default function MonsterSkillDatabase() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-[#6eb5ff]">Monster Skill Database</h1>
-            <p className="text-gray-400 text-sm">
-              {totalSaved} saved • {lockedCount} locked • {generatedSkills.length} generated
-            </p>
-          </div>
-        </div>
+    <div className="flex min-h-screen bg-[#0a0a0a] text-white font-sans">
+      {/* Sidebar */}
+      <Sidebar 
+        activeCategory={view === 'category' ? selectedCategory : null}
+        onSelectCategory={handleSelectCategory}
+        onBackToDashboard={handleBackToDashboard}
+      />
 
-        {/* Message */}
+      {/* Main Content Area */}
+      <div className="flex-1 ml-64 p-8">
+        {/* Message Toast */}
         {message && (
-          <div className={`mb-4 p-3 rounded-lg text-sm ${message.includes('Error') || message.includes('failed') ? 'bg-red-900/50 text-red-300' : 'bg-green-900/50 text-green-300'}`}>
-            {message}
+          <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg border backdrop-blur-md flex items-center gap-3 ${
+            message.includes('Error') || message.includes('failed') 
+              ? 'bg-red-900/80 border-red-500/50 text-red-100' 
+              : 'bg-green-900/80 border-green-500/50 text-green-100'
+          }`}>
+            <span>{message}</span>
+            <button onClick={() => setMessage('')} className="opacity-70 hover:opacity-100 font-bold ml-2">✕</button>
           </div>
         )}
 
-        <div className="grid grid-cols-12 gap-6">
-          {/* Category Sidebar */}
-          <div className="col-span-2 bg-[#1a1a1a] rounded-lg border border-[#333] p-4">
-            <h3 className="text-sm font-semibold text-gray-400 mb-3">Categories</h3>
-            <div className="space-y-1">
-              {CATEGORIES.map(cat => {
-                const genCount = generatedSkills.filter(s => s.category === cat.id).length
-                const savedCount = savedSkills.filter(s => s.category === cat.id).length
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`w-full text-left p-2 rounded-lg transition-colors ${
-                      selectedCategory === cat.id
-                        ? 'bg-[#6eb5ff]/20 border border-[#6eb5ff]'
-                        : 'bg-[#2a2a2a] hover:bg-[#333] border border-transparent'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{cat.icon}</span>
-                      <span className="text-sm font-medium">{cat.label}</span>
-                    </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {savedCount} saved {genCount > 0 && `• ${genCount} new`}
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Stats */}
-            <div className="mt-6 pt-4 border-t border-[#333]">
-              <div className="text-xs text-gray-500 space-y-1">
-                <div>✅ Saved: {totalSaved}</div>
-                <div>🔒 Locked: {lockedCount}</div>
-                <div>⚪ Unsaved: {generatedSkills.filter(s => !s.isLocked).length}</div>
-              </div>
-            </div>
+        {view === 'dashboard' ? (
+          <div className="max-w-7xl mx-auto">
+            <h1 className="text-3xl font-bold text-white mb-2">Monster Skill Database</h1>
+            <p className="text-gray-400 mb-8">Select a category to view skills or generate new ones.</p>
+            
+            <DashboardStats 
+              totalSkills={savedSkills.length} 
+              totalCategories={CATEGORIES.length} 
+            />
+            
+            <CategoryGrid 
+              onSelectCategory={handleSelectCategory} 
+              skillCounts={skillCounts} 
+            />
           </div>
-
-          {/* Main Content */}
-          <div className="col-span-10 space-y-6">
-            {/* Action Bar */}
-            <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">{CATEGORIES.find(c => c.id === selectedCategory)?.icon}</span>
-                  <div>
-                    <h2 className="text-lg font-semibold">{CATEGORIES.find(c => c.id === selectedCategory)?.label} Skills</h2>
-                    <p className="text-xs text-gray-500">{CATEGORIES.find(c => c.id === selectedCategory)?.description}</p>
-                  </div>
+        ) : (
+          <div className="max-w-7xl mx-auto">
+            {/* Category Header */}
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={handleBackToDashboard}
+                  className="p-2 rounded-lg bg-[#1a1a1a] border border-[#333] text-gray-400 hover:text-white hover:border-gray-500 transition-all"
+                >
+                  ← Back
+                </button>
+                <div>
+                  <h1 className={`text-2xl font-bold ${CATEGORIES.find(c => c.id === selectedCategory)?.color}`}>
+                    {CATEGORIES.find(c => c.id === selectedCategory)?.label}
+                  </h1>
+                  <p className="text-gray-400 text-sm">
+                    {CATEGORIES.find(c => c.id === selectedCategory)?.description}
+                  </p>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleGenerate}
-                    disabled={generating}
-                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2"
-                  >
-                    {generating ? <Spinner /> : '🎲'} Generate 10
-                  </button>
-                  <button
-                    onClick={handleLockAll}
-                    disabled={categoryGeneratedSkills.length === 0}
-                    className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg text-sm font-medium disabled:opacity-50"
-                  >
-                    {categoryGeneratedSkills.every(s => s.isLocked) ? '🔓 Unlock All' : '🔒 Lock All'}
-                  </button>
-                  <button
-                    onClick={handleReset}
-                    disabled={resetting || categoryGeneratedSkills.filter(s => !s.isLocked).length === 0}
-                    className="px-4 py-2 bg-red-600/50 hover:bg-red-600 rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2"
-                  >
-                    {resetting ? <Spinner /> : '🔃'} Reset
-                  </button>
-                  <button
-                    onClick={handleOpenPreview}
-                    disabled={saving || lockedCount === 0}
-                    className="px-4 py-2 bg-[#6eb5ff] hover:bg-[#8ec5ff] text-black rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2"
-                  >
-                    {saving ? <Spinner /> : '💾'} Save ({lockedCount})
-                  </button>
-                </div>
+              </div>
+              
+              <div className="flex gap-2">
+                <button
+                  onClick={handleGenerate}
+                  disabled={generating}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2"
+                >
+                  {generating ? <Spinner /> : '🎲'} Generate 10
+                </button>
+                <button
+                  onClick={handleLockAll}
+                  disabled={categoryGeneratedSkills.length === 0}
+                  className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg text-sm font-medium disabled:opacity-50"
+                >
+                  {categoryGeneratedSkills.every(s => s.isLocked) ? '🔓 Unlock All' : '🔒 Lock All'}
+                </button>
+                <button
+                  onClick={handleReset}
+                  disabled={resetting || categoryGeneratedSkills.filter(s => !s.isLocked).length === 0}
+                  className="px-4 py-2 bg-red-600/50 hover:bg-red-600 rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2"
+                >
+                  {resetting ? <Spinner /> : '🔃'} Reset
+                </button>
+                <button
+                  onClick={handleOpenPreview}
+                  disabled={saving || lockedCount === 0}
+                  className="px-4 py-2 bg-[#6eb5ff] hover:bg-[#8ec5ff] text-black rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2"
+                >
+                  {saving ? <Spinner /> : '💾'} Save ({lockedCount})
+                </button>
               </div>
             </div>
 
-            {/* Generated Skills */}
-            {categoryGeneratedSkills.length > 0 && (
-              <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4">
-                <h3 className="text-sm font-semibold text-yellow-400 mb-3">Generated Skills (Not Saved)</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {categoryGeneratedSkills.map(skill => (
-                    <div
-                      key={skill.tempId}
-                      onClick={() => setSelectedSkill(skill)}
-                      className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                        skill.isDuplicate
-                          ? 'bg-red-900/20 border-red-500/50'
-                          : skill.isLocked
-                          ? 'bg-yellow-900/20 border-yellow-500/50'
-                          : 'bg-[#2a2a2a] border-[#444] hover:border-[#666]'
-                      } ${selectedSkill?.tempId === skill.tempId ? 'ring-2 ring-[#6eb5ff]' : ''}`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">{skill.icon}</span>
-                          <div>
-                            <div className="font-medium text-sm flex items-center gap-1">
-                              {skill.name}
-                              {skill.isDuplicate && <span className="text-red-400 text-xs">⚠️ Duplicate</span>}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {skill.baseDamage > 0 ? `${skill.baseDamage} dmg` : 'No damage'} • {skill.accuracy}% acc • {skill.speed} spd
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleToggleLock(skill.tempId!) }}
-                            className={`p-1 rounded ${skill.isLocked ? 'text-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
-                          >
-                            {skill.isLocked ? '🔒' : '⚪'}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Saved Skills */}
-            <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4">
-              <h3 className="text-sm font-semibold text-green-400 mb-3">Saved Skills ({categorySavedSkills.length})</h3>
-              {categorySavedSkills.length === 0 ? (
-                <div className="text-center text-gray-500 py-8">
-                  No saved {selectedCategory} skills yet. Generate and save some!
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  {categorySavedSkills.map(skill => (
-                    <div
-                      key={skill.id}
-                      onClick={() => setSelectedSkill(skill)}
-                      className={`p-3 rounded-lg border cursor-pointer transition-colors bg-[#2a2a2a] border-[#444] hover:border-[#666] ${
-                        selectedSkill?.id === skill.id ? 'ring-2 ring-[#6eb5ff]' : ''
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">{skill.icon}</span>
-                          <div>
-                            <div className="font-medium text-sm flex items-center gap-1">
-                              {skill.name}
-                              <span className="text-green-400 text-xs">✅</span>
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {skill.baseDamage > 0 ? `${skill.baseDamage} dmg` : 'No damage'} • {skill.accuracy}% acc • {skill.speed} spd
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDeleteSaved(skill.id!) }}
-                          className="p-1 rounded text-red-400 hover:text-red-300"
+            <div className="grid grid-cols-12 gap-6">
+              {/* Main Content */}
+              <div className="col-span-12 space-y-6">
+                {/* Generated Skills */}
+                {categoryGeneratedSkills.length > 0 && (
+                  <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4">
+                    <h3 className="text-sm font-semibold text-yellow-400 mb-3">Generated Skills (Not Saved)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {categoryGeneratedSkills.map(skill => (
+                        <div
+                          key={skill.tempId}
+                          onClick={() => setSelectedSkill(skill)}
+                          className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                            skill.isDuplicate
+                              ? 'bg-red-900/20 border-red-500/50'
+                              : skill.isLocked
+                              ? 'bg-yellow-900/20 border-yellow-500/50'
+                              : 'bg-[#2a2a2a] border-[#444] hover:border-[#666]'
+                          } ${selectedSkill?.tempId === skill.tempId ? 'ring-2 ring-[#6eb5ff]' : ''}`}
                         >
-                          🗑️
-                        </button>
-                      </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl">{skill.icon}</span>
+                              <div>
+                                <div className="font-medium text-sm flex items-center gap-1">
+                                  {skill.name}
+                                  {skill.isDuplicate && <span className="text-red-400 text-xs">⚠️ Duplicate</span>}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {skill.baseDamage > 0 ? `${skill.baseDamage} dmg` : 'No damage'} • {skill.accuracy}% acc
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleToggleLock(skill.tempId!) }}
+                                className={`p-1 rounded ${skill.isLocked ? 'text-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
+                              >
+                                {skill.isLocked ? '🔒' : '⚪'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                  </div>
+                )}
 
-            {/* Skill Detail Panel - Tabbed Interface */}
-            {selectedSkill && (
-              <SkillDetailPanel 
-                skill={selectedSkill} 
-                onClose={() => setSelectedSkill(null)} 
-              />
-            )}
+                {/* Saved Skills */}
+                <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4">
+                  <h3 className="text-sm font-semibold text-green-400 mb-3">Saved Skills ({categorySavedSkills.length})</h3>
+                  {categorySavedSkills.length === 0 ? (
+                    <div className="text-center text-gray-500 py-8">
+                      No saved {selectedCategory} skills yet. Generate and save some!
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {categorySavedSkills.map(skill => (
+                        <div
+                          key={skill.id}
+                          onClick={() => setSelectedSkill(skill)}
+                          className={`p-3 rounded-lg border cursor-pointer transition-colors bg-[#2a2a2a] border-[#444] hover:border-[#666] ${
+                            selectedSkill?.id === skill.id ? 'ring-2 ring-[#6eb5ff]' : ''
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl">{skill.icon}</span>
+                              <div>
+                                <div className="font-medium text-sm flex items-center gap-1">
+                                  {skill.name}
+                                  <span className="text-green-400 text-xs">✅</span>
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {skill.baseDamage > 0 ? `${skill.baseDamage} dmg` : 'No damage'} • {skill.accuracy}% acc
+                                </div>
+                              </div>
+                            </div>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleDeleteSaved(skill.id!) }}
+                              className="p-1 rounded text-red-400 hover:text-red-300"
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Skill Detail Panel - Tabbed Interface */}
+                {selectedSkill && (
+                  <SkillDetailPanel 
+                    skill={selectedSkill} 
+                    onClose={() => setSelectedSkill(null)} 
+                  />
+                )}
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Preview Modal */}
