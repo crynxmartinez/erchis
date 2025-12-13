@@ -16,6 +16,8 @@ interface SkillEditorProps {
   onResetTree: () => Promise<void>
   onToggleLock: (skill: Skill) => void
   generating: boolean
+  saving: boolean
+  lockingSkillId: string | null
 }
 
 export function SkillEditor({
@@ -30,7 +32,9 @@ export function SkillEditor({
   onSaveAllChildren,
   onResetTree,
   onToggleLock,
-  generating
+  generating,
+  saving,
+  lockingSkillId
 }: SkillEditorProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'combat' | 'effects' | 'flavor' | 'tree'>('overview')
   const [editMode, setEditMode] = useState(false)
@@ -125,9 +129,17 @@ export function SkillEditor({
               <>
                 <button 
                   onClick={handleSave}
-                  className="px-4 py-2 bg-green-600 text-white font-bold rounded hover:bg-green-700 transition-colors"
+                  disabled={saving}
+                  className="px-4 py-2 bg-green-600 text-white font-bold rounded hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center gap-2"
                 >
-                  💾 Save
+                  {saving ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      Saving...
+                    </>
+                  ) : (
+                    '💾 Save'
+                  )}
                 </button>
                 <button 
                   onClick={() => setEditMode(false)}
@@ -417,17 +429,31 @@ export function SkillEditor({
               <div className="flex gap-2">
                 <button 
                   onClick={onSaveAllChildren}
-                  disabled={childSkills.length === 0 || childSkills.every(c => c.isSaved)}
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:bg-gray-700 transition-colors"
+                  disabled={childSkills.length === 0 || childSkills.every(c => c.isSaved) || saving}
+                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:bg-gray-700 transition-colors flex items-center gap-2"
                 >
-                  Save All
+                  {saving ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      Saving...
+                    </>
+                  ) : (
+                    'Save All'
+                  )}
                 </button>
                 <button 
                   onClick={onRegenerateChildren}
                   disabled={childSkills.length === 0 || generating}
-                  className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50 transition-colors"
+                  className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50 transition-colors flex items-center gap-2"
                 >
-                  Regenerate
+                  {generating ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      Regenerating...
+                    </>
+                  ) : (
+                    'Regenerate'
+                  )}
                 </button>
               </div>
             </div>
@@ -460,14 +486,19 @@ export function SkillEditor({
                             e.stopPropagation()
                             onToggleLock(child)
                           }}
+                          disabled={lockingSkillId === child.id}
                           className={`w-8 h-8 flex items-center justify-center rounded-md transition-all border-2 z-50 shadow-md ${
                             child.isLocked 
                               ? 'text-white bg-blue-600 border-blue-400 hover:bg-blue-500' 
                               : 'text-black bg-white border-gray-300 hover:bg-gray-100'
-                          }`}
+                          } ${lockingSkillId === child.id ? 'opacity-50' : ''}`}
                           title={child.isLocked ? "Unlock (Unsave & Allow Regeneration)" : "Lock & Save (Prevent Regeneration)"}
                         >
-                          <span className="text-lg leading-none">{child.isLocked ? '🔒' : '🔓'}</span>
+                          {lockingSkillId === child.id ? (
+                            <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+                          ) : (
+                            <span className="text-lg leading-none">{child.isLocked ? '🔒' : '🔓'}</span>
+                          )}
                         </button>
                       </div>
                       <div className={`flex gap-2 text-xs opacity-80 mb-2 ${child.isLocked ? 'opacity-60' : ''}`}>
@@ -517,9 +548,16 @@ export function SkillEditor({
                     <button
                       onClick={() => onGenerateChildren(selectedVariants.length > 0 ? selectedVariants : undefined)}
                       disabled={generating}
-                      className="w-full py-3 bg-gradient-to-r from-[#6eb5ff] to-[#a855f7] text-white font-bold rounded-lg hover:opacity-90 transition-opacity"
+                      className="w-full py-3 bg-gradient-to-r from-[#6eb5ff] to-[#a855f7] text-white font-bold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                      {generating ? 'Generating...' : `Generate Stage ${skill.stage + 1} Skills`}
+                      {generating ? (
+                        <>
+                          <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                          Generating...
+                        </>
+                      ) : (
+                        `Generate Stage ${skill.stage + 1} Skills`
+                      )}
                     </button>
                   </div>
                 )}

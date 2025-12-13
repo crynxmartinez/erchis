@@ -19,6 +19,8 @@ export default function SkillDatabaseBuilder() {
   // UI
   const [loading, setLoading] = useState(false)
   const [generating, setGenerating] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [lockingSkillId, setLockingSkillId] = useState<string | null>(null)
   const [message, setMessage] = useState('')
 
   // ============================================
@@ -197,6 +199,9 @@ export default function SkillDatabaseBuilder() {
   }
 
   const handleSaveSkill = async (skillToSave: Skill) => {
+    setSaving(true)
+    setMessage('💾 Saving skill...')
+    
     try {
       const response = await fetch('/api/skills/update', {
         method: 'POST',
@@ -214,12 +219,15 @@ export default function SkillDatabaseBuilder() {
       }
     } catch (error) {
       setMessage(`❌ Failed to save: ${error}`)
+    } finally {
+      setSaving(false)
     }
   }
 
   const handleSaveAllChildren = async () => {
     if (childSkills.length === 0) return
     
+    setSaving(true)
     setMessage('💾 Saving all children...')
     
     try {
@@ -242,6 +250,8 @@ export default function SkillDatabaseBuilder() {
       }
     } catch (error) {
       setMessage(`❌ Failed to save: ${error}`)
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -291,6 +301,7 @@ export default function SkillDatabaseBuilder() {
   }
 
   const handleToggleLock = async (skill: Skill) => {
+    setLockingSkillId(skill.id)
     try {
       // Toggle both Locked and Saved state together
       // If it's locked, we unlock and unsave
@@ -318,6 +329,8 @@ export default function SkillDatabaseBuilder() {
       }
     } catch (error) {
       setMessage(`❌ Failed to toggle lock: ${error}`)
+    } finally {
+      setLockingSkillId(null)
     }
   }
 
@@ -401,6 +414,8 @@ export default function SkillDatabaseBuilder() {
               onResetTree={handleResetTree}
               onToggleLock={handleToggleLock}
               generating={generating}
+              saving={saving}
+              lockingSkillId={lockingSkillId}
             />
           ) : (
             <SkillDashboard />
