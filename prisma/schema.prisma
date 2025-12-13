@@ -213,11 +213,13 @@ model Skill {
   hitCount      Int      @default(1)   // 1-4 hits for combo skills
   
   // Buff Effects (for buff_variant)
-  buffType         String?  // haste, empower, fortify, focus, regen
+  buffType         String?  // empower, focus, precision, berserk, fortify, barrier, evasion, reflect, haste, regen, stealth, immunity
+  buffValue        Int?     // Strength of buff (%, flat value, etc.)
   buffDuration     Int?     // turns
   
   // Debuff Effects (for debuff_variant)
-  debuffType       String?  // slow, bleed, armor_break, weaken, blind, stun
+  debuffType       String?  // bleed, burn, poison, weaken, armor_break, slow, blind, stun, root, silence, taunt, marked, curse
+  debuffValue      Int?     // Strength of debuff (damage, %, etc.)
   debuffDuration   Int?     // turns
   debuffChance     Int?     @default(100) // % chance to apply
   

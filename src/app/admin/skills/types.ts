@@ -22,8 +22,10 @@ export interface Skill {
   range: number
   hitCount: number
   buffType?: string | null
+  buffValue?: number | null
   buffDuration?: number | null
   debuffType?: string | null
+  debuffValue?: number | null
   debuffDuration?: number | null
   debuffChance?: number | null
   lifestealPercent?: number | null
