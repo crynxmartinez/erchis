@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 
 // ============================================
 // TYPES
@@ -582,10 +583,9 @@ function Sidebar({
             onClick={() => onSelectCategory(cat.id)}
             className={`w-full text-left px-6 py-3 text-sm font-medium transition-colors flex items-center justify-between group ${
               activeCategory === cat.id 
-                ? `text-[${cat.color}] bg-white/5 border-l-2 border-current` 
+                ? `${cat.color} bg-white/5 border-l-2 border-current` 
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
-            style={activeCategory === cat.id ? { color: cat.color.replace('text-', '') } : {}}
           >
             <div className="flex items-center gap-3">
               <span className="opacity-70 group-hover:opacity-100 transition-opacity">{cat.icon}</span>
@@ -843,6 +843,13 @@ export default function MonsterSkillDatabase() {
 
         {view === 'dashboard' ? (
           <div className="max-w-7xl mx-auto">
+            <Link 
+              href="/dashboard"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] text-gray-400 rounded-lg hover:text-white hover:border-gray-500 transition-all mb-8 text-sm font-medium"
+            >
+              ← Back to Dashboard
+            </Link>
+
             <h1 className="text-3xl font-bold text-white mb-2">Monster Skill Database</h1>
             <p className="text-gray-400 mb-8">Select a category to view skills or generate new ones.</p>
             
