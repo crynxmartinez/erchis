@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       baseDamage: 10, // TODO: Get from equipped weapon
       defense: player.vit * 2,
       magicResist: player.int,
-      accuracy: 70 + player.agi * 0.3,
+      accuracy: 70 + player.dex * 0.5,
       dodgeChance: 5 + player.agi * 0.5,
       critChance: 5 + player.dex * 0.3,
       critMultiplier: 1.5 + player.str * 0.01,

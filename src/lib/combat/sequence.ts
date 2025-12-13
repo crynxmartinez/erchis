@@ -71,18 +71,24 @@ export function interleaveActionQueues(
 
 /**
  * Create a queued action from a player skill
+ * @param playerLevel - Player's level, adds +0.5 speed per level to all skills
  */
 export function createPlayerSkillAction(
   skill: CombatSkill,
-  queuePosition: number
+  queuePosition: number,
+  playerLevel: number = 1
 ): QueuedAction {
+  // Base skill speed + 0.5 per player level (innate speed bonus)
+  const levelSpeedBonus = playerLevel * 0.5
+  const finalSpeed = (skill.speed || 50) + levelSpeedBonus
+  
   return {
     id: `player-${queuePosition}-${skill.id}`,
     actor: 'player',
     actionType: 'skill',
     actionId: skill.id,
     actionName: skill.name,
-    speed: skill.speed || 50,
+    speed: finalSpeed,
     skill,
   }
 }

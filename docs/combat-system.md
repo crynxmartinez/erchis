@@ -333,6 +333,29 @@ model Player {
 
 ---
 
+## Stat Formulas
+
+### Derived Combat Stats from Base Stats
+| Stat | Formula | Description |
+|------|---------|-------------|
+| **Accuracy** | `70 + DEX × 0.5` | Hit chance % |
+| **Dodge Chance** | `5 + AGI × 0.5` | Evade chance % |
+| **Crit Chance** | `5 + DEX × 0.3` | Critical hit % (physical only) |
+| **Crit Multiplier** | `1.5 + STR × 0.01` | Crit damage multiplier |
+| **Defense** | `VIT × 2` | Physical damage reduction |
+| **Magic Resist** | `INT` | Magic damage reduction |
+| **Base Speed** | `50 + AGI × 0.5` | Action priority |
+
+### Level Speed Bonus
+Players gain **+0.5 speed** to all skills per level.
+- Level 1: +0.5 speed
+- Level 50: +25 speed
+- Level 100: +50 speed
+
+This makes higher-level players act faster in combat, representing combat experience.
+
+---
+
 ## Dice Roll System
 
 ### Hit Calculation

@@ -89,7 +89,7 @@ export default function PlayerModal({ isOpen, onClose, playerData }: PlayerModal
     physicalDamage: playerData.stats.str * 2,
     critDamage: playerData.stats.str,
     evasion: (playerData.stats.agi * 0.5).toFixed(1),
-    accuracy: (playerData.stats.agi * 0.3).toFixed(1),
+    accuracy: (playerData.stats.dex * 0.5).toFixed(1),
     maxHp: 100 + playerData.stats.vit * 10,
     healBonus: playerData.stats.vit,
     magicAmp: (playerData.stats.int * 0.3).toFixed(1),
