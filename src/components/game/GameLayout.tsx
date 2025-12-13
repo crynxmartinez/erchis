@@ -65,8 +65,8 @@ export default function GameLayout({ children, playerData }: GameLayoutProps) {
           </div>
         </div>
 
-        {/* Main Content */}
-        <main className="flex-1 p-4 min-h-[calc(100vh-48px)]">
+        {/* Main Content - pb-24 accounts for fixed skill bar at bottom */}
+        <main className="flex-1 p-4 pb-24 min-h-[calc(100vh-48px)]">
           {children}
         </main>
       </div>
