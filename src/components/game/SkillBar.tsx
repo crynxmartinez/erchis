@@ -57,9 +57,8 @@ export default function SkillBar({
   )
   const [isExecuting, setIsExecuting] = useState(false)
 
-  // Add skill to action queue (combat mode)
+  // Add skill to action queue
   const addToQueue = (skill: Skill, slotIndex: number) => {
-    if (!inCombat) return
     const emptySlot = actionQueue.findIndex(slot => slot === null)
     if (emptySlot === -1) return // Queue full
     
@@ -119,13 +118,13 @@ export default function SkillBar({
   const handleSlotClick = (position: number) => {
     const skill = equippedSkills[position - 1]
     
-    // In combat: clicking a skill adds it to the action queue
-    if (inCombat && skill) {
+    // If skill exists, add to queue
+    if (skill) {
       addToQueue(skill, position - 1)
       return
     }
     
-    // Not in combat: open skill picker (only in safe zone)
+    // Empty slot: open skill picker (only in safe zone)
     if (!isInSafeZone) return
     setSelectedSlot(position)
     setShowSkillPicker(true)
@@ -284,11 +283,10 @@ export default function SkillBar({
               )
             })}
 
-            {/* Combat Action Queue (5 slots) - Only visible in combat */}
-            {inCombat && (
-              <>
-                {/* Separator */}
-                <div className="w-px h-10 bg-[#6eb5ff] mx-2" />
+            {/* Action Queue (5 slots) - Always visible */}
+            <>
+              {/* Separator */}
+              <div className="w-px h-10 bg-[#6eb5ff] mx-2" />
 
                 {/* Action Queue Label */}
                 <div className="flex flex-col items-center mr-2">
@@ -354,8 +352,7 @@ export default function SkillBar({
                     Clear
                   </button>
                 )}
-              </>
-            )}
+            </>
           </div>
         </div>
 

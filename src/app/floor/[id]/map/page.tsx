@@ -95,7 +95,7 @@ export default async function MapPage({ params }: MapPageProps) {
       <MapWithCombat 
         floorId={floorNumber} 
         locations={locations} 
-        currentAp={newAp}
+        floorName={floorNames[floorNumber]}
       />
     </GameLayout>
   )
