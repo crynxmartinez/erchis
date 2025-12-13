@@ -677,7 +677,7 @@ export default function SkillDatabaseBuilder() {
       setCurrentSkill(skill)
       setBreadcrumb([skill])
       await loadChildSkills(skill.id)
-      setView('detail')
+      setView('category')
     } catch (error) {
       setMessage(`Error: ${error}`)
     }
@@ -826,53 +826,69 @@ export default function SkillDatabaseBuilder() {
         )}
 
         {view === 'category' && activeCategoryConfig && (
-           <div className="max-w-7xl mx-auto">
-             <div className="flex items-center gap-4 mb-8">
-                <button onClick={handleBackToDashboard} className="p-2 bg-[#1a1a1a] border border-[#333] rounded-lg hover:text-white text-gray-400">← Back</button>
-                <div>
-                   <h1 className={`text-2xl font-bold ${activeCategoryConfig.color}`}>{activeCategoryConfig.label}</h1>
-                   <p className="text-gray-400 text-sm">{activeCategoryConfig.description}</p>
-                </div>
+           <div className="max-w-7xl mx-auto space-y-8">
+             {/* Category Header */}
+             <div className="flex items-center justify-between">
+               <div className="flex items-center gap-4">
+                  <button onClick={handleBackToDashboard} className="p-2 bg-[#1a1a1a] border border-[#333] rounded-lg hover:text-white text-gray-400">← Back</button>
+                  <div>
+                     <h1 className={`text-2xl font-bold ${activeCategoryConfig.color}`}>{activeCategoryConfig.label}</h1>
+                     <p className="text-gray-400 text-sm">{activeCategoryConfig.description}</p>
+                  </div>
+               </div>
              </div>
 
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {categoryStarterSkills.map(starter => (
-                   <button 
-                     key={starter.name} 
-                     onClick={() => handleSelectStarterSkill(starter)}
-                     className="bg-[#1a1a1a] border border-[#333] p-4 rounded-xl text-left hover:border-gray-500 transition-all flex items-center gap-4 group"
-                   >
-                      <div className="w-12 h-12 bg-black/40 rounded-lg flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-                        {activeCategoryConfig.icon}
-                      </div>
-                      <div>
-                        <div className="font-bold text-white">{starter.name}</div>
-                        <div className="text-xs text-gray-500">{starter.subtype} • {starter.damageType}</div>
-                      </div>
-                   </button>
-                ))}
+             {/* Starter Skills Grid */}
+             <div className="bg-[#1a1a1a] rounded-xl border border-[#333] p-6">
+               <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Starter Templates</h3>
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {categoryStarterSkills.map(starter => (
+                     <button 
+                       key={starter.name} 
+                       onClick={() => handleSelectStarterSkill(starter)}
+                       className={`border p-4 rounded-xl text-left transition-all flex items-center gap-4 group ${
+                         currentSkill?.starterSkillName === starter.name 
+                           ? 'bg-[#1a1a1a] border-[#6eb5ff] ring-1 ring-[#6eb5ff]' 
+                           : 'bg-[#0a0a0a] border-[#333] hover:border-gray-500'
+                       }`}
+                     >
+                        <div className="w-12 h-12 bg-black/40 rounded-lg flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                          {activeCategoryConfig.icon}
+                        </div>
+                        <div>
+                          <div className={`font-bold ${currentSkill?.starterSkillName === starter.name ? 'text-[#6eb5ff]' : 'text-white'}`}>
+                            {starter.name}
+                          </div>
+                          <div className="text-xs text-gray-500">{starter.subtype} • {starter.damageType}</div>
+                        </div>
+                     </button>
+                  ))}
+               </div>
              </div>
+
+             {/* Detail Panel */}
+             {currentSkill && (
+               <div className="animate-in slide-in-from-bottom-4 fade-in duration-300">
+                 <SkillDetailPanel 
+                   skill={currentSkill}
+                   childSkills={childSkills}
+                   breadcrumb={breadcrumb}
+                   onNavigate={handleNavigateToSkill}
+                   onBreadcrumbClick={handleBreadcrumbClick}
+                   onClose={() => setCurrentSkill(null)}
+                   onSave={handleSaveSkill}
+                   onGenerateChildren={handleGenerateChildren}
+                   onRegenerateChildren={handleRegenerateChildren}
+                   onSaveAllChildren={handleSaveAllChildren}
+                   onResetTree={handleResetTree}
+                   onToggleLock={handleToggleLock}
+                   generating={generating}
+                   saving={saving}
+                   lockingSkillId={lockingSkillId}
+                 />
+               </div>
+             )}
            </div>
-        )}
-
-        {view === 'detail' && currentSkill && (
-           <SkillDetailPanel 
-             skill={currentSkill}
-             childSkills={childSkills}
-             breadcrumb={breadcrumb}
-             onNavigate={handleNavigateToSkill}
-             onBreadcrumbClick={handleBreadcrumbClick}
-             onClose={() => setView('category')}
-             onSave={handleSaveSkill}
-             onGenerateChildren={handleGenerateChildren}
-             onRegenerateChildren={handleRegenerateChildren}
-             onSaveAllChildren={handleSaveAllChildren}
-             onResetTree={handleResetTree}
-             onToggleLock={handleToggleLock}
-             generating={generating}
-             saving={saving}
-             lockingSkillId={lockingSkillId}
-           />
         )}
       </div>
     </div>
