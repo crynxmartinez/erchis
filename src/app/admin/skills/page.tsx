@@ -224,17 +224,18 @@ function SkillDetailPanel({
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#6eb5ff]/50 to-transparent" />
         <div className="relative flex justify-between items-start">
           <div className="flex-1">
-             {/* Breadcrumbs */}
-             <div className="flex items-center gap-2 text-xs text-gray-400 mb-4">
-               <button onClick={() => onBreadcrumbClick(-1)} className="hover:text-[#6eb5ff] transition-colors flex items-center gap-1">
-                 <span>🏠</span> Dashboard
+             {/* Breadcrumbs - Styled as requested */}
+             <div className="flex items-center gap-2 text-sm text-gray-400 mb-6 font-medium">
+               <button onClick={() => onBreadcrumbClick(-1)} className="hover:text-[#6eb5ff] transition-colors flex items-center gap-2 group">
+                 <span className="text-lg group-hover:scale-110 transition-transform">🏠</span> 
+                 <span className="group-hover:text-white">Dashboard</span>
                </button>
                {breadcrumb.map((s: Skill, i: number) => (
-                 <span key={s.id} className="flex items-center gap-2">
-                   <span className="text-gray-600">›</span>
+                 <span key={s.id} className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2">
+                   <span className="text-gray-600 text-xs">›</span>
                    <button 
                      onClick={() => onBreadcrumbClick(i)}
-                     className={`hover:text-[#6eb5ff] transition-colors ${i === breadcrumb.length - 1 ? 'text-white font-bold' : ''}`}
+                     className={`transition-colors hover:text-[#6eb5ff] ${i === breadcrumb.length - 1 ? 'text-white font-bold' : 'text-gray-400'}`}
                    >
                      {s.name}
                    </button>
