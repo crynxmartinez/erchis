@@ -881,6 +881,13 @@ export default function SkillDatabaseBuilder() {
 
         {view === 'dashboard' && (
            <div className="max-w-7xl mx-auto">
+             <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] text-gray-400 rounded-lg hover:text-white hover:border-gray-500 transition-all mb-8 text-sm font-medium"
+            >
+              ← Back to Dashboard
+            </Link>
+
              <h1 className="text-3xl font-bold text-white mb-2">Skill Database</h1>
              <p className="text-gray-400 mb-8">Select a category to view skill trees.</p>
              <DashboardStats totalSkills={totalSkills} totalCategories={CATEGORIES.length} />
