@@ -224,91 +224,104 @@ function ItemDetailPanel({ item, onClose, getRarityColor }: {
   const isConsumable = item.useEffect !== null
 
   return (
-    <div className="bg-[#1a1a1a] rounded-xl border border-[#333] overflow-hidden">
+    <div className="bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#1a1a2e] rounded-xl border border-[#333] overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-[#333] bg-gradient-to-r from-[#1a1a1a] to-[#252525]">
-        <div className="flex items-center justify-between">
+      <div className="relative p-6 border-b border-[#333]">
+        <div className="absolute inset-0 opacity-20" 
+             style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z" fill="%23ffffff" fill-opacity="0.05" fill-rule="evenodd"/%3E%3C/svg%3E")' }}
+        />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#6eb5ff]/50 to-transparent" />
+        
+        <div className="relative flex justify-between items-start">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center text-4xl">
+            <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-black/80 to-black/40 border-2 border-white/20 flex items-center justify-center text-3xl shadow-xl">
               {item.icon}
             </div>
             <div>
-              <h2 className="text-xl font-bold" style={{ color: getRarityColor(item.rarity) }}>
+              <h2 className="text-2xl font-bold text-white mb-2" style={{ color: getRarityColor(item.rarity) }}>
                 {item.name}
               </h2>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs px-2 py-0.5 rounded bg-black/40 border border-white/10 text-gray-400">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-3 py-1 rounded-full text-xs font-bold border border-[#6eb5ff]/50 bg-[#6eb5ff]/20 text-[#6eb5ff]">
                   {item.itemType}
                 </span>
-                <span className="text-xs px-2 py-0.5 rounded bg-black/40 border border-white/10" style={{ color: getRarityColor(item.rarity) }}>
+                <span className="px-3 py-1 rounded-full text-xs font-medium border border-white/20 bg-black/40 capitalize" style={{ color: getRarityColor(item.rarity) }}>
                   {item.rarity}
                 </span>
                 {item.isUnique && (
-                  <span className="text-xs px-2 py-0.5 rounded bg-yellow-900/30 border border-yellow-500/30 text-yellow-400">
-                    Unique
+                  <span className="px-3 py-1 rounded-full text-xs font-medium border border-yellow-500/50 bg-yellow-500/20 text-yellow-300">
+                    ⭐ Unique
                   </span>
                 )}
               </div>
             </div>
           </div>
-          <button 
-            onClick={onClose}
-            className="p-2 rounded-lg text-gray-500 hover:text-white hover:bg-white/10 transition-colors"
-          >
-            ✕
-          </button>
+          <button onClick={onClose} className="text-gray-400 hover:text-white text-xl">✕</button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-[#333] bg-black/20">
+      <div className="flex border-b border-[#333] bg-[#111]">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as typeof activeTab)}
-            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
-              activeTab === tab.id
-                ? 'text-[#6eb5ff] border-b-2 border-[#6eb5ff] bg-[#6eb5ff]/5'
-                : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
+            className={`px-6 py-3 text-sm font-bold uppercase tracking-wider transition-all border-r border-[#222] flex items-center gap-2 ${
+              activeTab === tab.id 
+                ? 'bg-[#1a1a1a] text-[#6eb5ff] border-b-2 border-b-[#6eb5ff]' 
+                : 'text-gray-500 hover:text-gray-300 hover:bg-[#1a1a1a]'
             }`}
           >
             <span>{tab.icon}</span>
-            <span>{tab.label}</span>
+            {tab.label}
           </button>
         ))}
       </div>
 
       {/* Tab Content */}
-      <div className="p-6">
+      <div className="p-6 bg-gradient-to-b from-[#0a0a0a] to-[#111]">
         {activeTab === 'overview' && (
           <div className="space-y-6">
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <StatCard label="Buy Price" value={item.buyPrice} color="text-yellow-400" icon="💰" unit=" Col" />
               <StatCard label="Sell Price" value={item.sellPrice} color="text-green-400" icon="💵" unit=" Col" />
               <StatCard label="Max Stack" value={item.maxStack} color="text-blue-400" icon="📦" />
               <StatCard label="Weight" value={item.statBonuses?.weight || 1} color="text-gray-400" icon="⚖️" />
             </div>
             
-            <SectionPanel title="Basic Info" icon="📋">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="flex justify-between py-2 border-b border-white/5">
-                  <span className="text-gray-500">Item Type</span>
-                  <span className="text-white">{item.itemType}</span>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <SectionPanel title="Basic Info" icon="📋">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center py-2 border-b border-white/5">
+                    <span className="text-gray-500 text-sm">Item Type</span>
+                    <span className="text-white font-medium capitalize">{item.itemType}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-white/5">
+                    <span className="text-gray-500 text-sm">Rarity</span>
+                    <span className="font-medium capitalize" style={{ color: getRarityColor(item.rarity) }}>{item.rarity}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-white/5">
+                    <span className="text-gray-500 text-sm">Unique</span>
+                    <span className="text-white font-medium">{item.isUnique ? 'Yes' : 'No'}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-gray-500 text-sm">Stackable</span>
+                    <span className="text-white font-medium">{item.maxStack > 1 ? `Yes (${item.maxStack})` : 'No'}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between py-2 border-b border-white/5">
-                  <span className="text-gray-500">Rarity</span>
-                  <span style={{ color: getRarityColor(item.rarity) }}>{item.rarity}</span>
+              </SectionPanel>
+
+              <SectionPanel title="Description" icon="📝">
+                <div className="space-y-4">
+                  <div>
+                    <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">Description</div>
+                    <p className="text-gray-300 text-sm leading-relaxed">
+                      {item.description || `A ${item.rarity} ${item.itemType}.`}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex justify-between py-2 border-b border-white/5">
-                  <span className="text-gray-500">Unique</span>
-                  <span className="text-white">{item.isUnique ? 'Yes' : 'No'}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-white/5">
-                  <span className="text-gray-500">Stackable</span>
-                  <span className="text-white">{item.maxStack > 1 ? `Yes (${item.maxStack})` : 'No'}</span>
-                </div>
-              </div>
-            </SectionPanel>
+              </SectionPanel>
+            </div>
           </div>
         )}
 
@@ -316,31 +329,32 @@ function ItemDetailPanel({ item, onClose, getRarityColor }: {
           <div className="space-y-6">
             {isConsumable ? (
               <>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <StatCard label="Effect Type" value={item.useEffect || 'None'} color="text-purple-400" icon="✨" />
                   <StatCard label="Effect Value" value={item.effectValue} color="text-green-400" icon="💪" />
                   <StatCard label="Cooldown" value="0" color="text-blue-400" icon="⏱️" unit="s" />
                 </div>
                 
                 <SectionPanel title="Use Effect" icon="✨" color="border-purple-500/30">
-                  <div className="space-y-3">
-                    <div className="flex justify-between py-2 border-b border-white/5">
-                      <span className="text-gray-500">Effect</span>
-                      <span className="text-purple-400">{item.useEffect}</span>
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-2xl">
+                      ✨
                     </div>
-                    <div className="flex justify-between py-2 border-b border-white/5">
-                      <span className="text-gray-500">Value</span>
-                      <span className="text-green-400">+{item.effectValue}</span>
+                    <div>
+                      <div className="text-purple-300 font-bold text-lg capitalize">{item.useEffect?.replace(/_/g, ' ')}</div>
+                      <div className="text-gray-400 text-sm">
+                        <span className="text-green-400">+{item.effectValue}</span> effectiveness
+                      </div>
                     </div>
-                    <div className="mt-4 p-3 bg-black/30 rounded-lg text-sm text-gray-400 italic">
-                      "Use this item to {item.useEffect?.replace('_', ' ')} by {item.effectValue} points."
-                    </div>
+                  </div>
+                  <div className="mt-4 p-3 bg-black/30 rounded-lg text-sm text-gray-400 italic border border-white/5">
+                    "Use this item to {item.useEffect?.replace(/_/g, ' ')} by {item.effectValue} points."
                   </div>
                 </SectionPanel>
               </>
             ) : (
-              <div className="text-center text-gray-500 py-12">
-                <span className="text-4xl mb-4 block">🚫</span>
+              <div className="text-center text-gray-500 py-12 bg-black/20 rounded-lg border border-white/5">
+                <span className="text-4xl mb-4 block opacity-50">🚫</span>
                 This item has no use effects.
               </div>
             )}
@@ -351,36 +365,38 @@ function ItemDetailPanel({ item, onClose, getRarityColor }: {
           <div className="space-y-6">
             {isEquipment ? (
               <>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <StatCard label="Equip Slot" value={item.equipSlot || 'None'} color="text-blue-400" icon="🎯" />
                   <StatCard label="Durability" value={100} color="text-green-400" icon="🛡️" />
                   <StatCard label="Weight" value={item.statBonuses?.weight || 5} color="text-gray-400" icon="⚖️" />
                 </div>
                 
-                <SectionPanel title="Stat Bonuses" icon="📊" color="border-blue-500/30">
-                  {Object.keys(item.statBonuses || {}).length > 0 ? (
-                    <div className="grid grid-cols-3 gap-3">
-                      {Object.entries(item.statBonuses || {}).map(([stat, value]) => (
-                        <div key={stat} className="bg-black/30 rounded-lg p-3 text-center">
-                          <div className="text-xs text-gray-500 uppercase mb-1">{stat}</div>
-                          <div className="text-lg font-bold text-green-400">+{value}</div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center text-gray-500 py-4">No stat bonuses</div>
-                  )}
-                </SectionPanel>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <SectionPanel title="Stat Bonuses" icon="📊" color="border-blue-500/30">
+                    {Object.keys(item.statBonuses || {}).length > 0 ? (
+                      <div className="grid grid-cols-3 gap-3">
+                        {Object.entries(item.statBonuses || {}).map(([stat, value]) => (
+                          <div key={stat} className="bg-black/30 rounded-lg p-3 text-center border border-white/5">
+                            <div className="text-xs text-gray-500 uppercase mb-1">{stat}</div>
+                            <div className="text-lg font-bold text-green-400">+{value}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center text-gray-500 py-4">No stat bonuses</div>
+                    )}
+                  </SectionPanel>
 
-                <SectionPanel title="Requirements" icon="📋" color="border-yellow-500/30">
-                  <div className="text-center text-gray-500 py-4">
-                    No special requirements
-                  </div>
-                </SectionPanel>
+                  <SectionPanel title="Requirements" icon="📋" color="border-yellow-500/30">
+                    <div className="text-center text-gray-500 py-4 bg-black/20 rounded-lg">
+                      No special requirements
+                    </div>
+                  </SectionPanel>
+                </div>
               </>
             ) : (
-              <div className="text-center text-gray-500 py-12">
-                <span className="text-4xl mb-4 block">👕</span>
+              <div className="text-center text-gray-500 py-12 bg-black/20 rounded-lg border border-white/5">
+                <span className="text-4xl mb-4 block opacity-50">👕</span>
                 This item is not equippable.
               </div>
             )}
@@ -390,24 +406,26 @@ function ItemDetailPanel({ item, onClose, getRarityColor }: {
         {activeTab === 'flavor' && (
           <div className="space-y-6">
             <SectionPanel title="Description" icon="📝">
-              <p className="text-gray-300 leading-relaxed">
-                {item.description || `A ${item.rarity} ${item.itemType}.`}
+              <p className="text-gray-300 leading-relaxed italic">
+                "{item.description || `A ${item.rarity} ${item.itemType}.`}"
               </p>
             </SectionPanel>
 
             <SectionPanel title="Lore" icon="📜" color="border-purple-500/30">
-              <p className="text-gray-400 italic leading-relaxed">
+              <p className="text-purple-200/80 italic leading-relaxed">
                 "This item awaits its story to be written..."
               </p>
             </SectionPanel>
 
             <SectionPanel title="Acquisition" icon="🗺️" color="border-green-500/30">
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2 text-gray-400">
-                  <span>🏪</span> Available at general stores
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center gap-3 text-gray-400 bg-black/30 p-3 rounded-lg border border-white/5">
+                  <span className="text-xl">🏪</span> 
+                  <span>Available at general stores</span>
                 </div>
-                <div className="flex items-center gap-2 text-gray-400">
-                  <span>👹</span> Drops from various monsters
+                <div className="flex items-center gap-3 text-gray-400 bg-black/30 p-3 rounded-lg border border-white/5">
+                  <span className="text-xl">👹</span> 
+                  <span>Drops from various monsters</span>
                 </div>
               </div>
             </SectionPanel>
@@ -771,7 +789,7 @@ export default function ItemDatabase() {
   }
 
   return (
-    <div className="flex h-screen bg-[#111] text-white overflow-hidden">
+    <div className="flex min-h-screen bg-[#0a0a0a] text-white font-sans">
       {/* Sidebar */}
       <Sidebar 
         activeCategory={view === 'category' ? selectedCategory : null}
@@ -779,19 +797,17 @@ export default function ItemDatabase() {
         onBackToDashboard={handleBackToDashboard}
       />
 
-      {/* Main Content */}
-      <div className="flex-1 ml-64 overflow-y-auto p-8">
+      {/* Main Content Area */}
+      <div className="flex-1 ml-64 p-8">
         {/* Message Toast */}
         {message && (
-          <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-top-2 fade-in">
-            <div className={`px-4 py-3 rounded-lg shadow-lg border backdrop-blur-md flex items-center gap-3 ${
-              message.includes('Error') || message.includes('failed') 
-                ? 'bg-red-900/80 border-red-500/50 text-red-100' 
-                : 'bg-green-900/80 border-green-500/50 text-green-100'
-            }`}>
-              <span>{message}</span>
-              <button onClick={() => setMessage('')} className="opacity-70 hover:opacity-100 font-bold ml-2">✕</button>
-            </div>
+          <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg border backdrop-blur-md flex items-center gap-3 ${
+            message.includes('Error') || message.includes('failed') 
+              ? 'bg-red-900/80 border-red-500/50 text-red-100' 
+              : 'bg-green-900/80 border-green-500/50 text-green-100'
+          }`}>
+            <span>{message}</span>
+            <button onClick={() => setMessage('')} className="opacity-70 hover:opacity-100 font-bold ml-2">✕</button>
           </div>
         )}
 
@@ -818,24 +834,21 @@ export default function ItemDatabase() {
             />
           </div>
         ) : (
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             {/* Category Header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <button
                   onClick={handleBackToDashboard}
                   className="p-2 rounded-lg bg-[#1a1a1a] border border-[#333] text-gray-400 hover:text-white hover:border-gray-500 transition-all"
                 >
-                  ←
+                  ← Back
                 </button>
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl">{getCurrentCategory()?.icon}</span>
-                  <div>
-                    <h1 className={`text-2xl font-bold ${getCurrentCategory()?.color}`}>
-                      {getCurrentCategory()?.label}
-                    </h1>
-                    <p className="text-gray-400 text-sm">{getCurrentCategory()?.description}</p>
-                  </div>
+                <div>
+                  <h1 className={`text-2xl font-bold ${getCurrentCategory()?.color}`}>
+                    {getCurrentCategory()?.label}
+                  </h1>
+                  <p className="text-gray-400 text-sm">{getCurrentCategory()?.description}</p>
                 </div>
               </div>
               
@@ -872,104 +885,107 @@ export default function ItemDatabase() {
               </div>
             </div>
 
-            {/* Generated Items */}
-            {categoryGeneratedItems.length > 0 && (
-              <div className="bg-[#1a1a1a] rounded-xl border border-[#333] p-6 mb-6">
-                <h3 className="text-sm font-semibold text-yellow-400 mb-4 flex items-center gap-2">
-                  <span>⚡</span> Generated Items (Not Saved)
-                </h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {categoryGeneratedItems.map(item => (
-                    <div
-                      key={item.tempId}
-                      onClick={() => setSelectedItem(item)}
-                      className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                        item.isDuplicate
-                          ? 'bg-red-900/20 border-red-500/50'
-                          : item.isLocked
-                          ? 'bg-yellow-900/20 border-yellow-500/50'
-                          : 'bg-[#2a2a2a] border-[#444] hover:border-[#666]'
-                      } ${selectedItem?.tempId === item.tempId ? 'ring-2 ring-[#6eb5ff]' : ''}`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{item.icon}</span>
-                          <div>
-                            <div className="font-medium text-sm flex items-center gap-2" style={{ color: getRarityColor(item.rarity) }}>
-                              {item.name}
-                              {item.isDuplicate && <span className="text-red-400 text-xs">⚠️ Duplicate</span>}
+            <div className="grid grid-cols-12 gap-6">
+              {/* Main Content */}
+              <div className="col-span-12 space-y-6">
+                {/* Generated Items */}
+                {categoryGeneratedItems.length > 0 && (
+                  <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4">
+                    <h3 className="text-sm font-semibold text-yellow-400 mb-3">Generated Items (Not Saved)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {categoryGeneratedItems.map(item => (
+                        <div
+                          key={item.tempId}
+                          onClick={() => setSelectedItem(item)}
+                          className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                            item.isDuplicate
+                              ? 'bg-red-900/20 border-red-500/50'
+                              : item.isLocked
+                              ? 'bg-yellow-900/20 border-yellow-500/50'
+                              : 'bg-[#2a2a2a] border-[#444] hover:border-[#666]'
+                          } ${selectedItem?.tempId === item.tempId ? 'ring-2 ring-[#6eb5ff]' : ''}`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl">{item.icon}</span>
+                              <div>
+                                <div className="font-medium text-sm flex items-center gap-1" style={{ color: getRarityColor(item.rarity) }}>
+                                  {item.name}
+                                  {item.isDuplicate && <span className="text-red-400 text-xs">⚠️ Duplicate</span>}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {item.rarity} • {item.sellPrice} Col
+                                </div>
+                              </div>
                             </div>
-                            <div className="text-xs text-gray-500">
-                              {item.rarity} • {item.sellPrice} Col
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleToggleLock(item.tempId!) }}
+                                className={`p-1 rounded ${item.isLocked ? 'text-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
+                              >
+                                {item.isLocked ? '🔒' : '⚪'}
+                              </button>
                             </div>
                           </div>
                         </div>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleToggleLock(item.tempId!) }}
-                          className={`p-2 rounded-lg transition-colors ${item.isLocked ? 'text-yellow-400 bg-yellow-900/30' : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'}`}
-                        >
-                          {item.isLocked ? '🔒' : '⚪'}
-                        </button>
-                      </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+                )}
+
+                {/* Saved Items */}
+                <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4">
+                  <h3 className="text-sm font-semibold text-green-400 mb-3">Saved Items ({categorySavedItems.length})</h3>
+                  {categorySavedItems.length === 0 ? (
+                    <div className="text-center text-gray-500 py-8">
+                      No saved {getCurrentCategory()?.label.toLowerCase()} yet. Generate and save some!
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {categorySavedItems.map(item => (
+                        <div
+                          key={item.id}
+                          onClick={() => setSelectedItem(item)}
+                          className={`p-3 rounded-lg border cursor-pointer transition-colors bg-[#2a2a2a] border-[#444] hover:border-[#666] ${
+                            selectedItem?.id === item.id ? 'ring-2 ring-[#6eb5ff]' : ''
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl">{item.icon}</span>
+                              <div>
+                                <div className="font-medium text-sm flex items-center gap-1" style={{ color: getRarityColor(item.rarity) }}>
+                                  {item.name}
+                                  <span className="text-green-400 text-xs">✅</span>
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {item.rarity} • {item.sellPrice} Col
+                                </div>
+                              </div>
+                            </div>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleDeleteSaved(item.id!) }}
+                              className="p-1 rounded text-red-400 hover:text-red-300"
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
+
+                {/* Item Detail Panel */}
+                {selectedItem && (
+                  <ItemDetailPanel 
+                    item={selectedItem} 
+                    onClose={() => setSelectedItem(null)}
+                    getRarityColor={getRarityColor}
+                  />
+                )}
               </div>
-            )}
-
-            {/* Saved Items */}
-            <div className="bg-[#1a1a1a] rounded-xl border border-[#333] p-6 mb-6">
-              <h3 className="text-sm font-semibold text-green-400 mb-4 flex items-center gap-2">
-                <span>✅</span> Saved Items ({categorySavedItems.length})
-              </h3>
-              {categorySavedItems.length === 0 ? (
-                <div className="text-center text-gray-500 py-12">
-                  No saved {getCurrentCategory()?.label.toLowerCase()} yet. Generate and save some!
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  {categorySavedItems.map(item => (
-                    <div
-                      key={item.id}
-                      onClick={() => setSelectedItem(item)}
-                      className={`p-3 rounded-lg border cursor-pointer transition-all bg-[#2a2a2a] border-[#444] hover:border-[#666] ${
-                        selectedItem?.id === item.id ? 'ring-2 ring-[#6eb5ff]' : ''
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{item.icon}</span>
-                          <div>
-                            <div className="font-medium text-sm flex items-center gap-2" style={{ color: getRarityColor(item.rarity) }}>
-                              {item.name}
-                              <span className="text-green-400 text-xs">✅</span>
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {item.rarity} • {item.sellPrice} Col
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDeleteSaved(item.id!) }}
-                          className="p-2 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-colors"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
-
-            {/* Item Detail Panel */}
-            {selectedItem && (
-              <ItemDetailPanel 
-                item={selectedItem} 
-                onClose={() => setSelectedItem(null)}
-                getRarityColor={getRarityColor}
-              />
-            )}
           </div>
         )}
       </div>
