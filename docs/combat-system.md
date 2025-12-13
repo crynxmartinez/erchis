@@ -73,12 +73,14 @@ A turn-based combat system with **unified narrative storytelling** where player 
 - [x] **4.6** Update `SkillBar.tsx` - Click to add to queue
 - [ ] **4.7** Implement drag-and-drop functionality (optional enhancement)
 
-### Phase 5: Monster Data 🔄 IN PROGRESS
-- [ ] **5.1** Create Floor 1 monsters (5-10 monsters)
-- [ ] **5.2** Create monster skills for each monster
-- [ ] **5.3** Create monster attack patterns (AI sequences)
-- [ ] **5.4** Create loot tables for monsters
-- [ ] **5.5** Create Monster Database admin page
+### Phase 5: Monster Data ✅
+- [x] **5.1** Create MonsterSkill Database (30 reusable skills)
+- [x] **5.2** Create Item Database (consumables, materials, key items)
+- [x] **5.3** Create Monster Database admin page
+- [x] **5.4** Schema: Monsters are standalone objects (no floor/level)
+- [x] **5.5** Schema: Skills & Items attach to monsters via junction tables
+- [ ] **5.6** Create Floor 1 monsters (5-10 monsters) - use admin page
+- [ ] **5.7** Assign skills and loot to monsters - use admin page
 
 ### Phase 6: Integration
 - [ ] **6.1** Connect hunting areas to combat encounters
