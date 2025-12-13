@@ -4,7 +4,7 @@ export function SkillDashboard() {
   const totalStarters = SKILL_TYPE_CATEGORIES.reduce((acc, cat) => acc + cat.skills.length, 0)
   
   return (
-    <div className="p-8 max-w-5xl mx-auto">
+    <div className="p-8 w-full h-full overflow-y-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">Skill Database Dashboard</h1>
         <p className="text-gray-400">Select a starter skill from the sidebar to view its tree or generate evolutions.</p>
@@ -25,7 +25,7 @@ export function SkillDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-8">
         {SKILL_TYPE_CATEGORIES.map(cat => (
           <div key={cat.id} className={`p-4 rounded-lg border border-[#333] bg-gradient-to-br ${cat.color.replace('text-', 'from-black/40 to-black/40 text-')}`}>
             <div className="flex items-center gap-3 mb-2">

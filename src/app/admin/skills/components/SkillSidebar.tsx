@@ -7,12 +7,12 @@ interface SkillSidebarProps {
 }
 
 export function SkillSidebar({ onSelectStarter, selectedStarterName }: SkillSidebarProps) {
-  const [expandedCategories, setExpandedCategories] = useState<string[]>(SKILL_TYPE_CATEGORIES.map(c => c.id))
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([SKILL_TYPE_CATEGORIES[0]?.id || ''])
   const [searchTerm, setSearchTerm] = useState('')
 
   const toggleCategory = (id: string) => {
     setExpandedCategories(prev => 
-      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
+      prev.includes(id) ? [] : [id]
     )
   }
 
