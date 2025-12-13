@@ -602,8 +602,23 @@ export default function SkillDatabaseBuilder() {
   const [lockingSkillId, setLockingSkillId] = useState<string | null>(null)
   const [message, setMessage] = useState('')
 
-  // Count skills for dashboard (mocked or fetched)
+  // Count skills for dashboard
   const [skillCounts, setSkillCounts] = useState<Record<string, number>>({})
+  const [totalSkills, setTotalSkills] = useState(0)
+
+  useEffect(() => {
+    // Calculate counts from static data
+    const counts: Record<string, number> = {}
+    let total = 0
+    
+    SKILL_TYPE_CATEGORIES.forEach(cat => {
+      counts[cat.id] = cat.skills.length
+      total += cat.skills.length
+    })
+    
+    setSkillCounts(counts)
+    setTotalSkills(total)
+  }, [])
 
   // Navigation
   const handleSelectCategory = (id: string) => {
@@ -804,7 +819,7 @@ export default function SkillDatabaseBuilder() {
            <div className="max-w-7xl mx-auto">
              <h1 className="text-3xl font-bold text-white mb-2">Skill Database</h1>
              <p className="text-gray-400 mb-8">Select a category to view skill trees.</p>
-             <DashboardStats totalSkills={999} totalCategories={CATEGORIES.length} />
+             <DashboardStats totalSkills={totalSkills} totalCategories={CATEGORIES.length} />
              <CategoryGrid onSelectCategory={handleSelectCategory} skillCounts={skillCounts} />
            </div>
         )}
