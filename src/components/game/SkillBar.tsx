@@ -20,13 +20,29 @@ interface UsableItem {
   type: string
 }
 
+interface QueuedAction {
+  id: string
+  slotIndex: number
+  skill: Skill
+}
+
 interface SkillBarProps {
   maxSlots?: number
   maxItemSlots?: number
   isInSafeZone?: boolean
+  inCombat?: boolean
+  currentAp?: number
+  onExecuteTurn?: (queue: QueuedAction[]) => void
 }
 
-export default function SkillBar({ maxSlots = 10, maxItemSlots = 10, isInSafeZone = true }: SkillBarProps) {
+export default function SkillBar({ 
+  maxSlots = 10, 
+  maxItemSlots = 10, 
+  isInSafeZone = true,
+  inCombat = false,
+  currentAp = 100,
+  onExecuteTurn,
+}: SkillBarProps) {
   const [hoveredSlot, setHoveredSlot] = useState<number | null>(null)
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null)
   const [showSkillPicker, setShowSkillPicker] = useState(false)
@@ -34,6 +50,55 @@ export default function SkillBar({ maxSlots = 10, maxItemSlots = 10, isInSafeZon
   const [hoveredItemSlot, setHoveredItemSlot] = useState<number | null>(null)
   const [selectedItemSlot, setSelectedItemSlot] = useState<number | null>(null)
   const [showItemPicker, setShowItemPicker] = useState(false)
+
+  // Combat action queue (5 slots)
+  const [actionQueue, setActionQueue] = useState<(QueuedAction | null)[]>(
+    Array.from({ length: 5 }, () => null)
+  )
+  const [isExecuting, setIsExecuting] = useState(false)
+
+  // Add skill to action queue (combat mode)
+  const addToQueue = (skill: Skill, slotIndex: number) => {
+    if (!inCombat) return
+    const emptySlot = actionQueue.findIndex(slot => slot === null)
+    if (emptySlot === -1) return // Queue full
+    
+    const newQueue = [...actionQueue]
+    newQueue[emptySlot] = { id: `${skill.id}-${Date.now()}`, slotIndex, skill }
+    setActionQueue(newQueue)
+  }
+
+  // Remove from queue
+  const removeFromQueue = (index: number) => {
+    const newQueue = [...actionQueue]
+    newQueue[index] = null
+    // Shift remaining items left
+    const filtered = newQueue.filter(Boolean)
+    while (filtered.length < 5) filtered.push(null)
+    setActionQueue(filtered as (QueuedAction | null)[])
+  }
+
+  // Clear queue
+  const clearQueue = () => {
+    setActionQueue(Array.from({ length: 5 }, () => null))
+  }
+
+  // Execute turn
+  const handleExecute = async () => {
+    if (!onExecuteTurn) return
+    const validActions = actionQueue.filter(Boolean) as QueuedAction[]
+    if (validActions.length === 0) return
+    
+    setIsExecuting(true)
+    await onExecuteTurn(validActions)
+    setIsExecuting(false)
+    clearQueue()
+  }
+
+  // Calculate total AP cost
+  const totalApCost = actionQueue
+    .filter(Boolean)
+    .reduce((sum, action) => sum + (action?.skill.cooldown || 0) * 5, 0) // Using cooldown as AP proxy for now
 
   // Placeholder equipped skills - will be fetched from DB later
   const [equippedSkills, setEquippedSkills] = useState<(Skill | null)[]>(
@@ -52,6 +117,15 @@ export default function SkillBar({ maxSlots = 10, maxItemSlots = 10, isInSafeZon
   const inventoryItems: UsableItem[] = []
 
   const handleSlotClick = (position: number) => {
+    const skill = equippedSkills[position - 1]
+    
+    // In combat: clicking a skill adds it to the action queue
+    if (inCombat && skill) {
+      addToQueue(skill, position - 1)
+      return
+    }
+    
+    // Not in combat: open skill picker (only in safe zone)
     if (!isInSafeZone) return
     setSelectedSlot(position)
     setShowSkillPicker(true)
@@ -209,6 +283,79 @@ export default function SkillBar({ maxSlots = 10, maxItemSlots = 10, isInSafeZon
                 </div>
               )
             })}
+
+            {/* Combat Action Queue (5 slots) - Only visible in combat */}
+            {inCombat && (
+              <>
+                {/* Separator */}
+                <div className="w-px h-10 bg-[#6eb5ff] mx-2" />
+
+                {/* Action Queue Label */}
+                <div className="flex flex-col items-center mr-2">
+                  <span className="text-[10px] text-[#6eb5ff] font-semibold">QUEUE</span>
+                  <span className={`text-[10px] ${totalApCost > currentAp ? 'text-red-400' : 'text-gray-400'}`}>
+                    {totalApCost}/{currentAp} AP
+                  </span>
+                </div>
+
+                {/* 5 Action Queue Slots */}
+                {actionQueue.map((action, index) => (
+                  <div key={`queue-${index}`} className="relative">
+                    <button
+                      onClick={() => action && removeFromQueue(index)}
+                      disabled={isExecuting}
+                      className={`w-12 h-12 rounded border-2 flex items-center justify-center transition-all ${
+                        action
+                          ? 'bg-[#1a3a5c] border-[#6eb5ff] hover:bg-[#2a4a6c] cursor-pointer'
+                          : 'bg-[#1e1e1e] border-[#444] border-dashed'
+                      }`}
+                    >
+                      {action ? (
+                        <div className="flex flex-col items-center">
+                          <span className="text-lg">{action.skill.icon}</span>
+                          <span className="text-[8px] text-gray-300 truncate max-w-[40px]">
+                            {action.skill.name}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-gray-600 text-xs">{index + 1}</span>
+                      )}
+                    </button>
+                    {action && (
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500/80 rounded-full text-[10px] flex items-center justify-center text-white cursor-pointer hover:bg-red-600"
+                        onClick={(e) => { e.stopPropagation(); removeFromQueue(index); }}
+                      >
+                        ✕
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {/* Execute Button */}
+                <button
+                  onClick={handleExecute}
+                  disabled={isExecuting || actionQueue.every(a => a === null) || totalApCost > currentAp}
+                  className={`ml-2 px-4 h-12 rounded font-semibold text-sm transition-all ${
+                    !isExecuting && actionQueue.some(a => a !== null) && totalApCost <= currentAp
+                      ? 'bg-[#6eb5ff] text-black hover:bg-[#8ec5ff]'
+                      : 'bg-[#333] text-gray-500 cursor-not-allowed'
+                  }`}
+                >
+                  {isExecuting ? '⏳' : '▶'}
+                </button>
+
+                {/* Clear Button */}
+                {actionQueue.some(a => a !== null) && (
+                  <button
+                    onClick={clearQueue}
+                    disabled={isExecuting}
+                    className="ml-1 px-2 h-12 rounded bg-[#333] text-gray-400 hover:bg-[#444] hover:text-red-400 text-xs transition-all"
+                  >
+                    Clear
+                  </button>
+                )}
+              </>
+            )}
           </div>
         </div>
 

@@ -2,7 +2,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
 import GameLayout from '@/components/game/GameLayout'
-import FloorMapPins from '@/components/game/FloorMapPins'
+import MapWithCombat from '@/components/game/MapWithCombat'
 import { FLOOR_1_LOCATIONS } from '@/data/floor1-locations'
 import { calculateMaxHp, calculateHpRegen, calculateApRegen } from '@/lib/player'
 
@@ -92,32 +92,11 @@ export default async function MapPage({ params }: MapPageProps) {
 
   return (
     <GameLayout playerData={playerData}>
-      <div className="bg-[#242424] rounded border border-[#333] p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <span className="text-2xl">🗺️</span>
-          <div>
-            <h1 className="text-xl font-bold text-[#6eb5ff]">Floor {floorNumber} Map</h1>
-            <p className="text-sm text-gray-400">{floorNames[floorNumber] || `Floor ${floorNumber}`}</p>
-          </div>
-        </div>
-
-        {locations.length > 0 ? (
-          <FloorMapPins floorId={floorNumber} locations={locations} />
-        ) : (
-          <div className="text-center py-12 text-gray-400">
-            <span className="text-4xl block mb-4">🗺️</span>
-            <p>Map not available for this floor yet</p>
-          </div>
-        )}
-
-        <div className="mt-6 p-3 bg-[#1a1a1a] rounded border border-[#333]">
-          <div className="text-xs text-gray-500">
-            <p className="mb-1">• Hover over map pins to see location details</p>
-            <p className="mb-1">• Click on a pin to travel to that location</p>
-            <p>• Explore the world to discover new areas</p>
-          </div>
-        </div>
-      </div>
+      <MapWithCombat 
+        floorId={floorNumber} 
+        locations={locations} 
+        currentAp={newAp}
+      />
     </GameLayout>
   )
 }

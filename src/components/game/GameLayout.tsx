@@ -42,9 +42,11 @@ interface PlayerData {
 interface GameLayoutProps {
   children: React.ReactNode
   playerData: PlayerData
+  inCombat?: boolean
+  onExecuteTurn?: (queue: { id: string; slotIndex: number; skill: { id: string; name: string } }[]) => void
 }
 
-export default function GameLayout({ children, playerData }: GameLayoutProps) {
+export default function GameLayout({ children, playerData, inCombat = false, onExecuteTurn }: GameLayoutProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
@@ -72,7 +74,11 @@ export default function GameLayout({ children, playerData }: GameLayoutProps) {
       </div>
 
       {/* Skill Bar */}
-      <SkillBar />
+      <SkillBar 
+        inCombat={inCombat} 
+        currentAp={playerData.ap.current}
+        onExecuteTurn={onExecuteTurn}
+      />
 
       {/* Player Modal */}
       <PlayerModal 
