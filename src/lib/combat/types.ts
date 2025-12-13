@@ -362,6 +362,7 @@ export interface CombatEntity {
   dodgeChance: number            // Evade chance %
   critChance: number             // Critical hit chance %
   critMultiplier: number         // Critical damage multiplier (e.g., 1.5 = 150%)
+  speed: number                  // Action priority / flee calculation
   
   // Status Effects
   buffs: BuffEffect[]
@@ -393,6 +394,7 @@ export interface CombatSkill {
   ampPercent: number             // 50-200% multiplier
   apCost: number                 // 3-10 AP
   cooldown: number               // 1-5 turns
+  speed: number                  // 0-100, higher = faster action priority
   
   // Targeting
   targetType: TargetType
@@ -417,12 +419,19 @@ export interface CombatSkill {
   
   // Counter/Reactive
   isCounter: boolean
+  isReaction: boolean             // Dodge, Guard, Counter - triggers against enemy attacks
   triggerCondition?: TriggerCondition
   
   // Utility
   hasUtilityMode: boolean
   utilityEffect?: UtilityEffect
   utilityDuration?: number
+  
+  // Narrative Templates
+  narrativeSuccess?: string   // "Your blade connects with a satisfying impact!"
+  narrativeCrit?: string      // "A devastating blow! Critical hit!"
+  narrativeMiss?: string      // "Your swing goes wide, hitting nothing but air."
+  narrativeBlocked?: string   // "The enemy raises their guard, deflecting your attack."
 }
 
 // ============================================

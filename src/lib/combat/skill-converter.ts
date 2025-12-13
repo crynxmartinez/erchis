@@ -61,9 +61,17 @@ export interface DatabaseSkill {
   bonusVsDebuffed?: number | null
   
   isCounter: boolean
+  isReaction: boolean
   triggerCondition?: string | null
   
   passive?: string | null
+  
+  speed: number
+  
+  narrativeSuccess?: string | null
+  narrativeCrit?: string | null
+  narrativeMiss?: string | null
+  narrativeBlocked?: string | null
   
   isSaved: boolean
   isLocked: boolean
@@ -208,11 +216,19 @@ export function convertToCombatSkill(dbSkill: DatabaseSkill): CombatSkill {
     bonusVsDebuffed: dbSkill.bonusVsDebuffed || undefined,
     
     isCounter: dbSkill.isCounter,
+    isReaction: dbSkill.isReaction || false,
     triggerCondition: toTriggerCondition(dbSkill.triggerCondition),
     
     hasUtilityMode: dbSkill.hasUtilityMode,
     utilityEffect: toUtilityEffect(dbSkill.utilityEffect),
     utilityDuration: dbSkill.utilityDuration || undefined,
+    
+    speed: dbSkill.speed || 50,
+    
+    narrativeSuccess: dbSkill.narrativeSuccess || undefined,
+    narrativeCrit: dbSkill.narrativeCrit || undefined,
+    narrativeMiss: dbSkill.narrativeMiss || undefined,
+    narrativeBlocked: dbSkill.narrativeBlocked || undefined,
   }
 }
 

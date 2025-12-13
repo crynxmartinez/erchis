@@ -20,6 +20,18 @@ export * from './passive-system'
 // Skill Converter
 export * from './skill-converter'
 
+// Sequence Interleaving
+export * from './sequence'
+
+// Narrative Generator
+export * from './narrator'
+
+// Combo System
+export * from './combos'
+
+// Main Combat Engine
+export * from './engine'
+
 // ============================================
 // CONVENIENCE RE-EXPORTS
 // ============================================

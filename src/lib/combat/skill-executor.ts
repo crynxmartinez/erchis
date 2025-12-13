@@ -402,10 +402,12 @@ export function createBasicAttack(damageType: 'physical' | 'magic' = 'physical')
     ampPercent: 100,
     apCost: 0,
     cooldown: 0,
+    speed: 50,
     targetType: 'single' as any,
     range: 1,
     hitCount: 1,
     isCounter: false,
+    isReaction: false,
     hasUtilityMode: false,
   }
 }

@@ -25,39 +25,40 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  player    Player?
+  player Player?
 }
 
 model Player {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id])
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
 
   // Race (null until character creation)
-  raceId    String?
-  race      Race?    @relation(fields: [raceId], references: [id])
+  raceId String?
+  race   Race?   @relation(fields: [raceId], references: [id])
 
   // Character Image (user uploaded)
   characterImage String?
 
   // Basic Info
-  level     Int      @default(1)
-  exp       Int      @default(0)
-  col       Int      @default(0)
+  level         Int @default(1)
+  currentXp     Int @default(0) // Current XP towards next level
+  totalXpEarned Int @default(0) // Lifetime XP earned
+  col           Int @default(0)
 
   // Stats (25 points at creation, +1 per level, min 0)
-  str       Int      @default(0)
-  agi       Int      @default(0)
-  vit       Int      @default(0)
-  int       Int      @default(0)
-  dex       Int      @default(0)
-  luk       Int      @default(0)
-  statPoints Int     @default(25)
+  str        Int @default(0)
+  agi        Int @default(0)
+  vit        Int @default(0)
+  int        Int @default(0)
+  dex        Int @default(0)
+  luk        Int @default(0)
+  statPoints Int @default(25)
 
   // Resources
-  currentHp Int      @default(100)
-  currentAp Int      @default(100)
-  maxAp     Int      @default(100)
+  currentHp Int @default(100)
+  currentAp Int @default(100)
+  maxAp     Int @default(100)
 
   // Regen tracking
   lastHpRegen DateTime @default(now())
@@ -72,8 +73,9 @@ model Player {
   learnedSkillCount Int @default(0)
 
   // Relations
-  skills        PlayerSkill[]
-  inventory     PlayerInventory[]
+  skills         PlayerSkill[]
+  inventory      PlayerInventory[]
+  combatSessions CombatSession[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -84,19 +86,19 @@ model Player {
 // ============================================
 
 model Race {
-  id          String   @id @default(cuid())
-  name        String   @unique
+  id          String @id @default(cuid())
+  name        String @unique
   description String
 
   // Passive 1
   passive1Name  String
-  passive1Type  String   // expGain, magicAmp, npcDiscount, craftingSuccess, physicalDamage, evasion, dropRate, critDamage
-  passive1Value Float    // 5 = 5%
+  passive1Type  String // expGain, magicAmp, npcDiscount, craftingSuccess, physicalDamage, evasion, dropRate, critDamage
+  passive1Value Float // 5 = 5%
 
   // Passive 2
   passive2Name  String
-  passive2Type  String   // cookingSuccess, accuracy, alchemySuccess, weightCapacity, maxHp, critChance, debuffResist, cdr
-  passive2Value Float    // 3 = 3%
+  passive2Type  String // cookingSuccess, accuracy, alchemySuccess, weightCapacity, maxHp, critChance, debuffResist, cdr
+  passive2Value Float // 3 = 3%
 
   players Player[]
 
@@ -109,12 +111,12 @@ model Race {
 // ============================================
 
 model WeaponCategory {
-  id          String   @id @default(cuid())
-  name        String   @unique
+  id          String @id @default(cuid())
+  name        String @unique
   description String
 
-  primaryStat   String   // STR, DEX, INT
-  secondaryStat String?  // Optional secondary stat
+  primaryStat   String // STR, DEX, INT
+  secondaryStat String? // Optional secondary stat
 
   isRanged    Boolean @default(false)
   isTwoHanded Boolean @default(false)
@@ -127,7 +129,7 @@ model WeaponCategory {
 }
 
 model Weapon {
-  id          String   @id @default(cuid())
+  id          String @id @default(cuid())
   name        String
   description String
 
@@ -137,10 +139,10 @@ model Weapon {
   rarity String @default("Common") // Common, Uncommon, Rare, Epic, Legendary
 
   // Combat Stats
-  baseDamage   Int
-  attackSpeed  Float   @default(1.0)
-  critBonus    Float   @default(0)
-  range        Int     @default(1)
+  baseDamage  Int
+  attackSpeed Float @default(1.0)
+  critBonus   Float @default(0)
+  range       Int   @default(1)
 
   // Requirements
   levelRequired Int @default(1)
@@ -174,74 +176,82 @@ model Weapon {
 // ============================================
 
 model Skill {
-  id          String   @id @default(cuid())
-  name        String
-  description String   // Effect description (what it does mechanically)
-  executionDescription String?  // Narrative description of how the skill is performed (for game events)
+  id                   String  @id @default(cuid())
+  name                 String
+  description          String // Effect description (what it does mechanically)
+  executionDescription String? // Narrative description of how the skill is performed (for game events)
 
   // Skill Icon
-  iconUrl     String?  // URL to skill icon image
+  iconUrl String? // URL to skill icon image
 
   // Type
-  skillType   String   // Attack, Defensive, Buff, Debuff, Movement, Utility, Support
-  damageType  String   @default("physical") // physical, magic, none
-  
+  skillType  String // Attack, Defensive, Buff, Debuff, Movement, Utility, Support
+  damageType String @default("physical") // physical, magic, none
+
   // Weapon Requirement (for starter skills)
   weaponRequirement String @default("any") // melee_only, ranged_only, magic_only, any
-  
+
   // Magic Utility Mode (for magic skills used with non-magic weapons)
-  hasUtilityMode    Boolean @default(false)
-  utilityEffect     String?  // fire_enchant, ice_enchant, lightning_enchant, shadow_enchant, holy_enchant
-  utilityDuration   Int?     // turns or attacks the enchant lasts
+  hasUtilityMode  Boolean @default(false)
+  utilityEffect   String? // fire_enchant, ice_enchant, lightning_enchant, shadow_enchant, holy_enchant
+  utilityDuration Int? // turns or attacks the enchant lasts
 
   // Skill Tree Structure
-  starterSkillName String   // Root skill name for tree tracking
-  parentId         String?  // Parent skill ID in the tree
-  parent           Skill?   @relation("SkillTree", fields: [pabeforentId], references: [id])
-  children         Skill[]  @relation("SkillTree")
-  stage            Int      @default(0)  // 0-5
-  
+  starterSkillName String // Root skill name for tree tracking
+  parentId         String? // Parent skill ID in the tree
+  parent           Skill?  @relation("SkillTree", fields: [parentId], references: [id])
+  children         Skill[] @relation("SkillTree")
+  stage            Int     @default(0) // 0-5
+
   // Variant Type
   // root, upgrade, original_variant, buff_variant, debuff_variant, unique, aoe_variant, combo_variant, counter_variant, mobility_variant, sustain_variant
-  variantType      String   @default("base")
-  
+  variantType String @default("base")
+
   // Combat Stats (Amp-based system)
-  ampPercent    Int      @default(100) // 50-200% multiplier on weapon base
-  apCost        Int      @default(5)   // 3-10 AP
-  cooldown      Int      @default(1)   // 1-5 turns
-  
+  ampPercent Int @default(100) // 50-200% multiplier on weapon base
+  apCost     Int @default(5) // 3-10 AP
+  cooldown   Int @default(1) // 1-5 turns
+  speed      Int @default(50) // 0-100, higher = faster action priority
+
   // Targeting
-  targetType    String   @default("single") // single, self, aoe_cone, aoe_circle, aoe_line, all_enemies
-  range         Int      @default(1)   // 1 = melee, 2+ = ranged
-  hitCount      Int      @default(1)   // 1-4 hits for combo skills
-  
+  targetType String @default("single") // single, self, aoe_cone, aoe_circle, aoe_line, all_enemies
+  range      Int    @default(1) // 1 = melee, 2+ = ranged
+  hitCount   Int    @default(1) // 1-4 hits for combo skills
+
   // Buff Effects (for buff_variant)
-  buffType         String?  // empower, focus, precision, berserk, fortify, barrier, evasion, reflect, haste, regen, stealth, immunity
-  buffValue        Int?     // Strength of buff (%, flat value, etc.)
-  buffDuration     Int?     // turns
-  
+  buffType     String? // empower, focus, precision, berserk, fortify, barrier, evasion, reflect, haste, regen, stealth, immunity
+  buffValue    Int? // Strength of buff (%, flat value, etc.)
+  buffDuration Int? // turns
+
   // Debuff Effects (for debuff_variant)
-  debuffType       String?  // bleed, burn, poison, weaken, armor_break, slow, blind, stun, root, silence, taunt, marked, curse
-  debuffValue      Int?     // Strength of debuff (damage, %, etc.)
-  debuffDuration   Int?     // turns
-  debuffChance     Int?     @default(100) // % chance to apply
-  
+  debuffType     String? // bleed, burn, poison, weaken, armor_break, slow, blind, stun, root, silence, taunt, marked, curse
+  debuffValue    Int? // Strength of debuff (damage, %, etc.)
+  debuffDuration Int? // turns
+  debuffChance   Int?    @default(100) // % chance to apply
+
   // Special Effects
-  lifestealPercent Int?     // for sustain variant
-  armorPierce      Int?     // % of armor ignored
-  bonusVsGuard     Int?     // extra damage % vs guarding
-  bonusVsDebuffed  Int?     // extra damage % vs debuffed enemies
-  
+  lifestealPercent Int? // for sustain variant
+  armorPierce      Int? // % of armor ignored
+  bonusVsGuard     Int? // extra damage % vs guarding
+  bonusVsDebuffed  Int? // extra damage % vs debuffed enemies
+
   // Counter/Reactive
-  isCounter        Boolean  @default(false)
-  triggerCondition String?  // after_dodge, after_parry, on_hit_taken
-  
+  isCounter        Boolean @default(false)
+  isReaction       Boolean @default(false) // Dodge, Guard, Counter - triggers against enemy attacks
+  triggerCondition String? // after_dodge, after_parry, on_hit_taken
+
   // Passive (unlocked at each stage)
-  passive       String?  // e.g., "Quick Slash attacks are 5% faster"
-  
+  passive String? // e.g., "Quick Slash attacks are 5% faster"
+
+  // Narrative Templates (for combat storytelling)
+  narrativeSuccess String? // "Your blade connects with a satisfying impact!"
+  narrativeCrit    String? // "A devastating blow! Critical hit!"
+  narrativeMiss    String? // "Your swing goes wide, hitting nothing but air."
+  narrativeBlocked String? // "The enemy raises their guard, deflecting your attack."
+
   // State for admin builder
-  isSaved       Boolean  @default(false)
-  isLocked      Boolean  @default(false)
+  isSaved  Boolean @default(false)
+  isLocked Boolean @default(false)
 
   // Relations
   playerSkills PlayerSkill[]
@@ -265,9 +275,9 @@ model PlayerSkill {
   skillId String
   skill   Skill  @relation(fields: [skillId], references: [id])
 
-  useCount    Int      @default(0)  // Times used (for evolution tracking)
-  isEquipped  Boolean  @default(false)
-  slotPosition Int?    // 1-20 skill bar slot
+  useCount     Int     @default(0) // Times used (for evolution tracking)
+  isEquipped   Boolean @default(false)
+  slotPosition Int? // 1-20 skill bar slot
 
   learnedAt DateTime @default(now())
 
@@ -291,6 +301,180 @@ model PlayerInventory {
   equipSlot         String? // mainHand, offHand
 
   acquiredAt DateTime @default(now())
+}
+
+// ============================================
+// MONSTERS & COMBAT
+// ============================================
+
+model Monster {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  imageUrl    String?
+
+  // Location
+  floorId Int    @default(1)
+  areaId  String // Which hunting area spawns this monster
+
+  // Stats
+  level        Int
+  maxHp        Int
+  attack       Int // Base physical damage
+  magicAttack  Int @default(0) // Base magic damage
+  defense      Int // Damage reduction
+  magicDefense Int @default(0)
+  accuracy     Int @default(70) // Hit chance modifier
+  evasion      Int @default(10) // Dodge chance modifier
+  speed        Int @default(50) // Turn order priority
+
+  // Rewards
+  xpReward    Int
+  xpVariance  Int @default(0) // Random +/- variance
+  colReward   Int
+  colVariance Int @default(0)
+
+  // Behavior - AI attack patterns
+  attackPatterns Json @default("[]") // Array of skill sequence arrays
+
+  // Relations
+  skills         MonsterSkill[]
+  lootDrops      LootDrop[]
+  combatSessions CombatSession[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([floorId])
+  @@index([areaId])
+}
+
+model MonsterSkill {
+  id        String  @id @default(cuid())
+  monsterId String
+  monster   Monster @relation(fields: [monsterId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+
+  // Combat Stats
+  damageType String @default("physical") // physical, magic
+  baseDamage Int
+  accuracy   Int    @default(100) // Hit chance %
+  speed      Int    @default(50) // Action priority
+
+  // Effects
+  appliesDebuff  String? // bleed, poison, stun, etc.
+  debuffChance   Int?    @default(100)
+  debuffDuration Int?
+  debuffValue    Int?
+
+  // Narrative Templates
+  narrativeUse  String // "The Goblin lunges with snapping jaws..."
+  narrativeHit  String // "Its fangs sink into your flesh!"
+  narrativeMiss String // "You sidestep the clumsy attack."
+  narrativeCrit String? // "A vicious strike! Critical damage!"
+
+  createdAt DateTime @default(now())
+
+  @@index([monsterId])
+}
+
+model LootDrop {
+  id        String  @id @default(cuid())
+  monsterId String
+  monster   Monster @relation(fields: [monsterId], references: [id], onDelete: Cascade)
+
+  itemType String // weapon, consumable, material
+  itemId   String? // Reference to specific item if applicable
+  itemName String // Display name
+
+  dropChance  Float // 0.0 - 1.0 (0.1 = 10%)
+  minQuantity Int   @default(1)
+  maxQuantity Int   @default(1)
+
+  createdAt DateTime @default(now())
+
+  @@index([monsterId])
+}
+
+model CombatSession {
+  id        String  @id @default(cuid())
+  playerId  String
+  player    Player  @relation(fields: [playerId], references: [id])
+  monsterId String
+  monster   Monster @relation(fields: [monsterId], references: [id])
+
+  // Combat State
+  playerHp  Int
+  playerAp  Int
+  monsterHp Int
+  turn      Int    @default(1)
+  status    String @default("active") // active, won, lost, fled
+
+  // Queued Actions (JSON arrays)
+  playerQueue Json @default("[]") // [{type: "skill"|"item", id: string}]
+  enemyQueue  Json @default("[]") // Generated from monster AI
+
+  // Active Effects (JSON arrays)
+  playerBuffs    Json @default("[]") // [{type, value, duration}]
+  playerDebuffs  Json @default("[]")
+  monsterBuffs   Json @default("[]")
+  monsterDebuffs Json @default("[]")
+
+  // Cooldowns (JSON map)
+  skillCooldowns Json @default("{}") // {skillId: turnsRemaining}
+
+  // Timestamps
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+
+  // Relations
+  logs CombatLog[]
+
+  @@index([playerId])
+  @@index([status])
+}
+
+model CombatLog {
+  id        String        @id @default(cuid())
+  sessionId String
+  session   CombatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  turn          Int
+  sequenceOrder Int // Order within the turn (1, 2, 3...)
+
+  // Actor
+  actor      String // "player" or "monster"
+  actionType String // "skill", "item", "reaction"
+  actionId   String? // Skill or Item ID
+  actionName String
+
+  // Target
+  target String // "player" or "monster"
+
+  // Roll Results
+  hitRoll   Int? // What was rolled (1-100)
+  hitNeeded Int? // What was needed to hit
+  didHit    Boolean @default(true)
+
+  critRoll   Int?
+  critNeeded Int?
+  didCrit    Boolean @default(false)
+
+  // Effects
+  damageDealt   Int?
+  healingDone   Int?
+  buffApplied   String?
+  debuffApplied String?
+
+  // Narrative
+  narration String // The story text for this action
+
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([turn])
 }
 
 // ============================================
