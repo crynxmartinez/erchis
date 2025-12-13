@@ -42,13 +42,13 @@ interface PlayerModalProps {
 
 type TabType = 'stats' | 'skills' | 'inventory'
 
-const STAT_INFO: Record<keyof PlayerStats, { name: string; color: string; effects: string[] }> = {
-  str: { name: 'Strength', color: 'text-red-400', effects: ['+2 Physical Damage', '+1% Crit Damage'] },
-  agi: { name: 'Agility', color: 'text-green-400', effects: ['+0.5% Evasion', '+0.3% Accuracy'] },
-  vit: { name: 'Vitality', color: 'text-orange-400', effects: ['+10 Max HP', '+1% Heal Bonus'] },
-  int: { name: 'Intelligence', color: 'text-blue-400', effects: ['+0.3% Magic Amp', '+0.5% Debuff Resist'] },
-  dex: { name: 'Dexterity', color: 'text-yellow-400', effects: ['+0.3% Crit Chance', '+0.5% CDR'] },
-  luk: { name: 'Luck', color: 'text-purple-400', effects: ['+0.5% Drop Rate', 'Rare Encounters'] },
+const STAT_INFO: Record<keyof PlayerStats, { name: string; color: string }> = {
+  str: { name: 'Strength', color: 'text-red-400' },
+  agi: { name: 'Agility', color: 'text-green-400' },
+  vit: { name: 'Vitality', color: 'text-orange-400' },
+  int: { name: 'Intelligence', color: 'text-blue-400' },
+  dex: { name: 'Dexterity', color: 'text-yellow-400' },
+  luk: { name: 'Luck', color: 'text-purple-400' },
 }
 
 const PASSIVE_DESCRIPTIONS: Record<string, string> = {
@@ -162,16 +162,11 @@ export default function PlayerModal({ isOpen, onClose, playerData }: PlayerModal
                     <div className="grid grid-cols-2 gap-3">
                       {(Object.keys(STAT_INFO) as (keyof PlayerStats)[]).map(stat => (
                         <div key={stat} className="bg-[#252525] rounded-lg p-3 border border-[#333]">
-                          <div className="flex justify-between items-center mb-1">
+                          <div className="flex justify-between items-center">
                             <span className={`font-semibold ${STAT_INFO[stat].color}`}>
                               {STAT_INFO[stat].name}
                             </span>
                             <span className="text-xl font-bold text-white">{playerData.stats[stat]}</span>
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {STAT_INFO[stat].effects.map((effect, i) => (
-                              <div key={i}>{effect} per point</div>
-                            ))}
                           </div>
                         </div>
                       ))}
