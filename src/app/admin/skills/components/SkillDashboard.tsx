@@ -5,8 +5,19 @@ export function SkillDashboard() {
   
   return (
     <div className="p-8 w-full h-full overflow-y-auto">
+      {/* Back to Dashboard Button */}
+      <div className="mb-6">
+        <a 
+          href="/dashboard" 
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#242424] hover:bg-[#333] border border-[#444] rounded-lg text-gray-300 hover:text-white transition-all"
+        >
+          <span>←</span>
+          <span>Back to Dashboard</span>
+        </a>
+      </div>
+
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Skill Database Dashboard</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">Skill Database Builder</h1>
         <p className="text-gray-400">Select a starter skill from the sidebar to view its tree or generate evolutions.</p>
       </div>
 
