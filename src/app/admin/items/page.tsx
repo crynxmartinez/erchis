@@ -593,6 +593,7 @@ export default function ItemDatabase() {
   const [generating, setGenerating] = useState(false)
   const [saving, setSaving] = useState(false)
   const [resetting, setResetting] = useState(false)
+  const [seeding, setSeeding] = useState(false)
   const [message, setMessage] = useState('')
   const [selectedItem, setSelectedItem] = useState<Item | null>(null)
   const [showPreviewModal, setShowPreviewModal] = useState(false)
@@ -630,6 +631,30 @@ export default function ItemDatabase() {
     acc[cat.id] = savedItems.filter(s => s.itemType === cat.id).length
     return acc
   }, {} as Record<string, number>)
+
+  // ============================================
+  // SEED STARTER ITEMS
+  // ============================================
+
+  const handleSeedStarterItems = async () => {
+    if (!confirm('Seed all starter items (potions, materials, weapons, etc.) to the database?')) return
+    setSeeding(true)
+    setMessage('Seeding starter items...')
+    try {
+      const response = await fetch('/api/items/seed', { method: 'POST' })
+      const data = await response.json()
+      if (data.success) {
+        setMessage(`✅ ${data.message}`)
+        await fetchSavedItems() // Refresh the list
+      } else {
+        setMessage(`❌ Error: ${data.error}`)
+      }
+    } catch (error) {
+      setMessage('❌ Failed to seed items')
+    } finally {
+      setSeeding(false)
+    }
+  }
 
   // ============================================
   // GENERATE ITEMS
@@ -820,7 +845,16 @@ export default function ItemDatabase() {
               ← Back to Dashboard
             </Link>
 
-            <h1 className="text-3xl font-bold text-white mb-2">Item Database</h1>
+            <div className="flex items-center justify-between mb-2">
+              <h1 className="text-3xl font-bold text-white">Item Database</h1>
+              <button
+                onClick={handleSeedStarterItems}
+                disabled={seeding}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2"
+              >
+                {seeding ? <Spinner /> : '🌱'} Seed Starter Items
+              </button>
+            </div>
             <p className="text-gray-400 mb-8">Select a category to view items or generate new ones.</p>
             
             <DashboardStats 
