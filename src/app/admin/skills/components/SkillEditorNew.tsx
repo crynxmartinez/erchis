@@ -182,7 +182,7 @@ function SkillIcon({ iconUrl, variantType, size = 'lg' }: {
     xl: 'w-24 h-24 text-5xl',
   }
   
-  const variantConfig = VARIANT_CONFIG[variantType] || VARIANT_CONFIG.root
+  const variantConfig = VARIANT_CONFIG[variantType] || VARIANT_CONFIG.base
   
   return (
     <div className={`${sizeClasses[size]} relative rounded-lg overflow-hidden border-2 border-white/20 bg-gradient-to-br from-black/80 to-black/40 flex items-center justify-center shadow-xl`}>
@@ -250,7 +250,7 @@ export function SkillEditor({
   }
 
   const currentData = editMode && editedSkill ? editedSkill : skill
-  const variantConfig = VARIANT_CONFIG[currentData.variantType] || VARIANT_CONFIG.root
+  const variantConfig = VARIANT_CONFIG[currentData.variantType] || VARIANT_CONFIG.base
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: '📋' },
@@ -406,7 +406,7 @@ export function SkillEditor({
                     <InputField label="Skill Name" value={currentData.name} onChange={v => setEditedSkill({...editedSkill!, name: v})} />
                     <InputField label="Icon URL" value={currentData.iconUrl || ''} onChange={v => setEditedSkill({...editedSkill!, iconUrl: v || null})} placeholder="https://..." />
                     <div className="grid grid-cols-2 gap-4">
-                      <SelectField label="Variant" value={currentData.variantType} options={['root', ...ALL_VARIANTS]} onChange={v => setEditedSkill({...editedSkill!, variantType: v})} />
+                      <SelectField label="Variant" value={currentData.variantType} options={['base', ...ALL_VARIANTS]} onChange={v => setEditedSkill({...editedSkill!, variantType: v})} />
                       <InputField label="Stage" type="number" value={currentData.stage} onChange={v => setEditedSkill({...editedSkill!, stage: parseInt(v) || 0})} />
                     </div>
                     <InputField label="Skill Type" value={currentData.skillType} onChange={v => setEditedSkill({...editedSkill!, skillType: v})} />
@@ -810,7 +810,7 @@ export function SkillEditor({
             {childSkills.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {childSkills.map(child => {
-                  const childVariantConfig = VARIANT_CONFIG[child.variantType] || VARIANT_CONFIG.root
+                  const childVariantConfig = VARIANT_CONFIG[child.variantType] || VARIANT_CONFIG.base
                   return (
                     <div 
                       key={child.id}
@@ -878,7 +878,7 @@ export function SkillEditor({
                       <div className="text-xs text-gray-400 mb-3 uppercase tracking-wider font-bold">Force Variants (Optional)</div>
                       <div className="flex flex-wrap gap-2 justify-center">
                         {ALL_VARIANTS.map(v => {
-                          const vConfig = VARIANT_CONFIG[v] || VARIANT_CONFIG.root
+                          const vConfig = VARIANT_CONFIG[v] || VARIANT_CONFIG.base
                           return (
                             <button
                               key={v}

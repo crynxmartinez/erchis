@@ -297,7 +297,7 @@ async function main() {
           executionDescription: starter.executionDescription || null,
           starterSkillName: starter.name,
           stage: 0,
-          variantType: 'root',
+          variantType: 'base',
           isSaved: true,
           // Reset legacy fields if they exist in DB but not in schema (handled by schema default)
         },
@@ -330,7 +330,7 @@ async function main() {
           executionDescription: starter.executionDescription || null,
           starterSkillName: starter.name,
           stage: 0,
-          variantType: 'root',
+          variantType: 'base',
           isSaved: true,
         },
       })

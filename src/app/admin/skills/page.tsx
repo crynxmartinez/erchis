@@ -80,7 +80,7 @@ export default function SkillDatabaseBuilder() {
             utilityEffect: starter.utilityEffect || null,
             utilityDuration: starter.utilityDuration || null,
             stage: 0,
-            variantType: 'root',
+            variantType: 'base',
             ampPercent: starter.ampPercent,
             apCost: starter.apCost,
             cooldown: starter.cooldown,

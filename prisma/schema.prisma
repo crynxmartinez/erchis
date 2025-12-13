@@ -203,7 +203,7 @@ model Skill {
   
   // Variant Type
   // root, upgrade, original_variant, buff_variant, debuff_variant, unique, aoe_variant, combo_variant, counter_variant, mobility_variant, sustain_variant
-  variantType      String   @default("root")
+  variantType      String   @default("base")
   
   // Combat Stats (Amp-based system)
   ampPercent    Int      @default(100) // 50-200% multiplier on weapon base

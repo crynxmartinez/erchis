@@ -111,7 +111,7 @@ export const UTILITY_EFFECTS = [
 ]
 
 export const VARIANT_CONFIG: Record<string, { icon: string; color: string; label: string }> = {
-  root:       { icon: '🌱', color: 'bg-green-900/50 border-green-500 text-green-300', label: 'Root' },
+  base:       { icon: '🌱', color: 'bg-green-900/50 border-green-500 text-green-300', label: 'Base' },
   power:      { icon: '💥', color: 'bg-red-900/50 border-red-500 text-red-300', label: 'Power' },
   multihit:   { icon: '⚔️', color: 'bg-cyan-900/50 border-cyan-500 text-cyan-300', label: 'Multi-Hit' },
   aoe:        { icon: '🌊', color: 'bg-blue-900/50 border-blue-500 text-blue-300', label: 'AoE' },

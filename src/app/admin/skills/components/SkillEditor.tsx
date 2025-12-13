@@ -181,7 +181,7 @@ export function SkillEditor({
                 <div className="space-y-4">
                   <SectionHeader title="Identity" icon="🆔" />
                   <InputField label="Name" value={currentData.name} onChange={v => setEditedSkill({...editedSkill!, name: v})} />
-                  <SelectField label="Variant" value={currentData.variantType} options={['root', ...ALL_VARIANTS]} onChange={v => setEditedSkill({...editedSkill!, variantType: v})} />
+                  <SelectField label="Variant" value={currentData.variantType} options={['base', ...ALL_VARIANTS]} onChange={v => setEditedSkill({...editedSkill!, variantType: v})} />
                   <div className="grid grid-cols-2 gap-4">
                     <InputField label="Stage" type="number" value={currentData.stage} onChange={v => setEditedSkill({...editedSkill!, stage: parseInt(v) || 0})} />
                     <InputField label="Type" value={currentData.skillType} onChange={v => setEditedSkill({...editedSkill!, skillType: v})} />
@@ -461,7 +461,7 @@ export function SkillEditor({
             {childSkills.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {childSkills.map(child => {
-                  const variantConfig = VARIANT_CONFIG[child.variantType] || VARIANT_CONFIG.root
+                  const variantConfig = VARIANT_CONFIG[child.variantType] || VARIANT_CONFIG.base
                   return (
                     <div 
                       key={child.id}

@@ -17,7 +17,7 @@ export async function POST(request: Request) {
         utilityEffect: data.utilityEffect || null,
         utilityDuration: data.utilityDuration || null,
         stage: data.stage || 0,
-        variantType: data.variantType || 'root',
+        variantType: data.variantType || 'base',
         ampPercent: data.ampPercent ?? 50,
         apCost: data.apCost || 5,
         cooldown: data.cooldown || 1,
