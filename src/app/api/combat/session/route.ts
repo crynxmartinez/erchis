@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
         playerQueue: session.playerQueue,
         enemyQueue: session.enemyQueue,
         skillCooldowns: session.skillCooldowns,
-        logs: session.logs.map(log => ({
+        logs: session.logs.map((log: { turn: number; actor: string; actionName: string; narration: string; damageDealt: number | null; healingDone: number | null }) => ({
           turn: log.turn,
           actor: log.actor,
           actionName: log.actionName,

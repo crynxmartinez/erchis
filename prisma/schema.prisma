@@ -343,7 +343,7 @@ model MonsterSkill {
   icon        String  @default("👊") // Emoji icon
 
   // Skill Category
-  category String @default("attack") // attack, buff, debuff, heal, special
+  category String @default("melee") // melee, ranged, aoe, self, reactive, signature
 
   // Combat Stats
   damageType String @default("physical") // physical, magic, true
