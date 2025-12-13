@@ -105,10 +105,10 @@ export default function Sidebar({ maxUnlockedFloor = 1 }: SidebarProps) {
         </div>
       </div>
 
-      {/* Navigation Section */}
+      {/* Admin Section */}
       <div className="mb-2">
         <div className="bg-[#2a2a2a] px-3 py-1.5 text-xs font-medium text-gray-400 uppercase tracking-wide border-y border-[#333]">
-          Navigation
+          Admin
         </div>
         <div className="py-1 px-3">
           {/* Skill Database Link */}
@@ -122,6 +122,45 @@ export default function Sidebar({ maxUnlockedFloor = 1 }: SidebarProps) {
           >
             <span className="mr-2">⚔️</span>
             Skill Database
+          </Link>
+
+          {/* Monster Skills Link */}
+          <Link
+            href="/admin/monster-skills"
+            className={`flex items-center mt-1 px-3 py-2 text-sm rounded transition-colors ${
+              isActive('/admin/monster-skills')
+                ? 'bg-[#6eb5ff]/20 text-[#6eb5ff] border-l-2 border-[#6eb5ff]'
+                : 'text-gray-300 hover:bg-[#2a2a2a] hover:text-white'
+            }`}
+          >
+            <span className="mr-2">🐾</span>
+            Monster Skills
+          </Link>
+
+          {/* Monsters Link */}
+          <Link
+            href="/admin/monsters"
+            className={`flex items-center mt-1 px-3 py-2 text-sm rounded transition-colors ${
+              isActive('/admin/monsters')
+                ? 'bg-[#6eb5ff]/20 text-[#6eb5ff] border-l-2 border-[#6eb5ff]'
+                : 'text-gray-300 hover:bg-[#2a2a2a] hover:text-white'
+            }`}
+          >
+            <span className="mr-2">👹</span>
+            Monsters
+          </Link>
+
+          {/* Items Link */}
+          <Link
+            href="/admin/items"
+            className={`flex items-center mt-1 px-3 py-2 text-sm rounded transition-colors ${
+              isActive('/admin/items')
+                ? 'bg-[#6eb5ff]/20 text-[#6eb5ff] border-l-2 border-[#6eb5ff]'
+                : 'text-gray-300 hover:bg-[#2a2a2a] hover:text-white'
+            }`}
+          >
+            <span className="mr-2">📦</span>
+            Items
           </Link>
         </div>
       </div>
