@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { SkillTypeCategory, StarterSkill } from '@/data/universal-skills-data'
 import { SkillSidebar } from './components/SkillSidebar'
 import { SkillDashboard } from './components/SkillDashboard'
-import { SkillEditor } from './components/SkillEditor'
+import { SkillEditor } from './components/SkillEditorNew'
 import { Skill } from './types'
 
 export default function SkillDatabaseBuilder() {

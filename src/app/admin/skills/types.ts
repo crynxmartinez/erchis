@@ -5,6 +5,7 @@ export interface Skill {
   name: string
   description: string
   executionDescription?: string | null
+  iconUrl?: string | null
   parentId: string | null
   parent?: { id: string; name: string } | null
   stage: number
@@ -57,6 +58,57 @@ export const ALL_VARIANTS = [
 export const DAMAGE_TYPES = ['physical', 'magic', 'none']
 export const WEAPON_REQS = ['melee_only', 'ranged_only', 'magic_only', 'any']
 export const TARGET_TYPES = ['single', 'self', 'aoe_circle', 'aoe_cone', 'aoe_line', 'all_enemies']
+
+export const BUFF_TYPES = [
+  'empower',      // +X% damage dealt
+  'focus',        // +X% crit chance
+  'precision',    // +X% accuracy
+  'berserk',      // +X% damage, -X% defense
+  'fortify',      // +X% defense
+  'barrier',      // Absorb X damage
+  'evasion',      // +X% dodge chance
+  'reflect',      // Reflect X% damage
+  'haste',        // +X AP regen
+  'regen',        // +X HP per turn
+  'stealth',      // Cannot be targeted
+  'immunity',     // Immune to debuffs
+]
+
+export const DEBUFF_TYPES = [
+  'bleed',        // X damage per turn (physical)
+  'burn',         // X damage per turn (magic)
+  'poison',       // X% max HP per turn
+  'weaken',       // -X% damage dealt
+  'armor_break',  // -X% defense
+  'slow',         // -X AP regen
+  'blind',        // -X% accuracy
+  'stun',         // Cannot act
+  'root',         // Cannot move
+  'silence',      // Cannot use skills
+  'taunt',        // Must attack taunter
+  'marked',       // +X% damage taken
+  'curse',        // -X% healing received
+]
+
+export const TRIGGER_CONDITIONS = [
+  'after_dodge',
+  'after_parry',
+  'on_hit_taken',
+  'on_crit_taken',
+  'on_ally_hit',
+  'on_kill',
+  'on_low_hp',
+  'on_debuff_received',
+]
+
+export const UTILITY_EFFECTS = [
+  'fire_enchant',
+  'ice_enchant',
+  'lightning_enchant',
+  'shadow_enchant',
+  'holy_enchant',
+  'poison_enchant',
+]
 
 export const VARIANT_CONFIG: Record<string, { icon: string; color: string; label: string }> = {
   root:       { icon: '🌱', color: 'bg-green-900/50 border-green-500 text-green-300', label: 'Root' },
