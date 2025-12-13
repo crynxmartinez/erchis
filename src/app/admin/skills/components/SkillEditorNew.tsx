@@ -276,8 +276,12 @@ export function SkillEditor({
         <div className="relative p-6">
           {/* Breadcrumbs */}
           <div className="flex items-center gap-2 text-xs text-gray-400 mb-4">
+            <a href="/dashboard" className="hover:text-[#6eb5ff] transition-colors flex items-center gap-1">
+              <span>🏠</span> Dashboard
+            </a>
+            <span className="text-gray-600">›</span>
             <button onClick={() => onBreadcrumbClick(-1)} className="hover:text-[#6eb5ff] transition-colors flex items-center gap-1">
-              <span>🏠</span> Skills
+              <span>⚔️</span> Skills
             </button>
             {breadcrumb.map((s, i) => (
               <span key={s.id} className="flex items-center gap-2">
