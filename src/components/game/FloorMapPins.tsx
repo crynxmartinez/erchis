@@ -88,7 +88,7 @@ export default function FloorMapPins({ floorId, locations }: FloorMapPinsProps) 
         {/* Tooltip */}
         {hoveredLocation && (
           <div
-            className="absolute z-[100] pointer-events-none bg-[#1a1a1a]/95 border border-[#444] rounded-lg px-4 py-3 shadow-xl backdrop-blur-sm min-w-[280px] max-w-[320px]"
+            className="absolute z-[100] pointer-events-none bg-[#1a1a1a]/95 border border-[#444] rounded-lg px-4 py-3 shadow-xl backdrop-blur-sm w-[280px] whitespace-normal"
             style={{
               left: `${hoveredLocation.x}%`,
               top: `${hoveredLocation.y + 5}%`,
