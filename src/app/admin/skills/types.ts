@@ -19,6 +19,7 @@ export interface Skill {
   ampPercent: number
   apCost: number
   cooldown: number
+  speed: number
   targetType: string
   range: number
   hitCount: number

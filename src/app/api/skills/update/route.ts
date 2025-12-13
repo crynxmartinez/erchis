@@ -21,6 +21,7 @@ export async function POST(request: Request) {
     if (data.ampPercent !== undefined) updateData.ampPercent = data.ampPercent
     if (data.apCost !== undefined) updateData.apCost = data.apCost
     if (data.cooldown !== undefined) updateData.cooldown = data.cooldown
+    if (data.speed !== undefined) updateData.speed = data.speed
     if (data.targetType !== undefined) updateData.targetType = data.targetType
     if (data.range !== undefined) updateData.range = data.range
     if (data.hitCount !== undefined) updateData.hitCount = data.hitCount

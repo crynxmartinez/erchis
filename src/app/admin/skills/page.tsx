@@ -369,14 +369,15 @@ function SkillDetailPanel({
         {activeTab === 'combat' && (
           <div className="space-y-6">
              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <StatCard label="Speed" value={currentData.speed || 50} color="text-yellow-400" icon="⚡" />
                 <StatCard label="Target" value={currentData.targetType.replace(/_/g, ' ')} color="text-purple-300" icon="🎯" />
                 <StatCard label="Hits" value={`${currentData.hitCount}x`} color="text-cyan-300" icon="⚔️" />
-                {currentData.armorPierce && <StatCard label="Armor Pierce" value={currentData.armorPierce} unit="%" color="text-white" icon="🔪" />}
-                {currentData.lifestealPercent && <StatCard label="Lifesteal" value={currentData.lifestealPercent} unit="%" color="text-pink-400" icon="🩸" />}
+                {currentData.armorPierce ? <StatCard label="Armor Pierce" value={currentData.armorPierce} unit="%" color="text-white" icon="🔪" /> : <StatCard label="Damage Type" value={currentData.damageType} color="text-orange-300" icon="💥" />}
              </div>
-             {(currentData.bonusVsGuard || currentData.isCounter) && (
+             {(currentData.lifestealPercent || currentData.bonusVsGuard || currentData.isCounter) && (
                <SectionPanel title="Special Modifiers" icon="⭐">
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                   {currentData.lifestealPercent && <div className="text-pink-400">Lifesteal: {currentData.lifestealPercent}%</div>}
                    {currentData.bonusVsGuard && <div className="text-green-400">Bonus vs Guard: +{currentData.bonusVsGuard}%</div>}
                    {currentData.isCounter && <div className="text-yellow-400">Counter Trigger: {currentData.triggerCondition}</div>}
                  </div>
