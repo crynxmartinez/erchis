@@ -50,10 +50,6 @@ const CATEGORIES = [
   { id: 'signature', icon: '⭐', label: 'Signature', description: 'Unique boss skills' },
 ]
 
-const DEBUFF_TYPES = ['bleed', 'poison', 'burn', 'freeze', 'stun', 'slow', 'blind', 'weaken', 'curse']
-const BUFF_TYPES = ['enrage', 'shield', 'regen', 'haste', 'focus', 'fortify', 'sharpen', 'berserk']
-const DAMAGE_TYPES = ['physical', 'magic', 'fire', 'ice', 'lightning', 'poison', 'dark', 'true', 'none']
-
 // ============================================
 // LOADING SPINNER COMPONENT
 // ============================================
@@ -64,6 +60,340 @@ function Spinner() {
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
     </svg>
+  )
+}
+
+// ============================================
+// STAT CARD COMPONENT
+// ============================================
+
+function StatCard({ label, value, color, icon, unit = '' }: { 
+  label: string
+  value: number | string
+  color: string
+  icon?: string
+  unit?: string
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-lg border border-white/10 bg-gradient-to-br from-black/60 to-black/40 p-4">
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+      <div className="relative">
+        <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1 flex items-center gap-1">
+          {icon && <span>{icon}</span>}
+          {label}
+        </div>
+        <div className={`text-2xl font-bold ${color}`}>
+          {value}{unit}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ============================================
+// SECTION PANEL COMPONENT
+// ============================================
+
+function SectionPanel({ title, icon, children, color = 'border-white/10' }: {
+  title: string
+  icon: string
+  children: React.ReactNode
+  color?: string
+}) {
+  return (
+    <div className={`relative overflow-hidden rounded-xl border ${color} bg-gradient-to-br from-[#1a1a1a] to-[#0d0d0d]`}>
+      <div className="absolute inset-0 opacity-30 pointer-events-none" 
+           style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.03"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} 
+      />
+      <div className="relative">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-black/30">
+          <span className="text-lg">{icon}</span>
+          <span className="font-bold text-sm uppercase tracking-wider text-gray-300">{title}</span>
+        </div>
+        <div className="p-4">
+          {children}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ============================================
+// SKILL DETAIL PANEL COMPONENT
+// ============================================
+
+function SkillDetailPanel({ skill, onClose }: { skill: MonsterSkill; onClose: () => void }) {
+  const [activeTab, setActiveTab] = useState<'overview' | 'combat' | 'effects' | 'flavor'>('overview')
+  
+  const tabs = [
+    { id: 'overview', label: 'Overview', icon: '📋' },
+    { id: 'combat', label: 'Combat', icon: '⚔️' },
+    { id: 'effects', label: 'Effects', icon: '✨' },
+    { id: 'flavor', label: 'Flavor', icon: '📜' },
+  ]
+
+  const categoryConfig = CATEGORIES.find(c => c.id === skill.category)
+  const getDamageTypeColor = (type: string) => {
+    const colors: Record<string, string> = {
+      physical: 'text-orange-300',
+      magic: 'text-purple-300',
+      fire: 'text-red-400',
+      ice: 'text-cyan-300',
+      lightning: 'text-yellow-300',
+      poison: 'text-green-400',
+      dark: 'text-purple-400',
+      true: 'text-white',
+      none: 'text-gray-400',
+    }
+    return colors[type] || 'text-gray-400'
+  }
+
+  return (
+    <div className="bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#1a1a2e] rounded-xl border border-[#333] overflow-hidden">
+      {/* Header */}
+      <div className="relative p-6 border-b border-[#333]">
+        <div className="absolute inset-0 opacity-20" 
+             style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z" fill="%23ffffff" fill-opacity="0.05" fill-rule="evenodd"/%3E%3C/svg%3E")' }}
+        />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#6eb5ff]/50 to-transparent" />
+        
+        <div className="relative flex justify-between items-start">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-black/80 to-black/40 border-2 border-white/20 flex items-center justify-center text-3xl shadow-xl">
+              {skill.icon}
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-2">{skill.name}</h2>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-3 py-1 rounded-full text-xs font-bold border border-[#6eb5ff]/50 bg-[#6eb5ff]/20 text-[#6eb5ff]">
+                  {categoryConfig?.icon} {categoryConfig?.label}
+                </span>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium border border-white/20 bg-black/40 capitalize ${getDamageTypeColor(skill.damageType)}`}>
+                  {skill.damageType}
+                </span>
+                {skill.isSaved && (
+                  <span className="px-3 py-1 rounded-full text-xs font-medium border border-green-500/50 bg-green-500/20 text-green-300">
+                    ✅ Saved
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-white text-xl">✕</button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b border-[#333] bg-[#111]">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as typeof activeTab)}
+            className={`px-6 py-3 text-sm font-bold uppercase tracking-wider transition-all border-r border-[#222] flex items-center gap-2 ${
+              activeTab === tab.id 
+                ? 'bg-[#1a1a1a] text-[#6eb5ff] border-b-2 border-b-[#6eb5ff]' 
+                : 'text-gray-500 hover:text-gray-300 hover:bg-[#1a1a1a]'
+            }`}
+          >
+            <span>{tab.icon}</span>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div className="p-6 bg-gradient-to-b from-[#0a0a0a] to-[#111]">
+        {/* OVERVIEW TAB */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <StatCard label="Base Damage" value={skill.baseDamage} color="text-red-400" icon="💥" />
+              <StatCard label="Accuracy" value={skill.accuracy} unit="%" color="text-blue-400" icon="🎯" />
+              <StatCard label="Speed" value={skill.speed} color="text-yellow-400" icon="⚡" />
+              <StatCard label="Scaling" value={skill.scalesWithAttack ? skill.scalingPercent : 0} unit="%" color="text-purple-400" icon="📈" />
+            </div>
+
+            {/* Info Panels */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <SectionPanel title="Core Information" icon="📋">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center py-2 border-b border-white/5">
+                    <span className="text-gray-500 text-sm">Category</span>
+                    <span className="text-white font-medium capitalize">{skill.category}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-white/5">
+                    <span className="text-gray-500 text-sm">Damage Type</span>
+                    <span className={`font-medium capitalize ${getDamageTypeColor(skill.damageType)}`}>{skill.damageType}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-white/5">
+                    <span className="text-gray-500 text-sm">Scales with Attack</span>
+                    <span className="text-white font-medium">{skill.scalesWithAttack ? 'Yes' : 'No'}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-gray-500 text-sm">Self Heal</span>
+                    <span className="text-green-400 font-medium">{skill.selfHeal > 0 ? `+${skill.selfHeal} HP` : 'None'}</span>
+                  </div>
+                </div>
+              </SectionPanel>
+
+              <SectionPanel title="Description" icon="📝">
+                <div className="space-y-4">
+                  <div>
+                    <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">Effect</div>
+                    <p className="text-gray-300 text-sm leading-relaxed">{skill.description || 'No description available.'}</p>
+                  </div>
+                </div>
+              </SectionPanel>
+            </div>
+          </div>
+        )}
+
+        {/* COMBAT TAB */}
+        {activeTab === 'combat' && (
+          <div className="space-y-6">
+            {/* Main Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <StatCard label="Base Damage" value={skill.baseDamage} color="text-red-400" icon="💥" />
+              <StatCard label="Accuracy" value={skill.accuracy} unit="%" color="text-blue-400" icon="🎯" />
+              <StatCard label="Speed" value={skill.speed} color="text-yellow-400" icon="⚡" />
+              <StatCard label="Category" value={skill.category} color="text-cyan-300" icon="📂" />
+            </div>
+
+            {/* Scaling Info */}
+            <SectionPanel title="Damage Scaling" icon="📊">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="flex items-center gap-3 p-3 bg-black/30 rounded-lg border border-white/5">
+                  <span className="text-xl">📈</span>
+                  <div>
+                    <div className="text-xs text-gray-500">Scales with Attack</div>
+                    <div className={`font-bold ${skill.scalesWithAttack ? 'text-green-400' : 'text-gray-500'}`}>
+                      {skill.scalesWithAttack ? 'Yes' : 'No'}
+                    </div>
+                  </div>
+                </div>
+                {skill.scalesWithAttack && (
+                  <div className="flex items-center gap-3 p-3 bg-black/30 rounded-lg border border-white/5">
+                    <span className="text-xl">💯</span>
+                    <div>
+                      <div className="text-xs text-gray-500">Scaling Percent</div>
+                      <div className="text-purple-400 font-bold">{skill.scalingPercent}%</div>
+                    </div>
+                  </div>
+                )}
+                {skill.selfDamage > 0 && (
+                  <div className="flex items-center gap-3 p-3 bg-red-900/20 rounded-lg border border-red-500/30">
+                    <span className="text-xl">💔</span>
+                    <div>
+                      <div className="text-xs text-gray-500">Self Damage</div>
+                      <div className="text-red-400 font-bold">{skill.selfDamage}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </SectionPanel>
+          </div>
+        )}
+
+        {/* EFFECTS TAB */}
+        {activeTab === 'effects' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Buff Effects */}
+              <SectionPanel title="Buff Effects (Self)" icon="💪" color="border-yellow-500/30">
+                {skill.appliesBuff ? (
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-lg bg-yellow-500/20 border border-yellow-500/30 flex items-center justify-center text-2xl">
+                      💪
+                    </div>
+                    <div>
+                      <div className="text-yellow-300 font-bold text-lg capitalize">{skill.appliesBuff.replace(/_/g, ' ')}</div>
+                      <div className="text-gray-400 text-sm">
+                        {skill.buffValue > 0 && <span className="text-yellow-400">+{skill.buffValue}</span>}
+                        {skill.buffDuration > 0 && <span> for {skill.buffDuration} turns</span>}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-gray-500 text-sm py-4 text-center">No buff effects configured</div>
+                )}
+              </SectionPanel>
+
+              {/* Debuff Effects */}
+              <SectionPanel title="Debuff Effects (Enemy)" icon="💀" color="border-purple-500/30">
+                {skill.appliesDebuff ? (
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-2xl">
+                      💀
+                    </div>
+                    <div>
+                      <div className="text-purple-300 font-bold text-lg capitalize">{skill.appliesDebuff.replace(/_/g, ' ')}</div>
+                      <div className="text-gray-400 text-sm">
+                        {skill.debuffValue > 0 && <span className="text-purple-400">{skill.debuffValue}</span>}
+                        {skill.debuffDuration > 0 && <span> for {skill.debuffDuration} turns</span>}
+                        {skill.debuffChance < 100 && <span> ({skill.debuffChance}% chance)</span>}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-gray-500 text-sm py-4 text-center">No debuff effects configured</div>
+                )}
+              </SectionPanel>
+            </div>
+
+            {/* Self Heal */}
+            {skill.selfHeal > 0 && (
+              <SectionPanel title="Self Heal" icon="💚" color="border-green-500/30">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-lg bg-green-500/20 border border-green-500/30 flex items-center justify-center text-2xl">
+                    💚
+                  </div>
+                  <div>
+                    <div className="text-green-300 font-bold text-lg">Heals Self</div>
+                    <div className="text-gray-400 text-sm">
+                      <span className="text-green-400">+{skill.selfHeal} HP</span> on use
+                    </div>
+                  </div>
+                </div>
+              </SectionPanel>
+            )}
+          </div>
+        )}
+
+        {/* FLAVOR TAB */}
+        {activeTab === 'flavor' && (
+          <div className="space-y-6">
+            <SectionPanel title="Effect Description" icon="📝">
+              <p className="text-gray-300 leading-relaxed">{skill.description || 'No description available.'}</p>
+            </SectionPanel>
+
+            {skill.narrativeUse && (
+              <SectionPanel title="Execution Narrative" icon="📜">
+                <p className="text-gray-400 italic leading-relaxed">"{skill.narrativeUse}"</p>
+              </SectionPanel>
+            )}
+
+            {skill.narrativeHit && (
+              <SectionPanel title="On Hit" icon="✅" color="border-green-500/30">
+                <p className="text-green-300 italic leading-relaxed">"{skill.narrativeHit}"</p>
+              </SectionPanel>
+            )}
+
+            {skill.narrativeMiss && (
+              <SectionPanel title="On Miss" icon="❌" color="border-red-500/30">
+                <p className="text-red-300 italic leading-relaxed">"{skill.narrativeMiss}"</p>
+              </SectionPanel>
+            )}
+
+            {skill.narrativeCrit && (
+              <SectionPanel title="On Critical Hit" icon="💥" color="border-yellow-500/30">
+                <p className="text-yellow-300 italic leading-relaxed">"{skill.narrativeCrit}"</p>
+              </SectionPanel>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 
@@ -454,50 +784,12 @@ export default function MonsterSkillDatabase() {
               )}
             </div>
 
-            {/* Skill Detail Panel */}
+            {/* Skill Detail Panel - Tabbed Interface */}
             {selectedSkill && (
-              <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-4">
-                <h3 className="text-sm font-semibold text-[#6eb5ff] mb-3">Skill Details: {selectedSkill.name}</h3>
-                <div className="grid grid-cols-4 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-500">Category:</span>
-                    <span className="ml-2">{selectedSkill.category}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Damage Type:</span>
-                    <span className="ml-2">{selectedSkill.damageType}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Base Damage:</span>
-                    <span className="ml-2">{selectedSkill.baseDamage}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Accuracy:</span>
-                    <span className="ml-2">{selectedSkill.accuracy}%</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Speed:</span>
-                    <span className="ml-2">{selectedSkill.speed}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Scaling:</span>
-                    <span className="ml-2">{selectedSkill.scalesWithAttack ? `${selectedSkill.scalingPercent}%` : 'None'}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Debuff:</span>
-                    <span className="ml-2">{selectedSkill.appliesDebuff || 'None'}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Buff:</span>
-                    <span className="ml-2">{selectedSkill.appliesBuff || 'None'}</span>
-                  </div>
-                </div>
-                {selectedSkill.description && (
-                  <div className="mt-3 text-sm text-gray-400">
-                    {selectedSkill.description}
-                  </div>
-                )}
-              </div>
+              <SkillDetailPanel 
+                skill={selectedSkill} 
+                onClose={() => setSelectedSkill(null)} 
+              />
             )}
           </div>
         </div>
