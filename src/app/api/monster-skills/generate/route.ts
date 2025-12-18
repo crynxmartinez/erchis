@@ -585,7 +585,7 @@ function generateSkill(category: CategoryType, existingNames: Set<string>) {
     selfHeal: hasSelfHeal ? getRandomInRange(20, 50) : 0,
     selfDamage: 0,
     narrativeUse: narratives.use,
-    narrativeHit: narratives.hit,
+    narrativeSuccess: narratives.hit,
     narrativeMiss: narratives.miss,
     narrativeCrit: narratives.crit,
   }

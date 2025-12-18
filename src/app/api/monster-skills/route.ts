@@ -49,9 +49,11 @@ export async function POST(request: Request) {
         selfHeal: body.selfHeal || 0,
         selfDamage: body.selfDamage || 0,
         narrativeUse: body.narrativeUse || 'The monster attacks!',
-        narrativeHit: body.narrativeHit || 'The attack connects!',
+        narrativeSuccess: body.narrativeSuccess || 'The attack connects!',
         narrativeMiss: body.narrativeMiss || 'The attack misses!',
         narrativeCrit: body.narrativeCrit || 'Critical hit!',
+        isSaved: body.isSaved ?? false,
+        isLocked: body.isLocked ?? false,
       },
     })
 
@@ -101,9 +103,11 @@ export async function PUT(request: Request) {
         selfHeal: body.selfHeal,
         selfDamage: body.selfDamage,
         narrativeUse: body.narrativeUse,
-        narrativeHit: body.narrativeHit,
+        narrativeSuccess: body.narrativeSuccess,
         narrativeMiss: body.narrativeMiss,
         narrativeCrit: body.narrativeCrit,
+        isSaved: body.isSaved,
+        isLocked: body.isLocked,
       },
     })
 

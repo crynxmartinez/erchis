@@ -31,7 +31,7 @@ interface MonsterSkill {
   selfHeal: number
   selfDamage: number
   narrativeUse: string
-  narrativeHit: string
+  narrativeSuccess: string
   narrativeMiss: string
   narrativeCrit: string
   isDuplicate?: boolean
@@ -440,9 +440,9 @@ function SkillDetailPanel({ skill, onClose }: { skill: MonsterSkill; onClose: ()
               </SectionPanel>
             )}
 
-            {skill.narrativeHit && (
+            {skill.narrativeSuccess && (
               <SectionPanel title="On Hit" icon="✅" color="border-green-500/30">
-                <p className="text-green-300 italic leading-relaxed">"{skill.narrativeHit}"</p>
+                <p className="text-green-300 italic leading-relaxed">"{skill.narrativeSuccess}"</p>
               </SectionPanel>
             )}
 

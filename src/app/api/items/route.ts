@@ -44,6 +44,8 @@ export async function POST(request: Request) {
         rarity: body.rarity || 'common',
         narrativeUse: body.narrativeUse || 'You use the item.',
         narrativeSuccess: body.narrativeSuccess || 'The item takes effect!',
+        isSaved: body.isSaved ?? false,
+        isLocked: body.isLocked ?? false,
       },
     })
 
@@ -88,6 +90,8 @@ export async function PUT(request: Request) {
         rarity: body.rarity,
         narrativeUse: body.narrativeUse,
         narrativeSuccess: body.narrativeSuccess,
+        isSaved: body.isSaved,
+        isLocked: body.isLocked,
       },
     })
 
