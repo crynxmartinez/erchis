@@ -42,6 +42,8 @@ export async function POST(request: Request) {
         maxStack: body.maxStack || 99,
         isUnique: body.isUnique || false,
         rarity: body.rarity || 'common',
+        narrativeUse: body.narrativeUse || 'You use the item.',
+        narrativeSuccess: body.narrativeSuccess || 'The item takes effect!',
       },
     })
 
@@ -84,6 +86,8 @@ export async function PUT(request: Request) {
         maxStack: body.maxStack,
         isUnique: body.isUnique,
         rarity: body.rarity,
+        narrativeUse: body.narrativeUse,
+        narrativeSuccess: body.narrativeSuccess,
       },
     })
 

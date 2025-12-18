@@ -261,6 +261,128 @@ const DESCRIPTION_TEMPLATES: Record<ItemType, Record<string, string[]>> = {
 // LORE TEMPLATES
 // ============================================
 
+// ============================================
+// NARRATIVE TEMPLATES
+// ============================================
+
+const NARRATIVE_USE_TEMPLATES: Record<ItemType, string[]> = {
+  potions: [
+    'You uncork the vial and drink its contents in one gulp.',
+    'You swirl the potion and down it quickly.',
+    'The liquid glows faintly as you bring it to your lips.',
+    'You pop the cork and consume the elixir.',
+    'With practiced ease, you drink the potion.',
+  ],
+  food: [
+    'You take a hearty bite of the food.',
+    'You savor each morsel as you eat.',
+    'The aroma fills your senses as you consume the meal.',
+    'You quickly devour the food.',
+    'You eat the food, feeling its warmth spread through you.',
+  ],
+  scrolls: [
+    'You unroll the scroll and speak the ancient words.',
+    'The runes on the scroll begin to glow as you read them.',
+    'You trace the magical symbols with your finger.',
+    'The scroll crumbles to dust as its magic is released.',
+    'You invoke the power sealed within the parchment.',
+  ],
+  materials: [
+    'You examine the material closely.',
+    'You hold the material up to the light.',
+    'You test the quality of the material.',
+    'You assess the material\'s properties.',
+    'You inspect the crafting component.',
+  ],
+  weapons: [
+    'You draw the weapon and take a fighting stance.',
+    'You grip the weapon firmly, feeling its balance.',
+    'The weapon gleams as you ready it for battle.',
+    'You swing the weapon experimentally.',
+    'You equip the weapon with practiced precision.',
+  ],
+  armor: [
+    'You don the armor, adjusting the straps.',
+    'The armor settles into place with a satisfying click.',
+    'You secure the protective gear.',
+    'You equip the armor, feeling its weight.',
+    'The armor fits perfectly as you put it on.',
+  ],
+  accessories: [
+    'You put on the accessory, feeling its magic.',
+    'The trinket pulses with energy as you equip it.',
+    'You fasten the accessory securely.',
+    'A warm sensation spreads as you don the item.',
+    'You equip the accessory with care.',
+  ],
+  misc: [
+    'You use the item carefully.',
+    'You activate the item\'s function.',
+    'You employ the item as intended.',
+    'You put the item to use.',
+    'You utilize the mysterious object.',
+  ],
+}
+
+const NARRATIVE_SUCCESS_TEMPLATES: Record<ItemType, string[]> = {
+  potions: [
+    'Warmth spreads through your body as the potion takes effect!',
+    'You feel the elixir\'s power coursing through your veins!',
+    'The potion\'s magic washes over you!',
+    'A surge of energy fills you as the liquid works its magic!',
+    'The concoction takes hold, restoring your vitality!',
+  ],
+  food: [
+    'The food fills you with renewed energy!',
+    'You feel refreshed and invigorated!',
+    'The meal\'s effects take hold, strengthening you!',
+    'Warmth and comfort spread through your body!',
+    'You feel your strength returning!',
+  ],
+  scrolls: [
+    'The spell activates with a brilliant flash!',
+    'Arcane energy surges forth from the scroll!',
+    'The magic takes effect as the scroll disintegrates!',
+    'Power flows through you as the spell completes!',
+    'The ancient magic fulfills its purpose!',
+  ],
+  materials: [
+    'The material is ready for use.',
+    'You\'ve prepared the component successfully.',
+    'The material\'s quality is confirmed.',
+    'The crafting material is in perfect condition.',
+    'The resource is suitable for your needs.',
+  ],
+  weapons: [
+    'The weapon feels like an extension of your arm!',
+    'You\'re ready for battle with your new armament!',
+    'The weapon\'s power resonates with you!',
+    'You feel more dangerous with this weapon equipped!',
+    'The blade hums with anticipation!',
+  ],
+  armor: [
+    'You feel protected and ready for combat!',
+    'The armor\'s enchantments activate, shielding you!',
+    'A sense of security washes over you!',
+    'You feel invincible in your new armor!',
+    'The protective gear settles comfortably!',
+  ],
+  accessories: [
+    'The accessory\'s magic bonds with you!',
+    'You feel the trinket\'s power enhancing your abilities!',
+    'A subtle energy flows through you!',
+    'The item\'s enchantment takes hold!',
+    'You sense the accessory\'s magic working!',
+  ],
+  misc: [
+    'The item works as intended!',
+    'Success! The item fulfills its purpose!',
+    'The mysterious object does its work!',
+    'The item\'s effect manifests!',
+    'Everything goes according to plan!',
+  ],
+}
+
 const LORE_TEMPLATES: Record<ItemType, string[]> = {
   potions: [
     'Brewed in the ancient towers of the Alchemist Guild.',
@@ -363,6 +485,16 @@ function generateLore(itemType: ItemType): string {
   return getRandomElement(templates)
 }
 
+function generateNarrativeUse(itemType: ItemType): string {
+  const templates = NARRATIVE_USE_TEMPLATES[itemType] || ['You use the item.']
+  return getRandomElement(templates)
+}
+
+function generateNarrativeSuccess(itemType: ItemType): string {
+  const templates = NARRATIVE_SUCCESS_TEMPLATES[itemType] || ['The item takes effect!']
+  return getRandomElement(templates)
+}
+
 function generateItem(itemType: ItemType, existingNames: Set<string>) {
   const config = ITEM_TYPE_CONFIGS[itemType]
   const namePool = NAME_POOLS[itemType]
@@ -448,9 +580,11 @@ function generateItem(itemType: ItemType, existingNames: Set<string>) {
     isUnique = Math.random() < 0.3
   }
 
-  // Generate description and lore
+  // Generate description, lore, and narratives
   const description = generateDescription(itemType, rarity)
   const lore = generateLore(itemType)
+  const narrativeUse = generateNarrativeUse(itemType)
+  const narrativeSuccess = generateNarrativeSuccess(itemType)
 
   return {
     name,
@@ -466,6 +600,8 @@ function generateItem(itemType: ItemType, existingNames: Set<string>) {
     maxStack,
     isUnique,
     rarity,
+    narrativeUse,
+    narrativeSuccess,
   }
 }
 

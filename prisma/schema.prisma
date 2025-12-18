@@ -457,6 +457,10 @@ model Item {
   // Rarity
   rarity String @default("common") // common, uncommon, rare, epic, legendary
 
+  // Narrative Templates (for combat storytelling)
+  narrativeUse     String @default("You use the item.") // Action description
+  narrativeSuccess String @default("The item takes effect!") // On success
+
   // Relations
   lootDrops MonsterLootDrop[]
 

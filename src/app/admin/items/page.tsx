@@ -23,6 +23,8 @@ interface Item {
   maxStack: number
   isUnique: boolean
   rarity: string
+  narrativeUse: string
+  narrativeSuccess: string
   isDuplicate?: boolean
   isLocked?: boolean
   isSaved?: boolean
@@ -409,6 +411,23 @@ function ItemDetailPanel({ item, onClose, getRarityColor }: {
               <p className="text-gray-300 leading-relaxed italic">
                 "{item.description || `A ${item.rarity} ${item.itemType}.`}"
               </p>
+            </SectionPanel>
+
+            <SectionPanel title="Execution Narratives" icon="📖" color="border-yellow-500/30">
+              <div className="space-y-4">
+                <div className="bg-black/30 p-4 rounded-lg border border-white/5">
+                  <div className="text-xs text-yellow-400 mb-2 font-medium">On Use</div>
+                  <p className="text-yellow-200/80 italic leading-relaxed">
+                    "{item.narrativeUse || 'You use the item.'}"
+                  </p>
+                </div>
+                <div className="bg-black/30 p-4 rounded-lg border border-white/5">
+                  <div className="text-xs text-green-400 mb-2 font-medium">On Success</div>
+                  <p className="text-green-200/80 italic leading-relaxed">
+                    "{item.narrativeSuccess || 'The item takes effect!'}"
+                  </p>
+                </div>
+              </div>
             </SectionPanel>
 
             <SectionPanel title="Lore" icon="📜" color="border-purple-500/30">
