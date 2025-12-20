@@ -813,11 +813,13 @@ export default function SkillDatabaseBuilder() {
   const handleSaveSkill = async (skillToSave: Skill) => {
      setSaving(true)
      try {
-       const response = await fetch('/api/skills/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(skillToSave) })
+       // Always set isSaved to true when saving
+       const skillWithSaved = { ...skillToSave, isSaved: true }
+       const response = await fetch('/api/skills/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(skillWithSaved) })
        const data = await response.json()
        if(data.success) {
-         setCurrentSkill(skillToSave)
-         setMessage('✅ Saved')
+         setCurrentSkill(skillWithSaved)
+         setMessage('✅ Saved to database')
        }
      } catch (e) { setMessage('Failed to save') }
      setSaving(false)
