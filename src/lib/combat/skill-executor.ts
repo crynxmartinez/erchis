@@ -89,8 +89,8 @@ export function executeSkill(
   consumeSkillResources(attacker, skill)
   result.combatLog.push(`${attacker.name} uses ${skill.name}!`)
   
-  if (skill.executionDescription) {
-    result.combatLog.push(`"${skill.executionDescription}"`)
+  if (skill.narrativeUse) {
+    result.combatLog.push(`"${skill.narrativeUse}"`)
   }
   
   result.success = true

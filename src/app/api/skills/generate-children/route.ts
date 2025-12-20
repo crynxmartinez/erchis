@@ -431,7 +431,7 @@ function getRandomElement<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)]
 }
 
-function generateExecutionDescription(variantType: VariantType, stage: number): string {
+function generateNarrativeUse(variantType: VariantType, stage: number): string {
   // Tiered execution descriptions
   if (stage <= 2) {
     return getRandomElement(SIMPLE_EXECUTIONS[variantType])
@@ -666,7 +666,7 @@ export async function POST(request: Request) {
       // Name & Description
       const name = generateName(variantType, newStage)
       const description = generateEffect(variantType, ampPercent, parentSkill.damageType, newStage, hitCount)
-      const executionDescription = generateExecutionDescription(variantType, newStage)
+      const narrativeUse = generateNarrativeUse(variantType, newStage)
       
       // Inheritance
       // Mobility variant might allow 'any' weapon if parent was strict
@@ -677,7 +677,7 @@ export async function POST(request: Request) {
         data: {
           name,
           description,
-          executionDescription,
+          narrativeUse,
           skillType: parentSkill.skillType, // Keep parent's category (Attack, etc.)
           damageType: parentSkill.damageType,
           weaponRequirement,

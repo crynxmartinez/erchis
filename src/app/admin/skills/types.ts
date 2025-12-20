@@ -4,7 +4,7 @@ export interface Skill {
   id: string
   name: string
   description: string
-  executionDescription?: string | null
+  narrativeUse?: string | null
   iconUrl?: string | null
   parentId: string | null
   parent?: { id: string; name: string } | null

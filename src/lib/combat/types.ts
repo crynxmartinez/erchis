@@ -384,7 +384,7 @@ export interface CombatSkill {
   id: string
   name: string
   description: string
-  executionDescription?: string
+  narrativeUse?: string
   
   // Type
   skillType: string              // Attack, Defensive, Buff, Debuff, etc.

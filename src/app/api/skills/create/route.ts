@@ -9,7 +9,7 @@ export async function POST(request: Request) {
       data: {
         name: data.name,
         description: data.description,
-        executionDescription: data.executionDescription || null,
+        narrativeUse: data.narrativeUse || null,
         skillType: data.skillType,
         damageType: data.damageType || 'physical',
         weaponRequirement: data.weaponRequirement || 'any',

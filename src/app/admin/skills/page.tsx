@@ -409,8 +409,8 @@ function SkillDetailPanel({
                <>
                  <SectionPanel title="Execution Narrative" icon="📜">
                    <textarea 
-                     value={currentData.executionDescription || ''} 
-                     onChange={e => setEditedSkill({...editedSkill!, executionDescription: e.target.value})}
+                     value={currentData.narrativeUse || ''} 
+                     onChange={e => setEditedSkill({...editedSkill!, narrativeUse: e.target.value})}
                      className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-sm text-gray-300 italic focus:border-[#6eb5ff] focus:outline-none resize-none h-24"
                      placeholder="Describe how the skill looks when executed..."
                    />
@@ -446,7 +446,7 @@ function SkillDetailPanel({
              ) : (
                <>
                  <SectionPanel title="Execution Narrative" icon="📜">
-                   <p className="text-gray-400 italic leading-relaxed">"{currentData.executionDescription || 'No narrative description.'}"</p>
+                   <p className="text-gray-400 italic leading-relaxed">"{currentData.narrativeUse || 'No narrative description.'}"</p>
                  </SectionPanel>
 
                  {(currentData.narrativeSuccess || currentData.narrativeMiss || currentData.narrativeCrit) && (

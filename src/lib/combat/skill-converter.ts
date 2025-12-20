@@ -22,7 +22,7 @@ export interface DatabaseSkill {
   id: string
   name: string
   description: string
-  executionDescription?: string | null
+  narrativeUse?: string | null
   
   skillType: string
   damageType: string
@@ -188,7 +188,7 @@ export function convertToCombatSkill(dbSkill: DatabaseSkill): CombatSkill {
     id: dbSkill.id,
     name: dbSkill.name,
     description: dbSkill.description,
-    executionDescription: dbSkill.executionDescription || undefined,
+    narrativeUse: dbSkill.narrativeUse || undefined,
     
     skillType: dbSkill.skillType,
     damageType: toDamageType(dbSkill.damageType),

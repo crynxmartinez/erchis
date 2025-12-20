@@ -114,8 +114,8 @@ export async function POST(request: NextRequest) {
         monsterHp = Math.max(0, monsterHp - damage)
 
         // Add narrative
-        if (skill.executionDescription) {
-          narrativeLines.push(skill.executionDescription)
+        if (skill.narrativeUse) {
+          narrativeLines.push(skill.narrativeUse)
         }
         narrativeLines.push(`Your ${skill.name} deals ${damage} damage to ${session.monster.name}!`)
 
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
           playerHp = Math.max(0, playerHp - damage)
 
           narrativeLines.push(monsterSkill.narrativeUse)
-          narrativeLines.push(monsterSkill.narrativeHit.replace('{damage}', String(damage)))
+          narrativeLines.push(monsterSkill.narrativeSuccess.replace('{damage}', String(damage)))
         } else {
           // Miss
           narrativeLines.push(monsterSkill.narrativeMiss)
