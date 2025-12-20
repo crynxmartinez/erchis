@@ -1,0 +1,149 @@
+import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
+import prisma from '@/lib/prisma'
+import { STARTER_ITEMS } from '@/data/items-data'
+
+interface SessionData {
+  userId: string
+  username: string
+  role: string
+}
+
+// Get only buyable items (not starter weapons)
+const SHOP_ITEMS = STARTER_ITEMS.filter(item => 
+  item.buyPrice > 0 && 
+  !item.name.startsWith('Starter') &&
+  item.itemType !== 'weapons'
+)
+
+export async function POST(request: Request) {
+  try {
+    const cookieStore = await cookies()
+    const sessionCookie = cookieStore.get('session')
+
+    if (!sessionCookie) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+
+    let session: SessionData
+    try {
+      session = JSON.parse(sessionCookie.value)
+    } catch {
+      return NextResponse.json({ error: 'Invalid session' }, { status: 401 })
+    }
+
+    const { itemName, quantity = 1 } = await request.json()
+
+    if (!itemName) {
+      return NextResponse.json({ error: 'Item name is required' }, { status: 400 })
+    }
+
+    if (quantity < 1) {
+      return NextResponse.json({ error: 'Quantity must be at least 1' }, { status: 400 })
+    }
+
+    // Find the player
+    const player = await prisma.player.findUnique({
+      where: { userId: session.userId },
+      include: { inventory: { include: { item: true } } },
+    })
+
+    if (!player) {
+      return NextResponse.json({ error: 'Player not found' }, { status: 404 })
+    }
+
+    // Check if it's a valid shop item
+    const shopItem = SHOP_ITEMS.find(i => i.name === itemName)
+    if (!shopItem) {
+      return NextResponse.json({ error: 'Item not available in shop' }, { status: 400 })
+    }
+
+    // Calculate total price
+    const totalPrice = shopItem.buyPrice * quantity
+
+    // Check if player has enough Col
+    if (player.col < totalPrice) {
+      return NextResponse.json({ error: `Not enough Col. Need ${totalPrice}, have ${player.col}` }, { status: 400 })
+    }
+
+    // Find or create the item in the database
+    let item = await prisma.item.findFirst({
+      where: { name: itemName },
+    })
+
+    if (!item) {
+      // Create the item from shop data
+      item = await prisma.item.create({
+        data: {
+          name: shopItem.name,
+          description: shopItem.description,
+          itemType: shopItem.itemType,
+          rarity: shopItem.rarity,
+          icon: shopItem.icon,
+          weight: shopItem.weight,
+          maxStack: shopItem.maxStack,
+          buyPrice: shopItem.buyPrice,
+          sellPrice: shopItem.sellPrice,
+          useEffect: shopItem.useEffect,
+          effectValue: shopItem.effectValue,
+          isSaved: true,
+        },
+      })
+    }
+
+    // Check if player already has this item in inventory
+    const existingInventory = player.inventory.find(inv => inv.item.name === itemName)
+
+    if (existingInventory) {
+      // Check if adding would exceed max stack
+      const newQuantity = existingInventory.quantity + quantity
+      if (newQuantity > shopItem.maxStack) {
+        return NextResponse.json({ 
+          error: `Cannot carry more than ${shopItem.maxStack} of this item. You have ${existingInventory.quantity}` 
+        }, { status: 400 })
+      }
+
+      // Update quantity
+      await prisma.playerInventory.update({
+        where: { id: existingInventory.id },
+        data: { quantity: newQuantity },
+      })
+    } else {
+      // Check if quantity exceeds max stack
+      if (quantity > shopItem.maxStack) {
+        return NextResponse.json({ 
+          error: `Cannot buy more than ${shopItem.maxStack} at once` 
+        }, { status: 400 })
+      }
+
+      // Add to player inventory
+      await prisma.playerInventory.create({
+        data: {
+          playerId: player.id,
+          itemId: item.id,
+          quantity: quantity,
+        },
+      })
+    }
+
+    // Deduct Col from player
+    await prisma.player.update({
+      where: { id: player.id },
+      data: { col: player.col - totalPrice },
+    })
+
+    return NextResponse.json({
+      success: true,
+      message: `Bought ${quantity}x ${itemName} for ${totalPrice} Col!`,
+      item: {
+        id: item.id,
+        name: item.name,
+        quantity: quantity,
+      },
+      remainingCol: player.col - totalPrice,
+    })
+  } catch (error) {
+    console.error('Error buying item:', error)
+    return NextResponse.json({ error: 'Failed to buy item', details: String(error) }, { status: 500 })
+  }
+}
