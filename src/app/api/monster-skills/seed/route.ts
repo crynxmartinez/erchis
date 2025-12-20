@@ -46,7 +46,7 @@ export async function POST() {
             selfHeal: skillData.selfHeal || 0,
             selfDamage: skillData.selfDamage || 0,
             narrativeUse: skillData.narrativeUse,
-            narrativeHit: skillData.narrativeHit,
+            narrativeSuccess: skillData.narrativeSuccess,
             narrativeMiss: skillData.narrativeMiss,
             narrativeCrit: skillData.narrativeCrit,
           },
