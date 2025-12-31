@@ -126,24 +126,12 @@ export const LOCATION_TYPE_CONFIG = {
 
 // Helper function to get regions by level requirement
 export function getRegionsByLevel(playerLevel: number, regions: MapRegion[]): MapRegion[] {
-  return regions.filter(region => {
-    if (region.type === 'town') return true
-    if (region.level === 'Safe') return true
-    
-    const levelRange = region.level.split('-')
-    const minLevel = parseInt(levelRange[0])
-    const maxLevel = levelRange[1] === '+' ? 999 : parseInt(levelRange[1])
-    
-    return playerLevel >= minLevel && playerLevel <= maxLevel
-  })
+  // Return all regions - no level filtering
+  return regions
 }
 
 // Helper function to check if region is accessible
 export function isRegionAccessible(region: MapRegion, playerLevel: number): boolean {
-  if (region.type === 'town' || region.level === 'Safe') return true
-  
-  const levelRange = region.level.split('-')
-  const minLevel = parseInt(levelRange[0])
-  
-  return playerLevel >= minLevel
+  // All regions are accessible - no level requirements
+  return true
 }
