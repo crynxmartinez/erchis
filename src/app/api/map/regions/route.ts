@@ -85,39 +85,53 @@ export async function GET() {
       }
     }
     
-    // Process each state's cells into polygons
+    // Process each state's cells into proper region boundaries
     cellsByState.forEach((stateCells: any[], stateId: number) => {
       const gameRegion = stateToGameRegion[stateId]
       if (!gameRegion) return
       
-      // Collect all boundary points for this state
+      // Create a convex hull or simplified boundary for the entire state
       const allPoints: number[][] = []
       
+      // Get all unique boundary points for this state
       stateCells.forEach((cell: any) => {
-        const cellPoints: number[][] = []
-        
-        // Convert vertex IDs to coordinates
         cell.v.forEach((vertexId: number) => {
           const vertex = vertexMap.get(vertexId)
           if (vertex) {
-            cellPoints.push([vertex[0], vertex[1]])
+            // Check if this vertex is on the boundary (shared with cells of different states)
+            const isBoundary = vertices[vertexId].c.some((cellId: number) => {
+              const neighborCell = cells.find((c: any) => c.i === cellId)
+              return neighborCell && neighborCell.state !== stateId
+            })
+            
+            if (isBoundary) {
+              allPoints.push([vertex[0], vertex[1]])
+            }
           }
         })
-        
-        // Add cell polygon points
-        if (cellPoints.length >= 3) {
-          allPoints.push(...cellPoints)
-        }
       })
       
-      // Create a simplified polygon from all points
-      if (allPoints.length > 0) {
+      // Remove duplicate points
+      const uniquePoints = Array.from(new Set(allPoints.map(p => `${p[0]},${p[1]}`)))
+        .map(str => str.split(',').map(Number))
+      
+      // Create a simplified polygon from boundary points
+      if (uniquePoints.length > 0) {
         // Calculate center
-        const centerX = allPoints.reduce((sum, p) => sum + p[0], 0) / allPoints.length
-        const centerY = allPoints.reduce((sum, p) => sum + p[1], 0) / allPoints.length
+        const centerX = uniquePoints.reduce((sum, p) => sum + p[0], 0) / uniquePoints.length
+        const centerY = uniquePoints.reduce((sum, p) => sum + p[1], 0) / uniquePoints.length
+        
+        // Sort points by angle from center to create a proper polygon
+        const sortedPoints = uniquePoints
+          .map(p => ({
+            point: p,
+            angle: Math.atan2(p[1] - centerY, p[0] - centerX)
+          }))
+          .sort((a, b) => a.angle - b.angle)
+          .map(item => item.point)
         
         // Create polygon points string
-        const polygonPoints = allPoints.map(p => `${p[0]},${p[1]}`).join(' ')
+        const polygonPoints = sortedPoints.map(p => `${p[0]},${p[1]}`).join(' ')
         
         regions.push({
           ...gameRegion,
