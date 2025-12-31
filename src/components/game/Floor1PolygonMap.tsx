@@ -166,19 +166,45 @@ export default function Floor1PolygonMap({ playerLevel = 1 }: Floor1PolygonMapPr
           {accessibleRegions.map((region) => {
             const isHovered = hoveredRegion?.id === region.id
             const isAccessible = isRegionAccessible(region, playerLevel)
+            const isOtherHovered = hoveredRegion && hoveredRegion.id !== region.id
             
             return (
               <g key={region.id}>
+                {/* Glow Effect Layer (only for hovered region) */}
+                {isHovered && (
+                  <polygon
+                    points={region.polygonPoints}
+                    fill="none"
+                    stroke={region.strokeColor}
+                    strokeWidth={8}
+                    opacity={0.4}
+                    className="pointer-events-none animate-pulse"
+                    style={{
+                      filter: `blur(8px) drop-shadow(0 0 20px ${region.color})`,
+                    }}
+                  />
+                )}
+                
                 {/* Region Polygon */}
                 <polygon
                   points={region.polygonPoints}
                   fill={isAccessible ? region.fillColor : 'rgba(100, 100, 100, 0.2)'}
                   stroke={isAccessible ? region.strokeColor : '#666'}
-                  strokeWidth={isHovered ? 3 : 2}
-                  opacity={isAccessible ? (isHovered ? 0.8 : 0.5) : 0.3}
-                  className="pointer-events-auto cursor-pointer transition-all duration-200"
+                  strokeWidth={isHovered ? 4 : 2}
+                  opacity={
+                    isOtherHovered 
+                      ? (isAccessible ? 0.2 : 0.1)  // Dim other regions when one is hovered
+                      : (isAccessible ? (isHovered ? 0.9 : 0.5) : 0.3)
+                  }
+                  className="pointer-events-auto cursor-pointer transition-all duration-300 ease-in-out"
                   style={{
-                    filter: isHovered ? 'brightness(1.2)' : 'brightness(1)',
+                    filter: isHovered 
+                      ? `brightness(1.3) saturate(1.2) drop-shadow(0 0 15px ${region.color})` 
+                      : isOtherHovered 
+                        ? 'brightness(0.7) saturate(0.8)' 
+                        : 'brightness(1)',
+                    transform: isHovered ? 'scale(1.01)' : 'scale(1)',
+                    transformOrigin: `${region.centerX}px ${region.centerY}px`,
                   }}
                   onMouseEnter={() => setHoveredRegion(region)}
                   onMouseLeave={() => setHoveredRegion(null)}
@@ -198,8 +224,17 @@ export default function Floor1PolygonMap({ playerLevel = 1 }: Floor1PolygonMapPr
                   fill={isAccessible ? '#fff' : '#999'}
                   fontSize={14 / zoomLevel}
                   fontWeight="bold"
-                  className="pointer-events-none select-none"
-                  opacity={isAccessible ? 0.9 : 0.5}
+                  className="pointer-events-none select-none transition-all duration-300"
+                  opacity={
+                    isOtherHovered 
+                      ? 0.3 
+                      : (isAccessible ? (isHovered ? 1 : 0.9) : 0.5)
+                  }
+                  style={{
+                    filter: isHovered ? `drop-shadow(0 0 8px ${region.color})` : 'none',
+                    transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+                    transformOrigin: `${region.centerX}px ${region.centerY}px`,
+                  }}
                 >
                   {region.name}
                 </text>
