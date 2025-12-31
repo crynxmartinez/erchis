@@ -15,6 +15,9 @@ export default function Floor1PolygonMap({ playerLevel = 1 }: Floor1PolygonMapPr
   const [loading, setLoading] = useState(true)
   const [zoomLevel, setZoomLevel] = useState(1)
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 })
+  const [isPanning, setIsPanning] = useState(false)
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 })
+  const [lastPanOffset, setLastPanOffset] = useState({ x: 0, y: 0 })
 
   useEffect(() => {
     const loadRegions = async () => {
@@ -50,7 +53,43 @@ export default function Floor1PolygonMap({ playerLevel = 1 }: Floor1PolygonMapPr
   const handleResetZoom = () => {
     setZoomLevel(1)
     setPanOffset({ x: 0, y: 0 })
+    setLastPanOffset({ x: 0, y: 0 })
   }
+
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    const delta = e.deltaY > 0 ? -0.1 : 0.1
+    setZoomLevel(prev => Math.max(0.5, Math.min(3, prev + delta)))
+  }
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.button === 0) { // Left click only
+      setIsPanning(true)
+      setPanStart({ x: e.clientX, y: e.clientY })
+      setLastPanOffset(panOffset)
+    }
+  }
+
+  const handleMouseMoveMap = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isPanning) {
+      const deltaX = (e.clientX - panStart.x) / zoomLevel
+      const deltaY = (e.clientY - panStart.y) / zoomLevel
+      setPanOffset({
+        x: lastPanOffset.x + deltaX,
+        y: lastPanOffset.y + deltaY
+      })
+    }
+  }
+
+  const handleMouseUp = () => {
+    setIsPanning(false)
+  }
+
+  useEffect(() => {
+    const handleGlobalMouseUp = () => setIsPanning(false)
+    window.addEventListener('mouseup', handleGlobalMouseUp)
+    return () => window.removeEventListener('mouseup', handleGlobalMouseUp)
+  }, [])
 
   // Get regions that are accessible at player's level
   const accessibleRegions = getRegionsByLevel(playerLevel, regions)
@@ -73,9 +112,21 @@ export default function Floor1PolygonMap({ playerLevel = 1 }: Floor1PolygonMapPr
       {/* Map Container */}
       <div 
         className="relative overflow-hidden rounded-lg border border-[#333] shadow-xl bg-[#1a1a1a]"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={() => setHoveredRegion(null)}
-        style={{ height: '600px' }}
+        onMouseMove={(e) => {
+          handleMouseMove(e)
+          handleMouseMoveMap(e)
+        }}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={() => {
+          setHoveredRegion(null)
+          setIsPanning(false)
+        }}
+        onWheel={handleWheel}
+        style={{ 
+          height: '600px',
+          cursor: isPanning ? 'grabbing' : 'grab'
+        }}
       >
         {/* Map Image with Zoom */}
         <div

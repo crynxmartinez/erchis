@@ -1,4 +1,11 @@
 import { NextResponse } from 'next/server'
+import { 
+  buildEdgeGraph, 
+  traceBoundaryPath, 
+  simplifyPolygon, 
+  calculateCentroid,
+  ensureCounterClockwise 
+} from '@/lib/polygon-utils'
 
 // Process the JSON map data to extract actual regions
 export async function GET() {
@@ -90,89 +97,134 @@ export async function GET() {
       const gameRegion = stateToGameRegion[stateId]
       if (!gameRegion) return
       
-      // Create a set of all boundary edges for this state
-      const boundaryEdges = new Set<string>()
+      console.log(`\n=== Processing State ${stateId}: ${gameRegion.name} ===`)
+      console.log(`Total cells: ${stateCells.length}`)
       
-      // Find all edges that are on the external boundary of the state
+      // Step 1: Find all boundary edges for this state
+      const boundaryEdges = new Set<string>()
+      const cellEdgeCount = new Map<string, number>()
+      
+      // Count how many cells of THIS state use each edge
       stateCells.forEach((cell: any) => {
         const cellVertices = cell.v
         
-        // Check each edge of the cell
         for (let i = 0; i < cellVertices.length; i++) {
           const v1 = cellVertices[i]
           const v2 = cellVertices[(i + 1) % cellVertices.length]
-          
-          // Create edge key (sorted to ensure consistency)
           const edgeKey = v1 < v2 ? `${v1}-${v2}` : `${v2}-${v1}`
           
-          // Check if this edge is shared with a cell of a different state
-          let isBoundaryEdge = false
-          
-          // Find all cells that share this edge
-          const sharedCells = cells.filter((c: any) => 
-            c.state !== stateId && 
-            c.v.includes(v1) && 
-            c.v.includes(v2)
-          )
-          
-          // If no cells from other states share this edge, it's a boundary edge
-          if (sharedCells.length === 0) {
-            isBoundaryEdge = true
-          }
-          
-          if (isBoundaryEdge) {
-            boundaryEdges.add(edgeKey)
-          } else {
-            // Remove if it was added previously (shared edge)
-            boundaryEdges.delete(edgeKey)
-          }
+          cellEdgeCount.set(edgeKey, (cellEdgeCount.get(edgeKey) || 0) + 1)
         }
       })
       
-      // Convert boundary edges to polygon points
-      const boundaryPoints: number[][] = []
-      const edgeMap = new Map<string, [number, number]>()
-      
-      // Convert edges to point pairs
-      boundaryEdges.forEach(edge => {
-        const [v1, v2] = edge.split('-').map(Number)
-        const p1 = vertexMap.get(v1)
-        const p2 = vertexMap.get(v2)
-        
-        if (p1 && p2) {
-          boundaryPoints.push(p1, p2)
-          edgeMap.set(`${v1}-${v2}`, [p1, p2])
+      // Boundary edges are those used by exactly 1 cell of this state
+      cellEdgeCount.forEach((count, edgeKey) => {
+        if (count === 1) {
+          boundaryEdges.add(edgeKey)
         }
       })
       
-      // Create a single polygon from boundary points
-      if (boundaryPoints.length > 0) {
-        // Remove duplicate points
-        const uniquePoints = Array.from(new Set(boundaryPoints.map(p => `${p[0]},${p[1]}`)))
-          .map(str => str.split(',').map(Number))
+      console.log(`Boundary edges found: ${boundaryEdges.size}`)
+      
+      if (boundaryEdges.size === 0) {
+        console.warn(`No boundary edges found for state ${stateId}`)
+        return
+      }
+      
+      // Step 2: Build edge graph (vertex -> connected vertices)
+      const edgeGraph = buildEdgeGraph(boundaryEdges)
+      console.log(`Edge graph vertices: ${edgeGraph.size}`)
+      
+      // Step 3: Trace boundary path(s)
+      const visitedEdges = new Set<string>()
+      const polygons: number[][][] = []
+      
+      // Start from any boundary vertex
+      const startVertex = Array.from(edgeGraph.keys())[0]
+      
+      if (startVertex !== undefined) {
+        const path = traceBoundaryPath(startVertex, edgeGraph, visitedEdges)
+        console.log(`Traced path with ${path.length} vertices`)
         
-        // Calculate center
-        const centerX = uniquePoints.reduce((sum, p) => sum + p[0], 0) / uniquePoints.length
-        const centerY = uniquePoints.reduce((sum, p) => sum + p[1], 0) / uniquePoints.length
+        // Convert vertex IDs to coordinates
+        const pathPoints = path
+          .map(vid => vertexMap.get(vid))
+          .filter((p): p is number[] => p !== undefined)
         
-        // Sort points by angle from center to create a proper polygon
-        const sortedPoints = uniquePoints
-          .map(p => ({
-            point: p,
-            angle: Math.atan2(p[1] - centerY, p[0] - centerX)
-          }))
-          .sort((a, b) => a.angle - b.angle)
-          .map(item => item.point)
+        if (pathPoints.length > 2) {
+          polygons.push(pathPoints)
+        }
+      }
+      
+      // Check for additional disconnected polygons (islands)
+      let attempts = 0
+      while (visitedEdges.size < boundaryEdges.size && attempts < 10) {
+        attempts++
         
-        // Create polygon points string
-        const polygonPoints = sortedPoints.map(p => `${Math.round(p[0])},${Math.round(p[1])}`).join(' ')
+        // Find an unvisited edge
+        let unvisitedVertex: number | undefined
+        for (const [vertex, neighbors] of edgeGraph.entries()) {
+          const hasUnvisitedEdge = neighbors.some(neighbor => {
+            const edgeKey = vertex < neighbor ? `${vertex}-${neighbor}` : `${neighbor}-${vertex}`
+            return !visitedEdges.has(edgeKey)
+          })
+          
+          if (hasUnvisitedEdge) {
+            unvisitedVertex = vertex
+            break
+          }
+        }
+        
+        if (unvisitedVertex === undefined) break
+        
+        const path = traceBoundaryPath(unvisitedVertex, edgeGraph, visitedEdges)
+        console.log(`Traced additional path with ${path.length} vertices`)
+        
+        const pathPoints = path
+          .map(vid => vertexMap.get(vid))
+          .filter((p): p is number[] => p !== undefined)
+        
+        if (pathPoints.length > 2) {
+          polygons.push(pathPoints)
+        }
+      }
+      
+      console.log(`Total polygons found: ${polygons.length}`)
+      
+      // Step 4: Process the largest polygon (main boundary)
+      if (polygons.length > 0) {
+        // Sort by size, take the largest
+        polygons.sort((a, b) => b.length - a.length)
+        let mainPolygon = polygons[0]
+        
+        console.log(`Main polygon points before simplification: ${mainPolygon.length}`)
+        
+        // Step 5: Simplify polygon to reduce point count
+        mainPolygon = simplifyPolygon(mainPolygon, 3)
+        console.log(`Main polygon points after simplification: ${mainPolygon.length}`)
+        
+        // Step 6: Ensure counter-clockwise winding
+        mainPolygon = ensureCounterClockwise(mainPolygon)
+        
+        // Step 7: Calculate proper centroid
+        const centroid = calculateCentroid(mainPolygon)
+        console.log(`Centroid: (${Math.round(centroid.x)}, ${Math.round(centroid.y)})`)
+        
+        // Step 8: Create polygon points string
+        const polygonPoints = mainPolygon
+          .map(p => `${Math.round(p[0])},${Math.round(p[1])}`)
+          .join(' ')
         
         regions.push({
           ...gameRegion,
           polygonPoints,
-          centerX: Math.round(centerX),
-          centerY: Math.round(centerY)
+          centerX: Math.round(centroid.x),
+          centerY: Math.round(centroid.y)
         })
+        
+        console.log(`✓ Successfully processed ${gameRegion.name}`)
+      } else {
+        console.warn(`Failed to create polygon for state ${stateId}`)
       }
     })
     
