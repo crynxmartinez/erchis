@@ -208,45 +208,210 @@ export default function Floor1PolygonMap({ playerLevel = 1 }: Floor1PolygonMapPr
           })}
         </svg>
 
-        {/* Tooltip */}
+        {/* Enhanced Tooltip */}
         {hoveredRegion && (
           <div
-            className="absolute z-[100] pointer-events-none bg-[#1a1a1a]/95 border border-[#444] rounded-lg px-4 py-3 shadow-xl backdrop-blur-sm"
+            className="absolute z-[100] pointer-events-none bg-gradient-to-br from-[#1a1a1a]/98 to-[#0a0a0a]/98 border-2 rounded-xl shadow-2xl backdrop-blur-md overflow-hidden"
             style={{
-              width: '280px',
+              width: hoveredRegion.type === 'town' ? '380px' : '420px',
+              maxHeight: '85vh',
               left: `${(hoveredRegion.centerX / 1875) * 100}%`,
               top: `${(hoveredRegion.centerY / 925) * 100}%`,
               transform: hoveredRegion.centerX > 1400 ? 'translateX(-100%)' : hoveredRegion.centerX < 475 ? 'translateX(0)' : 'translateX(-50%)',
+              borderColor: hoveredRegion.color,
+              boxShadow: `0 0 30px ${hoveredRegion.color}40`
             }}
           >
-            {/* Location Name */}
-            <div className="font-bold text-white text-lg mb-1">{hoveredRegion.name}</div>
-            
-            {/* Location Type */}
-            <div className={`text-xs font-medium mb-2 ${LOCATION_TYPE_CONFIG[hoveredRegion.type].textClass}`}>
-              {LOCATION_TYPE_CONFIG[hoveredRegion.type].label}
+            {/* Header with gradient */}
+            <div className="px-4 py-3 border-b-2" style={{ 
+              borderColor: hoveredRegion.color,
+              background: `linear-gradient(135deg, ${hoveredRegion.color}20, transparent)`
+            }}>
+              <div className="font-bold text-white text-xl mb-1">{hoveredRegion.name}</div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className={`text-xs font-semibold px-2 py-1 rounded ${LOCATION_TYPE_CONFIG[hoveredRegion.type].textClass}`}
+                  style={{ backgroundColor: LOCATION_TYPE_CONFIG[hoveredRegion.type].bgColor }}>
+                  {LOCATION_TYPE_CONFIG[hoveredRegion.type].label}
+                </div>
+                {hoveredRegion.dangerLevel && (
+                  <div className={`text-xs font-semibold px-2 py-1 rounded ${
+                    hoveredRegion.dangerLevel === 'Safe' ? 'bg-green-900/50 text-green-400' :
+                    hoveredRegion.dangerLevel === 'Low' ? 'bg-blue-900/50 text-blue-400' :
+                    hoveredRegion.dangerLevel === 'Medium' ? 'bg-yellow-900/50 text-yellow-400' :
+                    hoveredRegion.dangerLevel === 'High' ? 'bg-orange-900/50 text-orange-400' :
+                    'bg-red-900/50 text-red-400'
+                  }`}>
+                    {hoveredRegion.dangerLevel} Danger
+                  </div>
+                )}
+                <div className="text-xs font-semibold px-2 py-1 rounded bg-purple-900/50 text-purple-400">
+                  Level {hoveredRegion.level}
+                </div>
+              </div>
             </div>
-            
-            {/* Level Requirement */}
-            <div className="text-xs text-gray-300 mb-2">
-              Level: {hoveredRegion.level}
+
+            {/* Scrollable Content */}
+            <div className="px-4 py-3 max-h-[70vh] overflow-y-auto custom-scrollbar">
+              {/* Description */}
+              <p className="text-sm text-gray-300 leading-relaxed mb-3">
+                {hoveredRegion.description}
+              </p>
+
+              {/* Combat Info */}
+              {hoveredRegion.recommendedLevel && (
+                <div className="mb-3 p-2 bg-[#0a0a0a]/50 rounded border border-[#333]">
+                  <div className="text-xs font-semibold text-[#6eb5ff] mb-1">⚔️ Combat Info</div>
+                  <div className="grid grid-cols-2 gap-1 text-xs text-gray-300">
+                    <div>Recommended: Lv.{hoveredRegion.recommendedLevel}</div>
+                    <div>Party: {hoveredRegion.recommendedPartySize}</div>
+                    {hoveredRegion.avgCombatDuration && <div className="col-span-2">Duration: {hoveredRegion.avgCombatDuration}</div>}
+                  </div>
+                </div>
+              )}
+
+              {/* Monsters */}
+              {hoveredRegion.monsters && hoveredRegion.monsters.length > 0 && (
+                <div className="mb-3">
+                  <div className="text-xs font-semibold text-[#ff6b6b] mb-2">👾 Monsters</div>
+                  <div className="space-y-1">
+                    {hoveredRegion.monsters.map((monster, idx) => (
+                      <div key={idx} className="flex items-center justify-between text-xs bg-[#0a0a0a]/50 p-2 rounded border border-[#333]">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">{monster.icon}</span>
+                          <span className="text-gray-200">{monster.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-yellow-400">Lv.{monster.level}</span>
+                          <span className="text-gray-400">×{monster.count}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Rewards */}
+              {(hoveredRegion.expGain || hoveredRegion.colGain) && (
+                <div className="mb-3 p-2 bg-[#0a0a0a]/50 rounded border border-[#333]">
+                  <div className="text-xs font-semibold text-[#ffd700] mb-1">💰 Rewards</div>
+                  <div className="grid grid-cols-2 gap-1 text-xs">
+                    {hoveredRegion.expGain && <div className="text-blue-400">EXP: {hoveredRegion.expGain}</div>}
+                    {hoveredRegion.colGain && <div className="text-yellow-400">Col: {hoveredRegion.colGain}</div>}
+                  </div>
+                </div>
+              )}
+
+              {/* Loot Table */}
+              {hoveredRegion.lootTable && (
+                <div className="mb-3">
+                  <div className="text-xs font-semibold text-[#a855f7] mb-2">🎁 Loot Drops</div>
+                  <div className="space-y-1">
+                    {hoveredRegion.lootTable.common.length > 0 && (
+                      <div className="text-xs bg-[#0a0a0a]/50 p-2 rounded border border-[#333]">
+                        <div className="text-gray-400 font-semibold mb-1">Common ({hoveredRegion.lootTable.dropRates.common}%)</div>
+                        <div className="text-gray-300">{hoveredRegion.lootTable.common.join(', ')}</div>
+                      </div>
+                    )}
+                    {hoveredRegion.lootTable.uncommon.length > 0 && (
+                      <div className="text-xs bg-[#0a0a0a]/50 p-2 rounded border border-[#333]">
+                        <div className="text-green-400 font-semibold mb-1">Uncommon ({hoveredRegion.lootTable.dropRates.uncommon}%)</div>
+                        <div className="text-gray-300">{hoveredRegion.lootTable.uncommon.join(', ')}</div>
+                      </div>
+                    )}
+                    {hoveredRegion.lootTable.rare.length > 0 && (
+                      <div className="text-xs bg-[#0a0a0a]/50 p-2 rounded border border-[#333]">
+                        <div className="text-purple-400 font-semibold mb-1">Rare ({hoveredRegion.lootTable.dropRates.rare}%)</div>
+                        <div className="text-gray-300">{hoveredRegion.lootTable.rare.join(', ')}</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Skill Training */}
+              {hoveredRegion.bestForSkills && hoveredRegion.bestForSkills.length > 0 && (
+                <div className="mb-3">
+                  <div className="text-xs font-semibold text-[#4ade80] mb-2">📚 Best for Training</div>
+                  <div className="space-y-1">
+                    {hoveredRegion.bestForSkills.map((skill, idx) => (
+                      <div key={idx} className="text-xs bg-[#0a0a0a]/50 p-2 rounded border border-[#333]">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-gray-200 font-semibold">{skill.skill}</span>
+                          <span className="text-yellow-400">{skill.efficiency}</span>
+                        </div>
+                        <div className="text-gray-400 text-[10px]">{skill.reason}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Skill Trainers (Town) */}
+              {hoveredRegion.skillTrainers && hoveredRegion.skillTrainers.length > 0 && (
+                <div className="mb-3">
+                  <div className="text-xs font-semibold text-[#60a5fa] mb-2">👨‍🏫 Skill Trainers</div>
+                  <div className="space-y-2">
+                    {hoveredRegion.skillTrainers.map((trainer, idx) => (
+                      <div key={idx} className="text-xs bg-[#0a0a0a]/50 p-2 rounded border border-[#333]">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-base">{trainer.icon}</span>
+                          <span className="text-gray-200 font-semibold">{trainer.name}</span>
+                        </div>
+                        <div className="text-gray-400 text-[10px] mb-1">{trainer.skills.join(', ')}</div>
+                        <div className="text-green-400 text-[10px]">{trainer.cost}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Weapon Effectiveness */}
+              {hoveredRegion.weaponEffectiveness && (
+                <div className="mb-3">
+                  <div className="text-xs font-semibold text-[#fb923c] mb-2">⚔️ Weapon Effectiveness</div>
+                  <div className="grid grid-cols-2 gap-1">
+                    {Object.entries(hoveredRegion.weaponEffectiveness).map(([weapon, effectiveness]) => (
+                      <div key={weapon} className="text-xs bg-[#0a0a0a]/50 p-2 rounded border border-[#333] flex items-center justify-between">
+                        <span className="text-gray-300 capitalize">{weapon}</span>
+                        <span className={effectiveness > 1 ? 'text-green-400' : effectiveness < 1 ? 'text-red-400' : 'text-gray-400'}>
+                          {effectiveness > 1 ? '+' : ''}{((effectiveness - 1) * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Additional Info */}
+              {(hoveredRegion.enemyRespawnTime || hoveredRegion.avgDurabilityLoss || hoveredRegion.repairShop) && (
+                <div className="mb-3 p-2 bg-[#0a0a0a]/50 rounded border border-[#333]">
+                  <div className="text-xs font-semibold text-[#94a3b8] mb-1">ℹ️ Additional Info</div>
+                  <div className="space-y-1 text-xs text-gray-300">
+                    {hoveredRegion.enemyRespawnTime && <div>⏱️ Respawn: {hoveredRegion.enemyRespawnTime}</div>}
+                    {hoveredRegion.avgDurabilityLoss && <div>🔧 Durability Loss: {hoveredRegion.avgDurabilityLoss}</div>}
+                    {hoveredRegion.safeZoneNearby !== undefined && (
+                      <div>{hoveredRegion.safeZoneNearby ? '🏘️ Safe Zone Nearby' : '⚠️ No Safe Zone Nearby'}</div>
+                    )}
+                    {hoveredRegion.repairShop?.available && (
+                      <div>🔨 {hoveredRegion.repairShop.npcName} - {hoveredRegion.repairShop.repairCost}</div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-            
-            {/* Description */}
-            <p className="text-sm text-gray-300 leading-relaxed mb-2">
-              {hoveredRegion.description}
-            </p>
-            
-            {/* Access Status */}
-            <div className={`text-xs p-2 rounded ${
-              isRegionAccessible(hoveredRegion, playerLevel) 
-                ? 'bg-green-900/50 text-green-400 border border-green-700' 
-                : 'bg-red-900/50 text-red-400 border border-red-700'
-            }`}>
-              {isRegionAccessible(hoveredRegion, playerLevel) 
-                ? '✓ Click to travel here' 
-                : `🔒 Requires level ${hoveredRegion.level.split('-')[0]}+`
-              }
+
+            {/* Footer - Access Status */}
+            <div className="px-4 py-3 border-t-2" style={{ borderColor: hoveredRegion.color }}>
+              <div className={`text-xs p-2 rounded text-center font-semibold ${
+                isRegionAccessible(hoveredRegion, playerLevel) 
+                  ? 'bg-green-900/50 text-green-400 border border-green-700' 
+                  : 'bg-red-900/50 text-red-400 border border-red-700'
+              }`}>
+                {isRegionAccessible(hoveredRegion, playerLevel) 
+                  ? '✓ Click region to travel here' 
+                  : `🔒 Requires level ${hoveredRegion.level.split('-')[0]}+`
+                }
+              </div>
             </div>
           </div>
         )}
