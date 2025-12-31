@@ -201,36 +201,36 @@ export default function Floor1PolygonMap({ playerLevel = 1 }: Floor1PolygonMapPr
         )}
 
         {/* Zoom Controls */}
-        <div className="absolute right-4 top-4 flex flex-col gap-2">
+        <div className="absolute right-4 top-4 flex flex-col gap-2 z-[200]">
           <button
             onClick={handleZoomIn}
-            className="w-10 h-10 bg-[#2a2a2a] hover:bg-[#333] border border-[#444] rounded-lg flex items-center justify-center text-white transition-colors shadow-lg"
+            className="w-12 h-12 bg-[#1a1a1a] hover:bg-[#333] border-2 border-[#6eb5ff] rounded-lg flex items-center justify-center text-white transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-110"
             title="Zoom In"
             disabled={zoomLevel >= 3}
           >
-            <span className="text-lg font-bold">+</span>
+            <span className="text-xl font-bold text-[#6eb5ff]">+</span>
           </button>
           
           <button
             onClick={handleZoomOut}
-            className="w-10 h-10 bg-[#2a2a2a] hover:bg-[#333] border border-[#444] rounded-lg flex items-center justify-center text-white transition-colors shadow-lg"
+            className="w-12 h-12 bg-[#1a1a1a] hover:bg-[#333] border-2 border-[#6eb5ff] rounded-lg flex items-center justify-center text-white transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-110"
             title="Zoom Out"
             disabled={zoomLevel <= 0.5}
           >
-            <span className="text-lg font-bold">−</span>
+            <span className="text-xl font-bold text-[#6eb5ff]">−</span>
           </button>
           
           <button
             onClick={handleResetZoom}
-            className="w-10 h-10 bg-[#2a2a2a] hover:bg-[#333] border border-[#444] rounded-lg flex items-center justify-center text-white transition-colors shadow-lg"
+            className="w-12 h-12 bg-[#1a1a1a] hover:bg-[#333] border-2 border-[#6eb5ff] rounded-lg flex items-center justify-center text-white transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-110"
             title="Reset Zoom"
           >
-            <span className="text-xs font-bold">⟲</span>
+            <span className="text-sm font-bold text-[#6eb5ff]">⟲</span>
           </button>
         </div>
 
         {/* Zoom Level Indicator */}
-        <div className="absolute left-4 top-4 bg-[#2a2a2a]/90 border border-[#444] rounded px-3 py-1 text-xs text-gray-300">
+        <div className="absolute left-4 top-4 bg-[#1a1a1a]/95 border-2 border-[#6eb5ff] rounded-lg px-3 py-2 text-xs text-[#6eb5ff] font-semibold z-[200] shadow-lg">
           Zoom: {Math.round(zoomLevel * 100)}%
         </div>
       </div>
