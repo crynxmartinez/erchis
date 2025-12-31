@@ -85,44 +85,54 @@ export async function GET() {
       }
     }
     
-    // Process each state's cells into proper region boundaries
+    // Process each state's cells into simplified region boundaries
     cellsByState.forEach((stateCells: any[], stateId: number) => {
       const gameRegion = stateToGameRegion[stateId]
       if (!gameRegion) return
       
-      // Create a convex hull or simplified boundary for the entire state
-      const allPoints: number[][] = []
+      // Get the extreme boundary points for this state (simplified approach)
+      const boundaryPoints: number[][] = []
       
-      // Get all unique boundary points for this state
+      // Find all cells that border other states or water
       stateCells.forEach((cell: any) => {
-        cell.v.forEach((vertexId: number) => {
-          const vertex = vertexMap.get(vertexId)
-          if (vertex) {
-            // Check if this vertex is on the boundary (shared with cells of different states)
-            const isBoundary = vertices[vertexId].c.some((cellId: number) => {
-              const neighborCell = cells.find((c: any) => c.i === cellId)
-              return neighborCell && neighborCell.state !== stateId
-            })
-            
-            if (isBoundary) {
-              allPoints.push([vertex[0], vertex[1]])
-            }
-          }
+        const cellVertices = cell.v.map((vid: number) => vertexMap.get(vid))
+        
+        // Check if this cell is on the boundary
+        const isBoundaryCell = cell.c.some((neighborId: number) => {
+          const neighborCell = cells.find((c: any) => c.i === neighborId)
+          return !neighborCell || neighborCell.state !== stateId
         })
+        
+        if (isBoundaryCell) {
+          // Add all vertices of boundary cells
+          cellVertices.forEach((vertex: number[]) => {
+            if (vertex && vertex.length === 2) {
+              boundaryPoints.push(vertex)
+            }
+          })
+        }
       })
       
-      // Remove duplicate points
-      const uniquePoints = Array.from(new Set(allPoints.map(p => `${p[0]},${p[1]}`)))
-        .map(str => str.split(',').map(Number))
-      
-      // Create a simplified polygon from boundary points
-      if (uniquePoints.length > 0) {
+      // Create a simplified convex hull from boundary points
+      if (boundaryPoints.length > 0) {
+        // Remove duplicate points
+        const uniquePoints = Array.from(new Set(boundaryPoints.map(p => `${p[0]},${p[1]}`)))
+          .map(str => str.split(',').map(Number))
+        
         // Calculate center
         const centerX = uniquePoints.reduce((sum, p) => sum + p[0], 0) / uniquePoints.length
         const centerY = uniquePoints.reduce((sum, p) => sum + p[1], 0) / uniquePoints.length
         
-        // Sort points by angle from center to create a proper polygon
-        const sortedPoints = uniquePoints
+        // Create a simplified polygon by taking every Nth point to reduce complexity
+        const step = Math.max(1, Math.floor(uniquePoints.length / 20)) // Limit to ~20 points max
+        const simplifiedPoints: number[][] = []
+        
+        for (let i = 0; i < uniquePoints.length; i += step) {
+          simplifiedPoints.push(uniquePoints[i])
+        }
+        
+        // Sort points by angle from center for proper polygon shape
+        const sortedPoints = simplifiedPoints
           .map(p => ({
             point: p,
             angle: Math.atan2(p[1] - centerY, p[0] - centerX)
@@ -131,13 +141,13 @@ export async function GET() {
           .map(item => item.point)
         
         // Create polygon points string
-        const polygonPoints = sortedPoints.map(p => `${p[0]},${p[1]}`).join(' ')
+        const polygonPoints = sortedPoints.map(p => `${Math.round(p[0])},${Math.round(p[1])}`).join(' ')
         
         regions.push({
           ...gameRegion,
           polygonPoints,
-          centerX,
-          centerY
+          centerX: Math.round(centerX),
+          centerY: Math.round(centerY)
         })
       }
     })
