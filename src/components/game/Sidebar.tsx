@@ -77,7 +77,19 @@ export default function Sidebar({ maxUnlockedFloor = 1 }: SidebarProps) {
             )}
           </div>
 
-          
+          {/* World Map Link */}
+          <Link
+            href={`/floor/${selectedFloor}/map`}
+            className={`flex items-center mt-2 px-3 py-2 text-sm rounded transition-colors ${
+              isActive(`/floor/${selectedFloor}/map`)
+                ? 'bg-[#6eb5ff]/20 text-[#6eb5ff] border-l-2 border-[#6eb5ff]'
+                : 'text-gray-300 hover:bg-[#2a2a2a] hover:text-white'
+            }`}
+          >
+            <span className="mr-2">🗺️</span>
+            World Map
+          </Link>
+
           {/* Main Town Link */}
           <Link
             href={`/floor/${selectedFloor}/town`}
