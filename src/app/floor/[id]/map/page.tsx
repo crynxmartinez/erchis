@@ -2,7 +2,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
 import GameLayout from '@/components/game/GameLayout'
-import Floor1Map from '@/components/game/Floor1Map'
+import Floor1PolygonMap from '@/components/game/Floor1PolygonMap'
 import { calculateMaxHp, calculateHpRegen, calculateApRegen } from '@/lib/player'
 
 interface SessionData {
@@ -105,13 +105,13 @@ export default async function MapPage({ params }: MapPageProps) {
           </div>
         </div>
 
-        <Floor1Map playerLevel={player.level} />
+        <Floor1PolygonMap playerLevel={player.level} />
 
         <div className="mt-6 p-3 bg-[#1a1a1a] rounded border border-[#333]">
           <div className="text-xs text-gray-500">
-            <p className="mb-1">• Hover over map pins to see location details</p>
-            <p className="mb-1">• Click on accessible locations to travel there</p>
-            <p className="mb-1">• More regions unlock as you level up</p>
+            <p className="mb-1">• Hover over regions to see location details</p>
+            <p className="mb-1">• Click on accessible regions to travel there</p>
+            <p className="mb-1">• Regions unlock as you level up</p>
             <p>• Safe zones (towns) are always accessible</p>
           </div>
         </div>
