@@ -246,13 +246,12 @@ export default function Floor1PolygonMap({ playerLevel = 1 }: Floor1PolygonMapPr
         {/* Enhanced Tooltip */}
         {hoveredRegion && (
           <div
-            className="absolute z-[100] pointer-events-none bg-gradient-to-br from-[#1a1a1a]/98 to-[#0a0a0a]/98 border-2 rounded-xl shadow-2xl backdrop-blur-md overflow-hidden"
+            className="fixed z-[1000] pointer-events-none bg-gradient-to-br from-[#1a1a1a]/98 to-[#0a0a0a]/98 border-2 rounded-xl shadow-2xl backdrop-blur-md overflow-visible"
             style={{
               width: hoveredRegion.type === 'town' ? '380px' : '420px',
-              maxHeight: '85vh',
-              left: `${(hoveredRegion.centerX / 1875) * 100}%`,
-              top: `${(hoveredRegion.centerY / 925) * 100}%`,
-              transform: hoveredRegion.centerX > 1400 ? 'translateX(-100%)' : hoveredRegion.centerX < 475 ? 'translateX(0)' : 'translateX(-50%)',
+              maxHeight: 'calc(100vh - 100px)',
+              left: mousePos.x > window.innerWidth - 450 ? mousePos.x - (hoveredRegion.type === 'town' ? 380 : 420) - 20 : mousePos.x + 20,
+              top: Math.min(mousePos.y, window.innerHeight - 600),
               borderColor: hoveredRegion.color,
               boxShadow: `0 0 30px ${hoveredRegion.color}40`
             }}
@@ -286,7 +285,7 @@ export default function Floor1PolygonMap({ playerLevel = 1 }: Floor1PolygonMapPr
             </div>
 
             {/* Scrollable Content */}
-            <div className="px-4 py-3 max-h-[70vh] overflow-y-auto custom-scrollbar">
+            <div className="px-4 py-3 max-h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar">
               {/* Description */}
               <p className="text-sm text-gray-300 leading-relaxed mb-3">
                 {hoveredRegion.description}
