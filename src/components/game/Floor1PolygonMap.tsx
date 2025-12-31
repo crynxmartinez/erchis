@@ -57,7 +57,6 @@ export default function Floor1PolygonMap({ playerLevel = 1 }: Floor1PolygonMapPr
   }
 
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    e.preventDefault()
     const delta = e.deltaY > 0 ? -0.1 : 0.1
     setZoomLevel(prev => Math.max(0.5, Math.min(3, prev + delta)))
   }
