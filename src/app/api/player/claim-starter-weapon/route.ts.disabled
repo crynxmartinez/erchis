@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     // Find the player
     const player = await prisma.player.findUnique({
       where: { userId: session.userId },
-      include: { inventory: { include: { item: true } } },
+      include: { inventory: { include: { weapon: true } } },
     })
 
     if (!player) {

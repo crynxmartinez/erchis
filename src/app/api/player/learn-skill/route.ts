@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     // Find the player
     const player = await prisma.player.findUnique({
       where: { userId: session.userId },
-      include: { learnedSkills: true },
+      include: { skills: true },
     })
 
     if (!player) {
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     }
 
     // Check if player already has max skills (100)
-    if (player.learnedSkills.length >= 100) {
+    if (player.skills.length >= 100) {
       return NextResponse.json({ error: 'You have reached the maximum number of learned skills (100)' }, { status: 400 })
     }
 
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     }
 
     // Check if player already learned this skill
-    const alreadyLearned = player.learnedSkills.some(ls => ls.skillId === skill.id)
+    const alreadyLearned = player.skills.some(ls => ls.skillId === skill.id)
     if (alreadyLearned) {
       return NextResponse.json({ error: 'You have already learned this skill' }, { status: 400 })
     }
@@ -79,7 +79,6 @@ export async function POST(request: Request) {
       data: {
         playerId: player.id,
         skillId: skill.id,
-        level: 1,
         useCount: 0,
       },
     })
