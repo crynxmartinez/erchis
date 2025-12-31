@@ -229,6 +229,53 @@ export async function GET() {
         safeZoneNearby: false,
         avgDurabilityLoss: '25-35 per hour',
         recommendedDurability: '100+'
+      },
+      5: { // Gomimaki - BOSS AREA
+        id: 'corrupted-sanctum',
+        name: 'The Corrupted Sanctum',
+        type: 'boss',
+        level: '30',
+        description: 'A twisted arena where reality bleeds into the void. Once a guardian of this sanctum, Malachar now stands as a corrupted nightmare, phasing between dimensions.',
+        discovered: false,
+        href: '/floor/1/boss/corrupted-sanctum',
+        color: '#a6d854',
+        fillColor: 'rgba(166, 216, 84, 0.3)',
+        strokeColor: '#a6d854',
+        monsters: [
+          { name: '👹 BOSS: Malachar, the Void Corruptor', level: 30, count: '1', icon: '👹' },
+          { name: 'Void Imp (Minion)', level: 25, count: '3 per phase', icon: '😈' }
+        ],
+        recommendedLevel: '28-32',
+        recommendedPartySize: '3-4 (Required)',
+        dangerLevel: 'Extreme',
+        avgCombatDuration: '10-15 minutes',
+        lootTable: {
+          common: ['Void Core (100%)', 'Malachar\'s Essence (100%)'],
+          uncommon: ['Voidbreaker Greatsword (20%)', 'Sanctum Guardian\'s Spear (20%)', 'Corrupted Wand (20%)', 'Void Walker\'s Daggers (20%)'],
+          rare: ['Void Plate Armor (15%)', 'Sanctum Robes (15%)', 'Void Essence Crystal (5%)', 'Dimensional Shard (5%)', 'Malachar\'s Mask (5%)'],
+          dropRates: { common: 100, uncommon: 80, rare: 45 }
+        },
+        expGain: '5,000 (First: 15,000)',
+        colGain: '1,000 (First: 3,000)',
+        terrainType: 'boss',
+        weaponEffectiveness: {
+          spear: 1.3,
+          bow: 1.2,
+          staff: 1.2,
+          greatsword: 1.1,
+          katana: 1.1,
+          dagger: 0.9
+        },
+        bestForSkills: [
+          { skill: 'Dodge', reason: 'Avoid Void Beam and AoE', efficiency: '★★★★★' },
+          { skill: 'Guard/Shield Block', reason: 'Survive big hits', efficiency: '★★★★★' },
+          { skill: 'AoE Skills', reason: 'Clear minions quickly', efficiency: '★★★★★' },
+          { skill: 'Defensive Buffs', reason: 'Phase 3 survival', efficiency: '★★★★☆' }
+        ],
+        enemyRespawnTime: 'Weekly reset (Wednesday)',
+        safeZoneNearby: false,
+        avgDurabilityLoss: '40-60 per attempt',
+        recommendedDurability: '150+'
       }
     }
     
