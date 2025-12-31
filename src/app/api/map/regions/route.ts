@@ -52,7 +52,38 @@ export async function GET() {
         href: '/floor/1/town',
         color: '#66c2a5',
         fillColor: 'rgba(102, 194, 165, 0.3)',
-        strokeColor: '#66c2a5'
+        strokeColor: '#66c2a5',
+        dangerLevel: 'Safe',
+        terrainType: 'town',
+        safeZoneNearby: true,
+        skillTrainers: [
+          {
+            name: 'Master Swordsman Kael',
+            skills: ['Sword Skills (Basic)', 'Guard', 'Riposte'],
+            cost: 'Free (Starter Skills)',
+            icon: '⚔️'
+          },
+          {
+            name: 'Archmage Lyra',
+            skills: ['Staff Skills (Basic)', 'Wand Skills (Basic)'],
+            cost: 'Free (Starter Skills)',
+            icon: '🔮'
+          },
+          {
+            name: 'Ranger Thorne',
+            skills: ['Bow Skills (Basic)', 'Dagger Skills (Basic)'],
+            cost: 'Free (Starter Skills)',
+            icon: '🏹'
+          }
+        ],
+        trainingDummies: true,
+        practiceArea: 'Training Grounds (North District)',
+        repairShop: {
+          available: true,
+          npcName: 'Blacksmith Grom',
+          repairCost: 'Standard rates (1 Col per durability)',
+          icon: '🔨'
+        }
       },
       2: { // Hohaumun
         id: 'verdant-plains',
@@ -64,7 +95,41 @@ export async function GET() {
         href: '/floor/1/area/verdant-plains',
         color: '#fc8d62',
         fillColor: 'rgba(252, 141, 98, 0.3)',
-        strokeColor: '#fc8d62'
+        strokeColor: '#fc8d62',
+        monsters: [
+          { name: 'Wild Rabbit', level: 1, count: '8-12', icon: '🐰' },
+          { name: 'Young Boar', level: 3, count: '5-8', icon: '🐗' },
+          { name: 'Plains Wolf', level: 5, count: '3-5', icon: '🐺' },
+          { name: 'Giant Bee', level: 7, count: '4-6', icon: '🐝' }
+        ],
+        recommendedLevel: '1-10',
+        recommendedPartySize: '1 (Solo Friendly)',
+        dangerLevel: 'Low',
+        avgCombatDuration: '1-2 minutes',
+        lootTable: {
+          common: ['Rabbit Pelt', 'Raw Meat', 'Boar Tusk'],
+          uncommon: ['Wolf Fang', 'Honey', 'Plains Herb'],
+          rare: ['Alpha Wolf Pelt', 'Royal Jelly'],
+          dropRates: { common: 70, uncommon: 25, rare: 5 }
+        },
+        expGain: '30-80 per kill',
+        colGain: '5-15 per kill',
+        terrainType: 'plains',
+        weaponEffectiveness: {
+          spear: 1.2,
+          bow: 1.1,
+          sword: 1.0,
+          greatsword: 0.9
+        },
+        bestForSkills: [
+          { skill: 'Quick Slash', reason: 'Fast, weak enemies', efficiency: '★★★★★' },
+          { skill: 'Dodge', reason: 'Predictable attack patterns', efficiency: '★★★★☆' },
+          { skill: 'Aimed Shot', reason: 'Open terrain for ranged', efficiency: '★★★★★' }
+        ],
+        enemyRespawnTime: '5 minutes',
+        safeZoneNearby: true,
+        avgDurabilityLoss: '8-12 per hour',
+        recommendedDurability: '50+'
       },
       3: { // Hublia
         id: 'whispering-woods',
@@ -76,7 +141,44 @@ export async function GET() {
         href: '/floor/1/area/whispering-woods',
         color: '#8da0cb',
         fillColor: 'rgba(141, 160, 203, 0.3)',
-        strokeColor: '#8da0cb'
+        strokeColor: '#8da0cb',
+        monsters: [
+          { name: 'Forest Wolf', level: 6, count: '5-8', icon: '🐺' },
+          { name: 'Treant Sapling', level: 8, count: '3-5', icon: '🌳' },
+          { name: 'Shadow Panther', level: 10, count: '2-4', icon: '🐆' },
+          { name: 'Woodland Sprite', level: 12, count: '4-6', icon: '🧚' },
+          { name: 'Elder Treant', level: 15, count: '1-2', icon: '🌲' }
+        ],
+        recommendedLevel: '5-15',
+        recommendedPartySize: '1-2',
+        dangerLevel: 'Medium',
+        avgCombatDuration: '2-4 minutes',
+        lootTable: {
+          common: ['Wolf Pelt', 'Treant Bark', 'Forest Herb'],
+          uncommon: ['Shadow Essence', 'Sprite Dust', 'Ancient Wood'],
+          rare: ['Elder Heart', 'Moonlit Fang', 'Enchanted Leaf'],
+          dropRates: { common: 65, uncommon: 30, rare: 5 }
+        },
+        expGain: '60-150 per kill',
+        colGain: '12-30 per kill',
+        terrainType: 'forest',
+        weaponEffectiveness: {
+          dagger: 1.3,
+          bow: 1.2,
+          spear: 1.1,
+          greatsword: 0.7,
+          hammer: 0.8
+        },
+        bestForSkills: [
+          { skill: 'Backstab', reason: 'Dense cover for stealth', efficiency: '★★★★★' },
+          { skill: 'Quick Shot', reason: 'Close-quarters combat', efficiency: '★★★★☆' },
+          { skill: 'Dodge', reason: 'Agile enemies', efficiency: '★★★★★' },
+          { skill: 'Counter', reason: 'Predictable melee attacks', efficiency: '★★★★☆' }
+        ],
+        enemyRespawnTime: '7 minutes',
+        safeZoneNearby: false,
+        avgDurabilityLoss: '15-20 per hour',
+        recommendedDurability: '80+'
       },
       4: { // Tseunfia
         id: 'crystal-mountains',
@@ -88,7 +190,45 @@ export async function GET() {
         href: '/floor/1/area/crystal-mountains',
         color: '#e78ac3',
         fillColor: 'rgba(231, 138, 195, 0.3)',
-        strokeColor: '#e78ac3'
+        strokeColor: '#e78ac3',
+        monsters: [
+          { name: 'Crystal Golem', level: 16, count: '3-5', icon: '💎' },
+          { name: 'Mountain Drake', level: 20, count: '2-3', icon: '🐉' },
+          { name: 'Ice Elemental', level: 23, count: '2-4', icon: '❄️' },
+          { name: 'Stone Wyvern', level: 26, count: '1-2', icon: '🦅' },
+          { name: 'Crystal Guardian', level: 30, count: '1', icon: '👹' }
+        ],
+        recommendedLevel: '15-30',
+        recommendedPartySize: '2-3',
+        dangerLevel: 'High',
+        avgCombatDuration: '4-8 minutes',
+        lootTable: {
+          common: ['Crystal Shard', 'Drake Scale', 'Ice Core'],
+          uncommon: ['Golem Heart', 'Wyvern Talon', 'Frozen Essence'],
+          rare: ['Ancient Crystal', 'Drake Fang', 'Guardian Core', 'Legendary Ore'],
+          dropRates: { common: 60, uncommon: 32, rare: 8 }
+        },
+        expGain: '150-400 per kill',
+        colGain: '30-80 per kill',
+        terrainType: 'mountains',
+        weaponEffectiveness: {
+          hammer: 1.3,
+          greataxe: 1.2,
+          mace: 1.2,
+          staff: 1.1,
+          dagger: 0.7,
+          bow: 0.8
+        },
+        bestForSkills: [
+          { skill: 'Heavy Slam', reason: 'Armored enemies', efficiency: '★★★★★' },
+          { skill: 'Guard', reason: 'Heavy-hitting enemies', efficiency: '★★★★★' },
+          { skill: 'Fireball', reason: 'Ice-weak enemies', efficiency: '★★★★☆' },
+          { skill: 'Shield Block', reason: 'Dangerous attacks', efficiency: '★★★★★' }
+        ],
+        enemyRespawnTime: '10 minutes',
+        safeZoneNearby: false,
+        avgDurabilityLoss: '25-35 per hour',
+        recommendedDurability: '100+'
       }
     }
     

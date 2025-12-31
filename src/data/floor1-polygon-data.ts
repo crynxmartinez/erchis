@@ -1,6 +1,35 @@
 // Floor 1 Map Data - Extracted from Azgaar's Fantasy Map Generator
 // This file contains processed region data with actual polygon boundaries from JSON
 
+export interface MonsterInfo {
+  name: string
+  level: number
+  count: string
+  icon: string
+}
+
+export interface LootTable {
+  common: string[]
+  uncommon: string[]
+  rare: string[]
+  dropRates: {
+    common: number
+    uncommon: number
+    rare: number
+  }
+}
+
+export interface SkillTrainer {
+  name: string
+  skills: string[]
+  cost: string
+  icon: string
+}
+
+export interface WeaponEffectiveness {
+  [weaponType: string]: number
+}
+
 export interface MapRegion {
   id: string
   name: string
@@ -19,6 +48,35 @@ export interface MapRegion {
   color: string
   fillColor: string
   strokeColor: string
+  // RPG-specific data
+  monsters?: MonsterInfo[]
+  recommendedLevel?: string
+  recommendedPartySize?: string
+  dangerLevel?: 'Safe' | 'Low' | 'Medium' | 'High' | 'Extreme'
+  avgCombatDuration?: string
+  lootTable?: LootTable
+  expGain?: string
+  colGain?: string
+  skillTrainers?: SkillTrainer[]
+  trainingDummies?: boolean
+  practiceArea?: string
+  terrainType?: 'forest' | 'plains' | 'mountains' | 'water' | 'town'
+  weaponEffectiveness?: WeaponEffectiveness
+  bestForSkills?: Array<{
+    skill: string
+    reason: string
+    efficiency: string
+  }>
+  enemyRespawnTime?: string
+  safeZoneNearby?: boolean
+  repairShop?: {
+    available: boolean
+    npcName: string
+    repairCost: string
+    icon: string
+  }
+  avgDurabilityLoss?: string
+  recommendedDurability?: string
 }
 
 // Process the JSON map data to extract actual regions
