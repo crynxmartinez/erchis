@@ -85,35 +85,67 @@ export async function GET() {
       }
     }
     
-    // Process each state's cells into simplified region boundaries
+    // Process each state to create clean, single region boundaries
     cellsByState.forEach((stateCells: any[], stateId: number) => {
       const gameRegion = stateToGameRegion[stateId]
       if (!gameRegion) return
       
-      // Get the extreme boundary points for this state (simplified approach)
-      const boundaryPoints: number[][] = []
+      // Create a set of all boundary edges for this state
+      const boundaryEdges = new Set<string>()
       
-      // Find all cells that border other states or water
+      // Find all edges that are on the external boundary of the state
       stateCells.forEach((cell: any) => {
-        const cellVertices = cell.v.map((vid: number) => vertexMap.get(vid))
+        const cellVertices = cell.v
         
-        // Check if this cell is on the boundary
-        const isBoundaryCell = cell.c.some((neighborId: number) => {
-          const neighborCell = cells.find((c: any) => c.i === neighborId)
-          return !neighborCell || neighborCell.state !== stateId
-        })
-        
-        if (isBoundaryCell) {
-          // Add all vertices of boundary cells
-          cellVertices.forEach((vertex: number[]) => {
-            if (vertex && vertex.length === 2) {
-              boundaryPoints.push(vertex)
-            }
-          })
+        // Check each edge of the cell
+        for (let i = 0; i < cellVertices.length; i++) {
+          const v1 = cellVertices[i]
+          const v2 = cellVertices[(i + 1) % cellVertices.length]
+          
+          // Create edge key (sorted to ensure consistency)
+          const edgeKey = v1 < v2 ? `${v1}-${v2}` : `${v2}-${v1}`
+          
+          // Check if this edge is shared with a cell of a different state
+          let isBoundaryEdge = false
+          
+          // Find all cells that share this edge
+          const sharedCells = cells.filter((c: any) => 
+            c.state !== stateId && 
+            c.v.includes(v1) && 
+            c.v.includes(v2)
+          )
+          
+          // If no cells from other states share this edge, it's a boundary edge
+          if (sharedCells.length === 0) {
+            isBoundaryEdge = true
+          }
+          
+          if (isBoundaryEdge) {
+            boundaryEdges.add(edgeKey)
+          } else {
+            // Remove if it was added previously (shared edge)
+            boundaryEdges.delete(edgeKey)
+          }
         }
       })
       
-      // Create a simplified convex hull from boundary points
+      // Convert boundary edges to polygon points
+      const boundaryPoints: number[][] = []
+      const edgeMap = new Map<string, [number, number]>()
+      
+      // Convert edges to point pairs
+      boundaryEdges.forEach(edge => {
+        const [v1, v2] = edge.split('-').map(Number)
+        const p1 = vertexMap.get(v1)
+        const p2 = vertexMap.get(v2)
+        
+        if (p1 && p2) {
+          boundaryPoints.push(p1, p2)
+          edgeMap.set(`${v1}-${v2}`, [p1, p2])
+        }
+      })
+      
+      // Create a single polygon from boundary points
       if (boundaryPoints.length > 0) {
         // Remove duplicate points
         const uniquePoints = Array.from(new Set(boundaryPoints.map(p => `${p[0]},${p[1]}`)))
@@ -123,16 +155,8 @@ export async function GET() {
         const centerX = uniquePoints.reduce((sum, p) => sum + p[0], 0) / uniquePoints.length
         const centerY = uniquePoints.reduce((sum, p) => sum + p[1], 0) / uniquePoints.length
         
-        // Create a simplified polygon by taking every Nth point to reduce complexity
-        const step = Math.max(1, Math.floor(uniquePoints.length / 20)) // Limit to ~20 points max
-        const simplifiedPoints: number[][] = []
-        
-        for (let i = 0; i < uniquePoints.length; i += step) {
-          simplifiedPoints.push(uniquePoints[i])
-        }
-        
-        // Sort points by angle from center for proper polygon shape
-        const sortedPoints = simplifiedPoints
+        // Sort points by angle from center to create a proper polygon
+        const sortedPoints = uniquePoints
           .map(p => ({
             point: p,
             angle: Math.atan2(p[1] - centerY, p[0] - centerX)
