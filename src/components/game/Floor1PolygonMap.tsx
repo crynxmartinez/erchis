@@ -13,6 +13,8 @@ export default function Floor1PolygonMap({ playerLevel = 1 }: Floor1PolygonMapPr
   const [hoveredRegion, setHoveredRegion] = useState<MapRegion | null>(null)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [loading, setLoading] = useState(true)
+  const [zoomLevel, setZoomLevel] = useState(1)
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 })
 
   useEffect(() => {
     const loadRegions = async () => {
@@ -35,6 +37,19 @@ export default function Floor1PolygonMap({ playerLevel = 1 }: Floor1PolygonMapPr
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
     })
+  }
+
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev + 0.2, 3))
+  }
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev - 0.2, 0.5))
+  }
+
+  const handleResetZoom = () => {
+    setZoomLevel(1)
+    setPanOffset({ x: 0, y: 0 })
   }
 
   // Get regions that are accessible at player's level
@@ -60,20 +75,40 @@ export default function Floor1PolygonMap({ playerLevel = 1 }: Floor1PolygonMapPr
         className="relative overflow-hidden rounded-lg border border-[#333] shadow-xl bg-[#1a1a1a]"
         onMouseMove={handleMouseMove}
         onMouseLeave={() => setHoveredRegion(null)}
+        style={{ height: '600px' }}
       >
-        {/* Map Image */}
-        <img
-          src="/maps/floor 1 map.png"
-          alt="Floor 1 Map - Erchis"
-          className="w-full h-auto block select-none"
-          draggable={false}
-          style={{ maxHeight: '600px', objectFit: 'contain' }}
-        />
+        {/* Map Image with Zoom */}
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{
+            transform: `scale(${zoomLevel}) translate(${panOffset.x}px, ${panOffset.y}px)`,
+            transformOrigin: 'center',
+            transition: 'transform 0.3s ease'
+          }}
+        >
+          <img
+            src="/maps/floor 1 map.png"
+            alt="Floor 1 Map - Erchis"
+            className="block select-none"
+            draggable={false}
+            style={{ 
+              maxHeight: '600px', 
+              objectFit: 'contain',
+              width: 'auto',
+              height: 'auto'
+            }}
+          />
+        </div>
 
-        {/* SVG Polygon Overlay */}
+        {/* SVG Polygon Overlay with Zoom */}
         <svg 
           className="absolute inset-0 w-full h-full pointer-events-none"
-          style={{ maxHeight: '600px' }}
+          style={{ 
+            maxHeight: '600px',
+            transform: `scale(${zoomLevel}) translate(${panOffset.x}px, ${panOffset.y}px)`,
+            transformOrigin: 'center',
+            transition: 'transform 0.3s ease'
+          }}
           viewBox="0 0 1875 925"
           preserveAspectRatio="xMidYMid meet"
         >
@@ -110,7 +145,7 @@ export default function Floor1PolygonMap({ playerLevel = 1 }: Floor1PolygonMapPr
                   textAnchor="middle"
                   dominantBaseline="middle"
                   fill={isAccessible ? '#fff' : '#999'}
-                  fontSize="14"
+                  fontSize={14 / zoomLevel}
                   fontWeight="bold"
                   className="pointer-events-none select-none"
                   opacity={isAccessible ? 0.9 : 0.5}
@@ -164,6 +199,40 @@ export default function Floor1PolygonMap({ playerLevel = 1 }: Floor1PolygonMapPr
             </div>
           </div>
         )}
+
+        {/* Zoom Controls */}
+        <div className="absolute right-4 top-4 flex flex-col gap-2">
+          <button
+            onClick={handleZoomIn}
+            className="w-10 h-10 bg-[#2a2a2a] hover:bg-[#333] border border-[#444] rounded-lg flex items-center justify-center text-white transition-colors shadow-lg"
+            title="Zoom In"
+            disabled={zoomLevel >= 3}
+          >
+            <span className="text-lg font-bold">+</span>
+          </button>
+          
+          <button
+            onClick={handleZoomOut}
+            className="w-10 h-10 bg-[#2a2a2a] hover:bg-[#333] border border-[#444] rounded-lg flex items-center justify-center text-white transition-colors shadow-lg"
+            title="Zoom Out"
+            disabled={zoomLevel <= 0.5}
+          >
+            <span className="text-lg font-bold">−</span>
+          </button>
+          
+          <button
+            onClick={handleResetZoom}
+            className="w-10 h-10 bg-[#2a2a2a] hover:bg-[#333] border border-[#444] rounded-lg flex items-center justify-center text-white transition-colors shadow-lg"
+            title="Reset Zoom"
+          >
+            <span className="text-xs font-bold">⟲</span>
+          </button>
+        </div>
+
+        {/* Zoom Level Indicator */}
+        <div className="absolute left-4 top-4 bg-[#2a2a2a]/90 border border-[#444] rounded px-3 py-1 text-xs text-gray-300">
+          Zoom: {Math.round(zoomLevel * 100)}%
+        </div>
       </div>
 
       {/* Legend */}
@@ -190,7 +259,8 @@ export default function Floor1PolygonMap({ playerLevel = 1 }: Floor1PolygonMapPr
         <div className="text-xs text-gray-400">
           <p>📍 <span className="text-gray-300">Current Level: {playerLevel}</span></p>
           <p>🗺️ <span className="text-gray-300">Accessible Regions: {accessibleRegions.length} / {regions.length}</span></p>
-          <p className="mt-1 text-gray-500">• Hover over regions to see details</p>
+          <p className="mt-1 text-gray-500">• Use +/− buttons to zoom in/out</p>
+          <p className="text-gray-500">• Hover over regions to see details</p>
           <p className="text-gray-500">• Click on accessible regions to travel</p>
           <p className="text-gray-500">• Regions unlock as you level up</p>
         </div>
